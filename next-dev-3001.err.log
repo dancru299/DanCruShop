@@ -1,0 +1,1169 @@
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="vi" suppressHydrationWarning={true} className="geist_a715...">
+                          <body
+                            className="min-h-dvh bg-background font-sans text-foreground antialiased"
+-                           __processed_ebf39ecd-2563-4dc1-b42b-5cb91d9b583d__="true"
+-                           bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6Im5pbWxtZWpibW5lY25hZ2hnbWJhaG1iYWRk..."
+                          >
+                  ...
+ 
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="vi" suppressHydrationWarning={true} className="geist_a715...">
+                          <body
+                            className="min-h-dvh bg-background font-sans text-foreground antialiased"
+-                           __processed_dc3a5f98-b206-4e2d-912a-fbca62e4b1e5__="true"
+-                           bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6Im5pbWxtZWpibW5lY25hZ2hnbWJhaG1iYWRk..."
+                          >
+                  ...
+ 
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="vi" suppressHydrationWarning={true} className="geist_a715...">
+                          <body
+                            className="min-h-dvh bg-background font-sans text-foreground antialiased"
+-                           __processed_a56ff7ec-e78e-4cdb-94aa-14e19dbb55f1__="true"
+-                           bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6Im5pbWxtZWpibW5lY25hZ2hnbWJhaG1iYWRk..."
+                          >
+                  ...
+ 
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published blog posts {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+Failed to fetch published products {
+  code: 'PGRST125',
+  details: null,
+  hint: null,
+  message: 'Invalid path specified in request URL'
+}
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="vi" suppressHydrationWarning={true} className="geist_a715...">
+                          <body
+                            className="min-h-dvh bg-background font-sans text-foreground antialiased"
+-                           __processed_636a57d3-9b6d-48c8-bdc5-434763706aa6__="true"
+-                           bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6Im5pbWxtZWpibW5lY25hZ2hnbWJhaG1iYWRk..."
+                          >
+                  ...
+ 
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/login" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="vi" suppressHydrationWarning={true} className="geist_a715...">
+                          <body
+                            className="min-h-dvh bg-background font-sans text-foreground antialiased"
+-                           __processed_991862e7-d9cc-442e-a7f6-72d9485a627a__="true"
+-                           bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6Im5pbWxtZWpibW5lY25hZ2hnbWJhaG1iYWRk..."
+                          >
+                  ...
+ 
