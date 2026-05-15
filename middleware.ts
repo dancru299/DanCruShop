@@ -1,4 +1,3 @@
-import type { JwtPayload } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { updateSession } from "@/lib/supabase/middleware";
@@ -24,23 +23,6 @@ function getLoginUrl(request: NextRequest) {
   return loginUrl;
 }
 
-function hasAdminRole(claims: JwtPayload | null) {
-  if (!claims) {
-    return false;
-  }
-
-  const appRole = claims.app_metadata?.role;
-  const appRoles = claims.app_metadata?.roles;
-  const userRole = claims.user_metadata?.role;
-
-  return (
-    claims.role === "admin" ||
-    appRole === "admin" ||
-    userRole === "admin" ||
-    (Array.isArray(appRoles) && appRoles.includes("admin"))
-  );
-}
-
 export async function middleware(request: NextRequest) {
   const { claims, response } = await updateSession(request);
   const { pathname } = request.nextUrl;
@@ -53,14 +35,6 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/admin")) {
     if (!isAuthenticated) {
       return getRedirectResponse(getLoginUrl(request), response);
-    }
-
-    if (!hasAdminRole(claims)) {
-      const homeUrl = request.nextUrl.clone();
-      homeUrl.pathname = "/";
-      homeUrl.search = "";
-
-      return getRedirectResponse(homeUrl, response);
     }
   }
 

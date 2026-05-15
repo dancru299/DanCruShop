@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
-import { ArrowUpRightIcon } from "lucide-react";
+import { ArrowUpRightIcon, BookOpenIcon, CalendarDaysIcon } from "lucide-react";
 
 import type { PublishedBlogPost } from "@/lib/supabase/queries/blog";
 
@@ -10,25 +10,58 @@ type BlogCardProps = {
 };
 
 function formatDate(value: string | null, fallback: string) {
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("vi-VN", {
     dateStyle: "medium",
   }).format(new Date(value ?? fallback));
 }
 
-export function BlogCard({ post }: BlogCardProps) {
-  const coverSrc = post.cover_image_url ?? "/window.svg";
+export function BlogCoverArtwork({ post }: BlogCardProps) {
+  return (
+    <div className="motion-gradient-pan absolute inset-0 overflow-hidden bg-gradient-to-br from-cyan-500/20 via-emerald-500/10 to-background">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0,transparent_calc(100%-1px),var(--border)_calc(100%-1px)),linear-gradient(to_bottom,transparent_0,transparent_calc(100%-1px),var(--border)_calc(100%-1px))] bg-[size:32px_32px] opacity-20" />
+      <div className="motion-scanline pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-transparent via-foreground/10 to-transparent" />
+      <div className="relative flex h-full flex-col justify-between p-5">
+        <div className="flex items-center justify-between gap-4">
+          <div className="grid gap-1">
+            <span className="text-xs font-medium uppercase tracking-normal text-muted-foreground">
+              DanCruShop Blog
+            </span>
+            <span className="line-clamp-2 text-sm font-semibold">
+              {post.title}
+            </span>
+          </div>
+          <div className="flex size-10 items-center justify-center rounded-lg border bg-background/70 text-foreground shadow-sm backdrop-blur">
+            <BookOpenIcon aria-hidden="true" className="size-5" />
+          </div>
+        </div>
 
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <CalendarDaysIcon aria-hidden="true" className="size-3.5" />
+          {formatDate(post.published_at, post.created_at)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function BlogCard({ post }: BlogCardProps) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-ring/60 hover:shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      className="group/blog-card flex h-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-xl hover:shadow-foreground/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-        <img
-          src={coverSrc}
-          alt={post.title}
-          className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+        {post.cover_image_url ? (
+          <img
+            src={post.cover_image_url}
+            alt={post.title}
+            className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover/blog-card:scale-105"
+          />
+        ) : (
+          <BlogCoverArtwork post={post} />
+        )}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/35 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover/blog-card:opacity-100" />
+        <div className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 skew-x-[-18deg] bg-gradient-to-r from-transparent via-foreground/15 to-transparent opacity-0 transition-all duration-700 group-hover/blog-card:left-full group-hover/blog-card:opacity-100" />
       </div>
 
       <div className="flex flex-1 flex-col gap-4 p-4">
@@ -43,13 +76,13 @@ export function BlogCard({ post }: BlogCardProps) {
           </div>
           <ArrowUpRightIcon
             aria-hidden="true"
-            className="mt-1 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
+            className="mt-1 shrink-0 text-muted-foreground transition-[color,transform] duration-300 group-hover/blog-card:-translate-y-0.5 group-hover/blog-card:translate-x-0.5 group-hover/blog-card:text-foreground"
           />
         </div>
 
         <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
           {post.excerpt ??
-            "Practical notes for creators building and selling digital products."}
+            "Ghi chú thực chiến cho creator đang xây và bán sản phẩm số."}
         </p>
       </div>
     </Link>

@@ -129,3 +129,194 @@
     @apply font-sans;
   }
 }
+
+@layer utilities {
+  .motion-fade-up {
+    animation: motion-fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .motion-delay-1 {
+    animation-delay: 120ms;
+  }
+
+  .motion-delay-2 {
+    animation-delay: 240ms;
+  }
+
+  .motion-delay-3 {
+    animation-delay: 360ms;
+  }
+
+  .motion-hero-grid {
+    animation: motion-grid-shift 22s linear infinite;
+  }
+
+  .motion-gradient-pan {
+    background-size: 220% 220%;
+    animation: motion-gradient-pan 14s ease-in-out infinite;
+  }
+
+  .motion-float-soft {
+    animation: motion-float-soft 6s ease-in-out infinite;
+  }
+
+  .motion-marquee {
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      black 10%,
+      black 90%,
+      transparent
+    );
+  }
+
+  .motion-marquee-track {
+    width: max-content;
+    animation: motion-marquee 32s linear infinite;
+  }
+
+  .motion-marquee:hover .motion-marquee-track {
+    animation-play-state: paused;
+  }
+
+  .motion-slide-column {
+    animation: motion-slide-column 12s cubic-bezier(0.76, 0, 0.24, 1) infinite;
+  }
+
+  .motion-scanline {
+    animation: motion-scanline 4.8s ease-in-out infinite;
+  }
+
+  .motion-pulse-dot {
+    animation: motion-pulse-dot 2.4s ease-in-out infinite;
+  }
+
+  .scroll-reveal {
+    animation: motion-fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @supports (animation-timeline: view()) {
+    .scroll-reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      animation: motion-fade-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 28%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .motion-fade-up,
+    .motion-hero-grid,
+    .motion-gradient-pan,
+    .motion-float-soft,
+    .motion-marquee-track,
+    .motion-slide-column,
+    .motion-scanline,
+    .motion-pulse-dot,
+    .scroll-reveal {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+}
+
+@keyframes motion-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes motion-grid-shift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 56px 56px;
+  }
+}
+
+@keyframes motion-gradient-pan {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes motion-float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes motion-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes motion-slide-column {
+  0%,
+  18% {
+    transform: translateY(0);
+  }
+  25%,
+  43% {
+    transform: translateY(-3rem);
+  }
+  50%,
+  68% {
+    transform: translateY(-6rem);
+  }
+  75%,
+  93% {
+    transform: translateY(-9rem);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes motion-scanline {
+  0%,
+  100% {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+  20%,
+  65% {
+    opacity: 0.5;
+  }
+  80% {
+    transform: translateY(220%);
+    opacity: 0;
+  }
+}
+
+@keyframes motion-pulse-dot {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}

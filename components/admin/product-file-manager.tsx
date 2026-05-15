@@ -6,18 +6,20 @@ import {
   FileIcon,
   Loader2Icon,
   StarIcon,
-  Trash2Icon,
   UploadIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
+import {
+  AdminActionMenu,
+  AdminActionMenuButton,
+} from "@/components/admin/admin-action-menu";
 import {
   addProductFile,
   deleteProductFile,
   type ProductFileRecord,
 } from "@/actions/product-file.actions";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
@@ -248,26 +250,16 @@ export function ProductFileManager({
                   <TableCell>{file.file_type ?? "Unknown"}</TableCell>
                   <TableCell>{formatDate(file.created_at)}</TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      disabled={isBusy}
-                      onClick={() => handleDelete(file)}
-                    >
-                      {deletingFileId === file.id ? (
-                        <Loader2Icon
-                          aria-hidden="true"
-                          className="animate-spin"
-                          data-icon="inline-start"
-                        />
-                      ) : (
-                        <Trash2Icon
-                          aria-hidden="true"
-                          data-icon="inline-start"
-                        />
-                      )}
-                      Delete
-                    </Button>
+                    <AdminActionMenu label={`Actions for ${file.file_name}`}>
+                      <AdminActionMenuButton
+                        icon={deletingFileId === file.id ? "loader" : "trash"}
+                        tone="destructive"
+                        disabled={isBusy}
+                        onClick={() => handleDelete(file)}
+                      >
+                        Delete
+                      </AdminActionMenuButton>
+                    </AdminActionMenu>
                   </TableCell>
                 </TableRow>
               ))}

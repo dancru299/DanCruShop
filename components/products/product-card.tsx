@@ -1,24 +1,68 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
-import { ArrowUpRightIcon } from "lucide-react";
+import {
+  ArrowUpRightIcon,
+  BookOpenIcon,
+  Code2Icon,
+  DownloadIcon,
+  FileCode2Icon,
+  Layers3Icon,
+  PackageIcon,
+  WrenchIcon,
+  type LucideIcon,
+} from "lucide-react";
 
 import type { PublishedProduct } from "@/lib/supabase/queries/products";
+import { cn } from "@/lib/utils";
 
 type ProductCardProps = {
   product: PublishedProduct;
 };
 
 const productTypeLabels: Record<PublishedProduct["product_type"], string> = {
-  bundle: "Bundle",
-  course: "Course",
-  digital_download: "Download",
-  free_resource: "Resource",
+  bundle: "Bộ sản phẩm",
+  course: "Khóa học",
+  digital_download: "Tải xuống",
+  free_resource: "Tài nguyên",
   template: "Template",
   tool: "Tool",
 };
 
-function formatPrice(product: PublishedProduct) {
+const productTypeVisuals: Record<
+  PublishedProduct["product_type"],
+  {
+    accentClassName: string;
+    Icon: LucideIcon;
+  }
+> = {
+  bundle: {
+    accentClassName: "from-emerald-500/25 via-cyan-500/10 to-background",
+    Icon: Layers3Icon,
+  },
+  course: {
+    accentClassName: "from-sky-500/25 via-emerald-500/10 to-background",
+    Icon: BookOpenIcon,
+  },
+  digital_download: {
+    accentClassName: "from-cyan-500/25 via-amber-500/10 to-background",
+    Icon: DownloadIcon,
+  },
+  free_resource: {
+    accentClassName: "from-lime-500/25 via-cyan-500/10 to-background",
+    Icon: FileCode2Icon,
+  },
+  template: {
+    accentClassName: "from-amber-500/25 via-emerald-500/10 to-background",
+    Icon: PackageIcon,
+  },
+  tool: {
+    accentClassName: "from-rose-500/20 via-cyan-500/10 to-background",
+    Icon: WrenchIcon,
+  },
+};
+
+export function formatProductPrice(product: PublishedProduct) {
   if (product.is_free) {
     return "Free";
   }
@@ -33,20 +77,78 @@ function formatPrice(product: PublishedProduct) {
   }).format(amount);
 }
 
-export function ProductCard({ product }: ProductCardProps) {
-  const thumbnailSrc = product.thumbnail_url ?? "/window.svg";
+export function ProductArtwork({
+  product,
+  className,
+}: ProductCardProps & {
+  className?: string;
+}) {
+  const visual = productTypeVisuals[product.product_type];
+  const Icon = visual.Icon;
 
+  return (
+    <div
+      className={cn(
+        "motion-gradient-pan absolute inset-0 overflow-hidden bg-gradient-to-br",
+        visual.accentClassName,
+        className
+      )}
+    >
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/30 to-transparent" />
+      <div className="motion-scanline pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-transparent via-foreground/10 to-transparent" />
+      <div className="absolute -right-10 -top-10 size-40 rounded-full border border-foreground/10" />
+      <div className="absolute -bottom-14 -left-10 size-44 rounded-full border border-foreground/10" />
+
+      <div className="relative flex h-full flex-col justify-between p-5">
+        <div className="flex items-center justify-between gap-4">
+          <div className="grid gap-1">
+            <span className="text-xs font-medium uppercase tracking-normal text-muted-foreground">
+              DanCruShop
+            </span>
+            <span className="text-sm font-semibold">
+              {productTypeLabels[product.product_type]}
+            </span>
+          </div>
+          <div className="flex size-10 items-center justify-center rounded-lg border bg-background/70 text-foreground shadow-sm backdrop-blur">
+            <Icon aria-hidden="true" className="size-5" />
+          </div>
+        </div>
+
+        <div className="grid gap-2">
+          <div className="h-2 w-28 rounded-full bg-foreground/70" />
+          <div className="h-2 w-40 rounded-full bg-foreground/25" />
+          <div className="h-2 w-24 rounded-full bg-foreground/20" />
+        </div>
+
+        <div className="flex items-end justify-between gap-4">
+          <Code2Icon aria-hidden="true" className="size-8 text-foreground/45" />
+          <span className="rounded-md border bg-background/70 px-2 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
+            Ready
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-ring/60 hover:shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      className="group/product-card flex h-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-xl hover:shadow-foreground/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-        <img
-          src={thumbnailSrc}
-          alt={product.title}
-          className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+        {product.thumbnail_url ? (
+          <img
+            src={product.thumbnail_url}
+            alt={product.title}
+            className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover/product-card:scale-105"
+          />
+        ) : (
+          <ProductArtwork product={product} />
+        )}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/35 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover/product-card:opacity-100" />
+        <div className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 skew-x-[-18deg] bg-gradient-to-r from-transparent via-foreground/15 to-transparent opacity-0 transition-all duration-700 group-hover/product-card:left-full group-hover/product-card:opacity-100" />
       </div>
 
       <div className="flex flex-1 flex-col gap-4 p-4">
@@ -61,7 +163,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
           <ArrowUpRightIcon
             aria-hidden="true"
-            className="mt-0.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
+            className="mt-0.5 shrink-0 text-muted-foreground transition-[color,transform] duration-300 group-hover/product-card:-translate-y-0.5 group-hover/product-card:translate-x-0.5 group-hover/product-card:text-foreground"
           />
         </div>
 
@@ -71,8 +173,10 @@ export function ProductCard({ product }: ProductCardProps) {
         </p>
 
         <div className="mt-auto flex items-center justify-between gap-3 border-t pt-4">
-          <span className="text-sm text-muted-foreground">Lifetime access</span>
-          <span className="text-sm font-semibold">{formatPrice(product)}</span>
+          <span className="text-sm text-muted-foreground">Truy cập trọn đời</span>
+          <span className="text-sm font-semibold">
+            {formatProductPrice(product)}
+          </span>
         </div>
       </div>
     </Link>

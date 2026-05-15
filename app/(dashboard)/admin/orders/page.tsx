@@ -1,5 +1,9 @@
 import { ReceiptTextIcon } from "lucide-react";
 
+import {
+  AdminActionMenu,
+  AdminActionMenuText,
+} from "@/components/admin/admin-action-menu";
 import { ApproveVietQrOrderButton } from "@/components/admin/approve-vietqr-order-button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -110,12 +114,14 @@ export default async function AdminOrdersPage() {
                   </TableCell>
                   <TableCell>{formatTotal(order)}</TableCell>
                   <TableCell className="text-right">
-                    {order.provider === "vietqr" &&
-                    order.status === "pending" ? (
-                      <ApproveVietQrOrderButton orderId={order.id} />
-                    ) : (
-                      <span className="text-sm text-muted-foreground">-</span>
-                    )}
+                    <AdminActionMenu label={`Actions for order ${getOrderDisplayId(order)}`}>
+                      {order.provider === "vietqr" &&
+                      order.status === "pending" ? (
+                        <ApproveVietQrOrderButton orderId={order.id} menuItem />
+                      ) : (
+                        <AdminActionMenuText>No actions available</AdminActionMenuText>
+                      )}
+                    </AdminActionMenu>
                   </TableCell>
                 </TableRow>
               ))}

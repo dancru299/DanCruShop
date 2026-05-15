@@ -40,12 +40,15 @@ export type AdminProductListItem = {
   id: string;
   title: string;
   slug: string;
+  short_description: string | null;
+  thumbnail_url: string | null;
   product_type: ProductType;
   status: ProductStatus;
   price_cents: number;
   currency: string;
   is_free: boolean;
   created_at: string;
+  updated_at: string;
 };
 
 const publishedProductSelect = `
@@ -85,12 +88,15 @@ const adminProductListSelect = `
   id,
   title,
   slug,
+  short_description,
+  thumbnail_url,
   product_type,
   status,
   price_cents,
   currency,
   is_free,
-  created_at
+  created_at,
+  updated_at
 `;
 
 export async function getPublishedProducts(

@@ -1,10 +1,14 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import {
   ArrowLeftIcon,
+  ArrowUpRightIcon,
+  ExternalLinkIcon,
   Loader2Icon,
   PaperclipIcon,
   SaveIcon,
@@ -17,6 +21,8 @@ import {
   type ProductInsert,
   type ProductUpdate,
 } from "@/actions/admin.actions";
+import { AdminMediaUploadField } from "@/components/admin/media-upload-field";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -34,10 +40,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  ProductArtwork,
+  formatProductPrice,
+} from "@/components/products/product-card";
 import type {
   ProductDetail,
   ProductStatus,
   ProductType,
+  PublishedProduct,
 } from "@/lib/supabase/queries/products";
 
 type ProductFormMode = "create" | "edit";
@@ -48,11 +59,17 @@ type ProductFormProduct = Pick<
   | "title"
   | "slug"
   | "short_description"
+  | "description"
   | "price_cents"
   | "currency"
   | "product_type"
   | "status"
   | "is_free"
+  | "thumbnail_url"
+  | "demo_url"
+  | "preview_url"
+  | "lemon_squeezy_product_id"
+  | "lemon_squeezy_variant_id"
 >;
 
 type ProductFormProps = {
@@ -92,6 +109,21 @@ const currencyOptions = [
   { label: "VND", value: "VND" },
 ] as const;
 
+const productTypeLabels: Record<ProductType, string> = {
+  bundle: "Bundle",
+  course: "Course",
+  digital_download: "Digital download",
+  free_resource: "Free resource",
+  template: "Template",
+  tool: "Tool",
+};
+
+const statusBadgeVariants: Record<ProductStatus, "default" | "outline" | "secondary"> = {
+  archived: "outline",
+  draft: "secondary",
+  published: "default",
+};
+
 function slugify(value: string) {
   return value
     .normalize("NFD")
@@ -127,6 +159,145 @@ function parsePriceCents(value: string, currency: string) {
   return Math.round(parsed * 100);
 }
 
+function ProductPreviewPanel({
+  currency,
+  description,
+  demoUrl,
+  priceCents,
+  productType,
+  previewUrl,
+  shortDescription,
+  slug,
+  status,
+  thumbnailUrl,
+  title,
+}: {
+  currency: string;
+  description: string;
+  demoUrl: string;
+  priceCents: number;
+  productType: ProductType;
+  previewUrl: string;
+  shortDescription: string;
+  slug: string;
+  status: ProductStatus;
+  thumbnailUrl: string;
+  title: string;
+}) {
+  const previewProduct: PublishedProduct = {
+    currency,
+    id: "preview",
+    is_free: priceCents === 0 || productType === "free_resource",
+    price_cents: priceCents,
+    product_type: productType,
+    short_description: shortDescription.trim() || null,
+    slug: slug || "product-slug",
+    thumbnail_url: thumbnailUrl.trim() || null,
+    title: title.trim() || "Untitled product",
+  };
+  const descriptionLines = description
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 3);
+
+  return (
+    <aside className="flex flex-col gap-4 lg:sticky lg:top-24">
+      <div className="overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm">
+        <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+          {previewProduct.thumbnail_url ? (
+            <img
+              alt={previewProduct.title}
+              className="absolute inset-0 size-full object-cover"
+              src={previewProduct.thumbnail_url}
+            />
+          ) : (
+            <ProductArtwork product={previewProduct} />
+          )}
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/80 to-transparent p-4">
+            <Badge variant={statusBadgeVariants[status]}>{status}</Badge>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4 p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-medium uppercase tracking-normal text-muted-foreground">
+                {productTypeLabels[productType]}
+              </p>
+              <h2 className="mt-1 line-clamp-2 text-lg font-semibold leading-7 tracking-normal">
+                {previewProduct.title}
+              </h2>
+            </div>
+            <ArrowUpRightIcon
+              aria-hidden="true"
+              className="mt-1 shrink-0 text-muted-foreground"
+            />
+          </div>
+
+          <p className="line-clamp-3 min-h-16 text-sm leading-6 text-muted-foreground">
+            {previewProduct.short_description ??
+              "A concise product summary will appear here on public cards."}
+          </p>
+
+          <div className="flex items-center justify-between gap-3 border-t pt-4">
+            <span className="text-sm text-muted-foreground">Lifetime access</span>
+            <span className="text-sm font-semibold">
+              {formatProductPrice(previewProduct)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold">Public detail preview</h3>
+            <p className="text-xs text-muted-foreground">
+              /products/{previewProduct.slug}
+            </p>
+          </div>
+          <Badge variant="outline">Preview</Badge>
+        </div>
+
+        <div className="mt-4 grid gap-3 text-sm">
+          <div className="rounded-lg bg-muted/40 p-3">
+            <p className="text-xs text-muted-foreground">Description</p>
+            {descriptionLines.length > 0 ? (
+              <div className="mt-2 grid gap-1 text-xs leading-5">
+                {descriptionLines.map((line) => (
+                  <p key={line} className="line-clamp-1">
+                    {line}
+                  </p>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Add a full description to make the detail page feel complete.
+              </p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-lg bg-muted/40 p-3">
+              <p className="text-xs text-muted-foreground">Demo</p>
+              <p className="mt-1 truncate text-xs">
+                {demoUrl.trim() ? "Connected" : "Missing"}
+              </p>
+            </div>
+            <div className="rounded-lg bg-muted/40 p-3">
+              <p className="text-xs text-muted-foreground">Preview</p>
+              <p className="mt-1 truncate text-xs">
+                {previewUrl.trim() ? "Connected" : "Missing"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
 export function ProductForm({ mode, product }: ProductFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -135,6 +306,16 @@ export function ProductForm({ mode, product }: ProductFormProps) {
   const [slugTouched, setSlugTouched] = useState(mode === "edit");
   const [shortDescription, setShortDescription] = useState(
     product?.short_description ?? ""
+  );
+  const [description, setDescription] = useState(product?.description ?? "");
+  const [thumbnailUrl, setThumbnailUrl] = useState(product?.thumbnail_url ?? "");
+  const [demoUrl, setDemoUrl] = useState(product?.demo_url ?? "");
+  const [previewUrl, setPreviewUrl] = useState(product?.preview_url ?? "");
+  const [lemonProductId, setLemonProductId] = useState(
+    product?.lemon_squeezy_product_id ?? ""
+  );
+  const [lemonVariantId, setLemonVariantId] = useState(
+    product?.lemon_squeezy_variant_id ?? ""
   );
   const [currency, setCurrency] = useState(product?.currency ?? "USD");
   const [priceUsd, setPriceUsd] = useState(
@@ -152,6 +333,7 @@ export function ProductForm({ mode, product }: ProductFormProps) {
     () => (mode === "create" ? "Create product" : "Save changes"),
     [mode]
   );
+  const previewPriceCents = parsePriceCents(priceUsd, currency) ?? 0;
 
   function handleTitleChange(value: string) {
     setTitle(value);
@@ -200,14 +382,21 @@ export function ProductForm({ mode, product }: ProductFormProps) {
     }
 
     const payload: ProductInsert = {
-      title: title.trim(),
-      slug: validated.normalizedSlug,
-      short_description: shortDescription.trim() || null,
-      product_type: productType,
-      status,
-      price_cents: validated.priceCents,
       currency,
-      is_free: validated.priceCents === 0 || productType === "free_resource",
+      demo_url: demoUrl.trim() || null,
+      description: description.trim() || null,
+      is_free:
+        validated.priceCents === 0 || productType === "free_resource",
+      lemon_squeezy_product_id: lemonProductId.trim() || null,
+      lemon_squeezy_variant_id: lemonVariantId.trim() || null,
+      preview_url: previewUrl.trim() || null,
+      price_cents: validated.priceCents,
+      product_type: productType,
+      short_description: shortDescription.trim() || null,
+      slug: validated.normalizedSlug,
+      status,
+      thumbnail_url: thumbnailUrl.trim() || null,
+      title: title.trim(),
     };
 
     startTransition(async () => {
@@ -230,10 +419,7 @@ export function ProductForm({ mode, product }: ProductFormProps) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex w-full max-w-3xl flex-col gap-6"
-    >
+    <form onSubmit={handleSubmit} className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-2">
         <Button
           className="w-fit"
@@ -249,142 +435,291 @@ export function ProductForm({ mode, product }: ProductFormProps) {
             {mode === "create" ? "New Product" : "Edit Product"}
           </h1>
           <p className="text-sm leading-6 text-muted-foreground">
-            Configure the storefront fields used by the product listing and
-            detail pages.
+            Build the product listing, media, checkout references, and public
+            preview in one workspace.
           </p>
         </div>
       </div>
 
-      <div className="rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
-        <FieldGroup>
-          <Field data-invalid={Boolean(errors.title)}>
-            <FieldLabel htmlFor="title">Title</FieldLabel>
-            <Input
-              id="title"
-              value={title}
-              onChange={(event) => handleTitleChange(event.target.value)}
-              placeholder="Premium landing page kit"
-              aria-invalid={Boolean(errors.title)}
-              disabled={isPending}
-            />
-            <FieldError>{errors.title}</FieldError>
-          </Field>
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
+        <div className="flex min-w-0 flex-col gap-5">
+          <section className="rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-base font-semibold tracking-normal">
+                  Storefront content
+                </h2>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  These fields shape the product card and public detail page.
+                </p>
+              </div>
+              <Badge variant={statusBadgeVariants[status]}>{status}</Badge>
+            </div>
 
-          <Field data-invalid={Boolean(errors.slug)}>
-            <FieldLabel htmlFor="slug">Slug</FieldLabel>
-            <Input
-              id="slug"
-              value={slug}
-              onChange={(event) => {
-                setSlugTouched(true);
-                setSlug(slugify(event.target.value));
-              }}
-              placeholder="premium-landing-page-kit"
-              aria-invalid={Boolean(errors.slug)}
-              disabled={isPending}
-            />
-            <FieldDescription>
-              Used in the product URL. It is auto-generated from the title.
-            </FieldDescription>
-            <FieldError>{errors.slug}</FieldError>
-          </Field>
+            <FieldGroup>
+              <Field data-invalid={Boolean(errors.title)}>
+                <FieldLabel htmlFor="title">Title</FieldLabel>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(event) => handleTitleChange(event.target.value)}
+                  placeholder="Premium landing page kit"
+                  aria-invalid={Boolean(errors.title)}
+                  disabled={isPending}
+                />
+                <FieldError>{errors.title}</FieldError>
+              </Field>
 
-          <Field>
-            <FieldLabel htmlFor="short-description">
-              Short Description
-            </FieldLabel>
-            <Textarea
-              id="short-description"
-              value={shortDescription}
-              onChange={(event) => setShortDescription(event.target.value)}
-              placeholder="A concise product summary for cards and SEO."
-              disabled={isPending}
-            />
-          </Field>
+              <Field data-invalid={Boolean(errors.slug)}>
+                <FieldLabel htmlFor="slug">Slug</FieldLabel>
+                <Input
+                  id="slug"
+                  value={slug}
+                  onChange={(event) => {
+                    setSlugTouched(true);
+                    setSlug(slugify(event.target.value));
+                  }}
+                  placeholder="premium-landing-page-kit"
+                  aria-invalid={Boolean(errors.slug)}
+                  disabled={isPending}
+                />
+                <FieldDescription>
+                  Used in the product URL. It is auto-generated from the title.
+                </FieldDescription>
+                <FieldError>{errors.slug}</FieldError>
+              </Field>
 
-          <div className="grid gap-5 md:grid-cols-2">
-            <Field data-invalid={Boolean(errors.priceUsd)}>
-              <FieldLabel htmlFor="price">Price ({currency})</FieldLabel>
-              <Input
-                id="price"
-                type="number"
-                min="0"
-                step="0.01"
-                value={priceUsd}
-                onChange={(event) => setPriceUsd(event.target.value)}
-                aria-invalid={Boolean(errors.priceUsd)}
-                disabled={isPending}
+              <Field>
+                <FieldLabel htmlFor="short-description">
+                  Short description
+                </FieldLabel>
+                <Textarea
+                  id="short-description"
+                  value={shortDescription}
+                  onChange={(event) => setShortDescription(event.target.value)}
+                  placeholder="A concise product summary for cards and SEO."
+                  disabled={isPending}
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="description">Full description</FieldLabel>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  placeholder="Explain what the buyer gets, who it is for, and what is included."
+                  className="min-h-40"
+                  disabled={isPending}
+                />
+              </Field>
+            </FieldGroup>
+          </section>
+
+          <section className="rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
+            <div className="mb-5">
+              <h2 className="text-base font-semibold tracking-normal">
+                Product media
+              </h2>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Upload a thumbnail for product cards, or paste a remote image
+                URL when the asset already lives elsewhere.
+              </p>
+            </div>
+
+            <AdminMediaUploadField
+              description="Recommended ratio: 16:10. Images are uploaded to the public media bucket."
+              disabled={isPending}
+              folder="products"
+              id="thumbnail-url"
+              label="Thumbnail URL"
+              onChange={setThumbnailUrl}
+              placeholder="https://example.com/product-thumbnail.jpg"
+              value={thumbnailUrl}
+            />
+          </section>
+
+          <section className="rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
+            <div className="mb-5">
+              <h2 className="text-base font-semibold tracking-normal">
+                Pricing and publishing
+              </h2>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Control catalog state, pricing, and product type.
+              </p>
+            </div>
+
+            <FieldGroup>
+              <div className="grid gap-5 md:grid-cols-2">
+                <Field data-invalid={Boolean(errors.priceUsd)}>
+                  <FieldLabel htmlFor="price">Price ({currency})</FieldLabel>
+                  <Input
+                    id="price"
+                    type="number"
+                    min="0"
+                    step={currency === "VND" ? "1" : "0.01"}
+                    value={priceUsd}
+                    onChange={(event) => setPriceUsd(event.target.value)}
+                    aria-invalid={Boolean(errors.priceUsd)}
+                    disabled={isPending}
+                  />
+                  <FieldError>{errors.priceUsd}</FieldError>
+                </Field>
+
+                <Field>
+                  <FieldLabel>Currency</FieldLabel>
+                  <Select
+                    value={currency}
+                    onValueChange={(value) => {
+                      if (value) {
+                        setCurrency(value);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full" disabled={isPending}>
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencyOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+
+              <div className="grid gap-5 md:grid-cols-2">
+                <Field>
+                  <FieldLabel>Product type</FieldLabel>
+                  <Select
+                    value={productType}
+                    onValueChange={(value) =>
+                      setProductType(value as ProductType)
+                    }
+                  >
+                    <SelectTrigger className="w-full" disabled={isPending}>
+                      <SelectValue placeholder="Select product type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {productTypeOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+
+                <Field>
+                  <FieldLabel>Status</FieldLabel>
+                  <Select
+                    value={status}
+                    onValueChange={(value) => setStatus(value as ProductStatus)}
+                  >
+                    <SelectTrigger className="w-full" disabled={isPending}>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {productStatusOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+            </FieldGroup>
+          </section>
+
+          <section className="rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-base font-semibold tracking-normal">
+                  Delivery and external links
+                </h2>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  Connect demos, previews, and Lemon Squeezy references.
+                </p>
+              </div>
+              <ExternalLinkIcon
+                aria-hidden="true"
+                className="size-4 text-muted-foreground"
               />
-              <FieldError>{errors.priceUsd}</FieldError>
-            </Field>
+            </div>
 
-            <Field>
-              <FieldLabel>Currency</FieldLabel>
-              <Select
-                value={currency}
-                onValueChange={(value) => {
-                  if (value) {
-                    setCurrency(value);
-                  }
-                }}
-              >
-                <SelectTrigger className="w-full" disabled={isPending}>
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currencyOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-          </div>
+            <FieldGroup>
+              <div className="grid gap-5 md:grid-cols-2">
+                <Field>
+                  <FieldLabel htmlFor="demo-url">Demo URL</FieldLabel>
+                  <Input
+                    id="demo-url"
+                    value={demoUrl}
+                    onChange={(event) => setDemoUrl(event.target.value)}
+                    placeholder="https://demo.example.com"
+                    disabled={isPending}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="preview-url">Preview URL</FieldLabel>
+                  <Input
+                    id="preview-url"
+                    value={previewUrl}
+                    onChange={(event) => setPreviewUrl(event.target.value)}
+                    placeholder="https://example.com/preview"
+                    disabled={isPending}
+                  />
+                </Field>
+              </div>
 
-          <div className="grid gap-5 md:grid-cols-2">
-            <Field>
-              <FieldLabel>Product Type</FieldLabel>
-              <Select
-                value={productType}
-                onValueChange={(value) => setProductType(value as ProductType)}
-              >
-                <SelectTrigger className="w-full" disabled={isPending}>
-                  <SelectValue placeholder="Select product type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {productTypeOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+              <div className="grid gap-5 md:grid-cols-2">
+                <Field>
+                  <FieldLabel htmlFor="lemon-product-id">
+                    Lemon Squeezy product ID
+                  </FieldLabel>
+                  <Input
+                    id="lemon-product-id"
+                    value={lemonProductId}
+                    onChange={(event) => setLemonProductId(event.target.value)}
+                    placeholder="Optional"
+                    disabled={isPending}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="lemon-variant-id">
+                    Lemon Squeezy variant ID
+                  </FieldLabel>
+                  <Input
+                    id="lemon-variant-id"
+                    value={lemonVariantId}
+                    onChange={(event) => setLemonVariantId(event.target.value)}
+                    placeholder="Optional"
+                    disabled={isPending}
+                  />
+                </Field>
+              </div>
+            </FieldGroup>
+          </section>
+        </div>
 
-            <Field>
-              <FieldLabel>Status</FieldLabel>
-              <Select
-                value={status}
-                onValueChange={(value) => setStatus(value as ProductStatus)}
-              >
-                <SelectTrigger className="w-full" disabled={isPending}>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {productStatusOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-          </div>
-        </FieldGroup>
+        <ProductPreviewPanel
+          currency={currency}
+          description={description}
+          demoUrl={demoUrl}
+          priceCents={previewPriceCents}
+          productType={productType}
+          previewUrl={previewUrl}
+          shortDescription={shortDescription}
+          slug={slug}
+          status={status}
+          thumbnailUrl={thumbnailUrl}
+          title={title}
+        />
       </div>
 
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <div className="flex flex-col-reverse gap-2 border-t pt-5 sm:flex-row sm:justify-end">
         {mode === "edit" && product ? (
           <Button
             variant="outline"
@@ -393,7 +728,7 @@ export function ProductForm({ mode, product }: ProductFormProps) {
             disabled={isPending}
           >
             <PaperclipIcon aria-hidden="true" data-icon="inline-start" />
-            Manage Files
+            Manage files
           </Button>
         ) : null}
         <Button

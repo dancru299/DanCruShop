@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { ExternalLinkIcon } from "lucide-react";
 
 import { ProductCta } from "@/components/products/product-cta";
+import { ProductArtwork } from "@/components/products/product-card";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -130,7 +131,6 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     : false;
   const techStack = getTechStack(product);
   const license = getLicense(product);
-  const thumbnailSrc = product.thumbnail_url ?? "/window.svg";
 
   return (
     <div className="bg-background">
@@ -138,11 +138,15 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 md:py-14 lg:grid-cols-[1.08fr_0.92fr] lg:gap-12">
           <div className="flex flex-col gap-4">
             <div className="relative aspect-[16/10] overflow-hidden rounded-lg border bg-muted shadow-sm">
-              <img
-                src={thumbnailSrc}
-                alt={product.title}
-                className="absolute inset-0 size-full object-cover"
-              />
+              {product.thumbnail_url ? (
+                <img
+                  src={product.thumbnail_url}
+                  alt={product.title}
+                  className="absolute inset-0 size-full object-cover"
+                />
+              ) : (
+                <ProductArtwork product={product} />
+              )}
             </div>
 
             {product.demo_url ? (

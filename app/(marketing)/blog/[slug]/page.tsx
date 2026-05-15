@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import { ArrowLeftIcon } from "lucide-react";
 
+import { BlogCoverArtwork } from "@/components/blog/blog-card";
 import { buttonVariants } from "@/components/ui/button";
 import { getPostBySlug } from "@/lib/supabase/queries/blog";
 import { cn } from "@/lib/utils";
@@ -62,8 +63,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     notFound();
   }
 
-  const coverSrc = post.cover_image_url ?? "/window.svg";
-
   return (
     <div className="bg-background">
       <div>
@@ -95,11 +94,15 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
         <div className="mx-auto w-full max-w-5xl px-4 py-8">
           <div className="relative aspect-[16/8] overflow-hidden rounded-lg border bg-muted shadow-sm">
-            <img
-              src={coverSrc}
-              alt={post.title}
-              className="absolute inset-0 size-full object-cover"
-            />
+            {post.cover_image_url ? (
+              <img
+                src={post.cover_image_url}
+                alt={post.title}
+                className="absolute inset-0 size-full object-cover"
+              />
+            ) : (
+              <BlogCoverArtwork post={post} />
+            )}
           </div>
         </div>
 

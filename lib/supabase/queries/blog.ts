@@ -70,16 +70,24 @@ function getVisiblePublishedFilter() {
   return `published_at.is.null,published_at.lte.${new Date().toISOString()}`;
 }
 
-export async function getPublishedPosts(): Promise<PublishedBlogPost[]> {
+export async function getPublishedPosts(
+  limit?: number
+): Promise<PublishedBlogPost[]> {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
+    let query = supabase
       .from("blog_posts")
       .select(publicPostListSelect)
       .eq("status", "published")
       .or(getVisiblePublishedFilter())
       .order("published_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false });
+
+    if (typeof limit === "number" && limit > 0) {
+      query = query.limit(limit);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Failed to fetch published blog posts", error);

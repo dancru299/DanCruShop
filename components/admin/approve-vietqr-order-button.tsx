@@ -6,12 +6,15 @@ import { toast } from "sonner";
 
 import { approveVietQrOrder } from "@/actions/order.actions";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type ApproveVietQrOrderButtonProps = {
+  menuItem?: boolean;
   orderId: string;
 };
 
 export function ApproveVietQrOrderButton({
+  menuItem = false,
   orderId,
 }: ApproveVietQrOrderButtonProps) {
   const [isPending, startTransition] = useTransition();
@@ -34,7 +37,14 @@ export function ApproveVietQrOrderButton({
   }
 
   return (
-    <Button size="sm" type="button" disabled={isPending} onClick={handleApprove}>
+    <Button
+      size="sm"
+      type="button"
+      variant={menuItem ? "ghost" : "default"}
+      className={cn(menuItem && "h-9 w-full justify-start px-2.5")}
+      disabled={isPending}
+      onClick={handleApprove}
+    >
       {isPending ? (
         <Loader2Icon
           data-icon="inline-start"
