@@ -10,6 +10,11 @@ export type ProductType =
 
 export type ProductStatus = "draft" | "published" | "archived";
 
+export type ProductCategory = {
+  name: string;
+  slug: string;
+};
+
 export type PublishedProduct = {
   id: string;
   title: string;
@@ -23,6 +28,7 @@ export type PublishedProduct = {
 };
 
 export type ProductDetail = PublishedProduct & {
+  categories: ProductCategory[];
   description: string | null;
   product_type: ProductType;
   status: ProductStatus;
@@ -99,6 +105,40 @@ const adminProductListSelect = `
   updated_at
 `;
 
+type ProductCategoryMapRow = {
+  category: ProductCategory | ProductCategory[] | null;
+};
+
+async function getProductCategories(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  productId: string
+): Promise<ProductCategory[]> {
+  const { data, error } = await supabase
+    .from("product_category_map")
+    .select(
+      `
+        category:product_categories (
+          name,
+          slug
+        )
+      `
+    )
+    .eq("product_id", productId);
+
+  if (error) {
+    console.error("Failed to fetch product categories", error);
+    return [];
+  }
+
+  return ((data ?? []) as ProductCategoryMapRow[]).flatMap((row) => {
+    const category = Array.isArray(row.category)
+      ? row.category[0]
+      : row.category;
+
+    return category ? [category] : [];
+  });
+}
+
 export async function getPublishedProducts(
   limit?: number
 ): Promise<PublishedProduct[]> {
@@ -151,7 +191,16 @@ export async function getProductBySlug(
       return null;
     }
 
-    return data as ProductDetail | null;
+    if (!data) {
+      return null;
+    }
+
+    const product = data as Omit<ProductDetail, "categories">;
+
+    return {
+      ...product,
+      categories: await getProductCategories(supabase, product.id),
+    };
   } catch (error) {
     console.error("Unexpected error while fetching product by slug", error);
     return null;
@@ -200,7 +249,16 @@ export async function getAdminProductById(
       return null;
     }
 
-    return data as ProductDetail | null;
+    if (!data) {
+      return null;
+    }
+
+    const product = data as Omit<ProductDetail, "categories">;
+
+    return {
+      ...product,
+      categories: await getProductCategories(supabase, product.id),
+    };
   } catch (error) {
     console.error("Unexpected error while fetching admin product by id", error);
     return null;

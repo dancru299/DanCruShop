@@ -135,6 +135,38 @@ create table if not exists public.purchases (
   )
 );
 
+create table if not exists public.product_reviews (
+  id uuid primary key default gen_random_uuid(),
+  product_id uuid not null references public.products(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  rating integer not null,
+  title text,
+  comment text not null,
+  status text not null default 'published',
+  helpful_count integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint product_reviews_user_product_unique unique (user_id, product_id),
+  constraint product_reviews_rating_check check (rating between 1 and 5),
+  constraint product_reviews_status_check check (
+    status in ('published', 'hidden', 'flagged')
+  ),
+  constraint product_reviews_helpful_count_check check (helpful_count >= 0)
+);
+
+create table if not exists public.product_review_replies (
+  id uuid primary key default gen_random_uuid(),
+  review_id uuid not null references public.product_reviews(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  comment text not null,
+  status text not null default 'published',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint product_review_replies_status_check check (
+    status in ('published', 'hidden', 'flagged')
+  )
+);
+
 create table if not exists public.courses (
   id uuid primary key default gen_random_uuid(),
   product_id uuid not null unique references public.products(id) on delete cascade,
@@ -227,6 +259,18 @@ execute function public.set_updated_at();
 drop trigger if exists set_orders_updated_at on public.orders;
 create trigger set_orders_updated_at
 before update on public.orders
+for each row
+execute function public.set_updated_at();
+
+drop trigger if exists set_product_reviews_updated_at on public.product_reviews;
+create trigger set_product_reviews_updated_at
+before update on public.product_reviews
+for each row
+execute function public.set_updated_at();
+
+drop trigger if exists set_product_review_replies_updated_at on public.product_review_replies;
+create trigger set_product_review_replies_updated_at
+before update on public.product_review_replies
 for each row
 execute function public.set_updated_at();
 
@@ -339,6 +383,18 @@ create index if not exists purchases_active_user_product_idx
   on public.purchases (user_id, product_id)
   where access_status = 'active';
 
+create index if not exists product_reviews_product_rating_idx
+  on public.product_reviews (product_id, rating)
+  where status = 'published';
+
+create index if not exists product_reviews_created_at_idx
+  on public.product_reviews (created_at desc)
+  where status = 'published';
+
+create index if not exists product_review_replies_review_id_idx
+  on public.product_review_replies (review_id, created_at)
+  where status = 'published';
+
 create index if not exists courses_product_id_idx
   on public.courses (product_id);
 
@@ -370,6 +426,8 @@ alter table public.product_files enable row level security;
 alter table public.orders enable row level security;
 alter table public.order_items enable row level security;
 alter table public.purchases enable row level security;
+alter table public.product_reviews enable row level security;
+alter table public.product_review_replies enable row level security;
 alter table public.courses enable row level security;
 alter table public.course_modules enable row level security;
 alter table public.lessons enable row level security;
@@ -518,6 +576,94 @@ to authenticated
 using ((select public.is_admin()))
 with check ((select public.is_admin()));
 
+drop policy if exists "Public can view published product reviews" on public.product_reviews;
+create policy "Public can view published product reviews"
+on public.product_reviews
+for select
+to anon, authenticated
+using (status = 'published');
+
+drop policy if exists "Verified buyers can create product reviews" on public.product_reviews;
+create policy "Verified buyers can create product reviews"
+on public.product_reviews
+for insert
+to authenticated
+with check (
+  (select auth.uid()) = user_id
+  and exists (
+    select 1
+    from public.purchases
+    where purchases.product_id = product_reviews.product_id
+      and purchases.user_id = (select auth.uid())
+      and purchases.access_status = 'active'
+  )
+);
+
+drop policy if exists "Review authors can update own reviews" on public.product_reviews;
+create policy "Review authors can update own reviews"
+on public.product_reviews
+for update
+to authenticated
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
+
+drop policy if exists "Admins can manage product reviews" on public.product_reviews;
+create policy "Admins can manage product reviews"
+on public.product_reviews
+for all
+to authenticated
+using ((select public.is_admin()))
+with check ((select public.is_admin()));
+
+drop policy if exists "Public can view published product review replies" on public.product_review_replies;
+create policy "Public can view published product review replies"
+on public.product_review_replies
+for select
+to anon, authenticated
+using (
+  status = 'published'
+  and exists (
+    select 1
+    from public.product_reviews
+    where product_reviews.id = product_review_replies.review_id
+      and product_reviews.status = 'published'
+  )
+);
+
+drop policy if exists "Verified buyers can create product review replies" on public.product_review_replies;
+create policy "Verified buyers can create product review replies"
+on public.product_review_replies
+for insert
+to authenticated
+with check (
+  (select auth.uid()) = user_id
+  and exists (
+    select 1
+    from public.product_reviews
+    join public.purchases on purchases.product_id = product_reviews.product_id
+    where product_reviews.id = product_review_replies.review_id
+      and product_reviews.status = 'published'
+      and purchases.user_id = (select auth.uid())
+      and purchases.access_status = 'active'
+  )
+);
+
+drop policy if exists "Reply authors can update own product review replies" on public.product_review_replies;
+create policy "Reply authors can update own product review replies"
+on public.product_review_replies
+for update
+to authenticated
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
+
+drop policy if exists "Admins can manage product review replies" on public.product_review_replies;
+create policy "Admins can manage product review replies"
+on public.product_review_replies
+for all
+to authenticated
+using ((select public.is_admin()))
+with check ((select public.is_admin()));
+
 drop policy if exists "Public can view published courses" on public.courses;
 create policy "Public can view published courses"
 on public.courses
@@ -642,6 +788,8 @@ grant select
 on public.products,
    public.product_categories,
    public.product_category_map,
+   public.product_reviews,
+   public.product_review_replies,
    public.courses,
    public.course_modules,
    public.lessons,
@@ -660,6 +808,8 @@ on public.products,
    public.orders,
    public.order_items,
    public.purchases,
+   public.product_reviews,
+   public.product_review_replies,
    public.courses,
    public.course_modules,
    public.lessons,

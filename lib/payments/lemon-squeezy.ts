@@ -7,6 +7,18 @@ type LemonSqueezyCustomData = Record<
   string | number | boolean | null | undefined
 >;
 
+type CheckoutSessionOptions = {
+  customPriceCents?: number;
+  enabledVariantIds?: number[];
+  productDescription?: string;
+  productMedia?: string[];
+  productName?: string;
+  variantQuantities?: Array<{
+    quantity: number;
+    variantId: number;
+  }>;
+};
+
 type LemonSqueezyCheckoutResponse = {
   data?: {
     attributes?: {
@@ -63,22 +75,42 @@ export async function createCheckoutSession(
   storeId: string,
   variantId: string,
   redirectUrl: string,
-  customData: LemonSqueezyCustomData = {}
+  customData: LemonSqueezyCustomData = {},
+  options: CheckoutSessionOptions = {}
 ): Promise<string> {
   const apiKey = getLemonSqueezyApiKey();
   const enabledVariantId = getEnabledVariantId(variantId);
+  const enabledVariantIds = options.enabledVariantIds ?? [enabledVariantId];
 
   const response = await fetch("https://api.lemonsqueezy.com/v1/checkouts", {
     body: JSON.stringify({
       data: {
         type: "checkouts",
         attributes: {
+          ...(options.customPriceCents
+            ? { custom_price: options.customPriceCents }
+            : {}),
           product_options: {
             redirect_url: redirectUrl,
-            enabled_variants: [enabledVariantId],
+            enabled_variants: enabledVariantIds,
+            ...(options.productName ? { name: options.productName } : {}),
+            ...(options.productDescription
+              ? { description: options.productDescription }
+              : {}),
+            ...(options.productMedia ? { media: options.productMedia } : {}),
           },
           checkout_data: {
             custom: customData,
+            ...(options.variantQuantities
+              ? {
+                  variant_quantities: options.variantQuantities.map(
+                    (item) => ({
+                      quantity: item.quantity,
+                      variant_id: item.variantId,
+                    })
+                  ),
+                }
+              : {}),
           },
         },
         relationships: {

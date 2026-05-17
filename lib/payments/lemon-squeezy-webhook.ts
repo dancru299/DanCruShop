@@ -30,6 +30,7 @@ type ProductForOrder = {
   title: string;
   slug: string;
   lemon_squeezy_variant_id: string | null;
+  price_cents: number;
 };
 
 type ExtractedOrderData = {
@@ -64,6 +65,23 @@ function getString(source: JsonObject | null | undefined, key: string) {
   return typeof value === "string" && value.trim().length > 0
     ? value.trim()
     : null;
+}
+
+function getCartProductIds(customData: JsonObject | null) {
+  const rawValue = getString(customData, "cart_product_ids");
+
+  if (!rawValue) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      rawValue
+        .split(",")
+        .map((productId) => productId.trim())
+        .filter((productId) => productId.length > 0)
+    )
+  ).slice(0, 50);
 }
 
 function getNumber(source: JsonObject | null | undefined, key: string) {
@@ -205,7 +223,7 @@ async function findProductByVariantId(
 ) {
   const { data, error } = await supabaseAdmin
     .from("products")
-    .select("id, title, slug, lemon_squeezy_variant_id")
+    .select("id, title, slug, lemon_squeezy_variant_id, price_cents")
     .eq("lemon_squeezy_variant_id", variantId)
     .maybeSingle();
 
@@ -218,6 +236,40 @@ async function findProductByVariantId(
   }
 
   return data as ProductForOrder;
+}
+
+async function findProductsByIds(
+  supabaseAdmin: SupabaseClient,
+  productIds: string[],
+  fallbackProduct: ProductForOrder
+) {
+  if (productIds.length === 0) {
+    return [fallbackProduct];
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from("products")
+    .select("id, title, slug, lemon_squeezy_variant_id, price_cents")
+    .in("id", productIds)
+    .eq("status", "published");
+
+  if (error) {
+    throw new Error(`Could not load cart products: ${error.message}`);
+  }
+
+  const products = (data ?? []) as ProductForOrder[];
+  const byId = new Map(products.map((product) => [product.id, product]));
+  const orderedProducts = productIds.flatMap((productId) => {
+    const product = byId.get(productId);
+
+    return product ? [product] : [];
+  });
+
+  if (orderedProducts.length !== productIds.length) {
+    throw new Error("Cart checkout referenced unavailable products.");
+  }
+
+  return orderedProducts;
 }
 
 async function upsertPaidOrder(
@@ -256,7 +308,7 @@ async function upsertPaidOrder(
 async function replaceOrderItems(
   supabaseAdmin: SupabaseClient,
   orderId: string,
-  productId: string,
+  products: ProductForOrder[],
   orderData: ExtractedOrderData
 ) {
   const { error: deleteError } = await supabaseAdmin
@@ -268,31 +320,34 @@ async function replaceOrderItems(
     throw new Error(`Could not reset order items: ${deleteError.message}`);
   }
 
-  const { error } = await supabaseAdmin.from("order_items").insert({
-    order_id: orderId,
-    price_cents: orderData.itemPriceCents,
-    product_id: productId,
-    quantity: orderData.quantity,
-  });
+  const { error } = await supabaseAdmin.from("order_items").insert(
+    products.map((product) => ({
+      order_id: orderId,
+      price_cents:
+        products.length === 1 ? orderData.itemPriceCents : product.price_cents,
+      product_id: product.id,
+      quantity: products.length === 1 ? orderData.quantity : 1,
+    }))
+  );
 
   if (error) {
     throw new Error(`Could not store order item: ${error.message}`);
   }
 }
 
-async function upsertPurchase(
+async function upsertPurchases(
   supabaseAdmin: SupabaseClient,
   userId: string,
-  productId: string,
+  products: ProductForOrder[],
   orderId: string
 ) {
   const { error } = await supabaseAdmin.from("purchases").upsert(
-    {
+    products.map((product) => ({
       access_status: "active",
       order_id: orderId,
-      product_id: productId,
+      product_id: product.id,
       user_id: userId,
-    },
+    })),
     {
       onConflict: "user_id,product_id",
     }
@@ -372,6 +427,12 @@ export async function processOrderCreatedEvent(payload: unknown) {
       supabaseAdmin,
       orderData.variantId
     );
+    const customData = getCustomData(orderPayload);
+    const products = await findProductsByIds(
+      supabaseAdmin,
+      getCartProductIds(customData),
+      product
+    );
     const user = await getOrCreateFulfillmentUser(
       supabaseAdmin,
       orderData.customerEmail,
@@ -384,17 +445,20 @@ export async function processOrderCreatedEvent(payload: unknown) {
       orderPayload
     );
 
-    await replaceOrderItems(supabaseAdmin, orderId, product.id, orderData);
-    await upsertPurchase(supabaseAdmin, user.id, product.id, orderId);
+    await replaceOrderItems(supabaseAdmin, orderId, products, orderData);
+    await upsertPurchases(supabaseAdmin, user.id, products, orderId);
     await sendPurchaseAccessEmail(
       supabaseAdmin,
       orderData.customerEmail,
-      product.title
+      products.length === 1
+        ? products[0].title
+        : `${products.length} DanCruShop products`
     );
 
     return {
       orderId,
       productId: product.id,
+      productIds: products.map((item) => item.id),
       userId: user.id,
     };
   } catch (error) {

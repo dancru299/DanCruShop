@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeftIcon, MailCheckIcon } from "lucide-react";
 
+import { ClearCartOnMount } from "@/components/cart/clear-cart-on-mount";
 import { SiteFooter } from "@/components/shared/site-footer";
 import { SiteHeader } from "@/components/shared/site-header";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 export default function CheckoutSuccessPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
+      <ClearCartOnMount />
       <SiteHeader />
       <main className="flex flex-1 items-center justify-center px-4 py-12">
         <section className="flex w-full max-w-xl flex-col items-center gap-6 rounded-lg border bg-card p-8 text-center text-card-foreground shadow-sm">

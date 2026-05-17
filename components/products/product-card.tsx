@@ -13,20 +13,18 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import type { CartProduct } from "@/components/cart/cart-provider";
+import {
+  formatProductPrice as formatDisplayProductPrice,
+  getProductDeliveryLabel,
+  productTypeLabels,
+} from "@/lib/products/display";
 import type { PublishedProduct } from "@/lib/supabase/queries/products";
 import { cn } from "@/lib/utils";
 
 type ProductCardProps = {
   product: PublishedProduct;
-};
-
-const productTypeLabels: Record<PublishedProduct["product_type"], string> = {
-  bundle: "Bộ sản phẩm",
-  course: "Khóa học",
-  digital_download: "Tải xuống",
-  free_resource: "Tài nguyên",
-  template: "Template",
-  tool: "Tool",
 };
 
 const productTypeVisuals: Record<
@@ -63,18 +61,20 @@ const productTypeVisuals: Record<
 };
 
 export function formatProductPrice(product: PublishedProduct) {
-  if (product.is_free) {
-    return "Free";
-  }
+  return formatDisplayProductPrice(product);
+}
 
-  const currency = product.currency.trim().toUpperCase() || "USD";
-  const amount = currency === "VND" ? product.price_cents : product.price_cents / 100;
-
-  return new Intl.NumberFormat(currency === "VND" ? "vi-VN" : "en-US", {
-    currency,
-    maximumFractionDigits: currency === "VND" ? 0 : 2,
-    style: "currency",
-  }).format(amount);
+function getCartProduct(product: PublishedProduct): CartProduct {
+  return {
+    currency: product.currency,
+    id: product.id,
+    isFree: product.is_free,
+    priceCents: product.price_cents,
+    productType: product.product_type,
+    slug: product.slug,
+    thumbnailUrl: product.thumbnail_url,
+    title: product.title,
+  };
 }
 
 export function ProductArtwork({
@@ -133,23 +133,25 @@ export function ProductArtwork({
 
 export function ProductCard({ product }: ProductCardProps) {
   return (
-    <Link
-      href={`/products/${product.slug}`}
-      className="group/product-card flex h-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-xl hover:shadow-foreground/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-    >
-      <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-        {product.thumbnail_url ? (
-          <img
-            src={product.thumbnail_url}
-            alt={product.title}
-            className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover/product-card:scale-105"
-          />
-        ) : (
-          <ProductArtwork product={product} />
-        )}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/35 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover/product-card:opacity-100" />
-        <div className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 skew-x-[-18deg] bg-gradient-to-r from-transparent via-foreground/15 to-transparent opacity-0 transition-all duration-700 group-hover/product-card:left-full group-hover/product-card:opacity-100" />
-      </div>
+    <article className="group/product-card flex h-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-xl hover:shadow-foreground/10">
+      <Link
+        href={`/products/${product.slug}`}
+        className="block focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      >
+        <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+          {product.thumbnail_url ? (
+            <img
+              src={product.thumbnail_url}
+              alt={product.title}
+              className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover/product-card:scale-105"
+            />
+          ) : (
+            <ProductArtwork product={product} />
+          )}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/35 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover/product-card:opacity-100" />
+          <div className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 skew-x-[-18deg] bg-gradient-to-r from-transparent via-foreground/15 to-transparent opacity-0 transition-all duration-700 group-hover/product-card:left-full group-hover/product-card:opacity-100" />
+        </div>
+      </Link>
 
       <div className="flex flex-1 flex-col gap-4 p-4">
         <div className="flex items-start justify-between gap-3">
@@ -157,9 +159,14 @@ export function ProductCard({ product }: ProductCardProps) {
             <p className="text-xs font-medium uppercase tracking-normal text-muted-foreground">
               {productTypeLabels[product.product_type]}
             </p>
-            <h3 className="line-clamp-2 text-base font-semibold leading-6 tracking-normal">
-              {product.title}
-            </h3>
+            <Link
+              href={`/products/${product.slug}`}
+              className="focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              <h3 className="line-clamp-2 text-base font-semibold leading-6 tracking-normal transition-colors group-hover/product-card:text-foreground/80">
+                {product.title}
+              </h3>
+            </Link>
           </div>
           <ArrowUpRightIcon
             aria-hidden="true"
@@ -173,12 +180,24 @@ export function ProductCard({ product }: ProductCardProps) {
         </p>
 
         <div className="mt-auto flex items-center justify-between gap-3 border-t pt-4">
-          <span className="text-sm text-muted-foreground">Truy cập trọn đời</span>
-          <span className="text-sm font-semibold">
-            {formatProductPrice(product)}
-          </span>
+          <div className="grid gap-0.5">
+            <span className="text-sm font-semibold">
+              {formatProductPrice(product)}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {getProductDeliveryLabel(product)}
+            </span>
+          </div>
+          <AddToCartButton
+            product={getCartProduct(product)}
+            size="sm"
+            className="shrink-0"
+          >
+            Add
+          </AddToCartButton>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }
+
