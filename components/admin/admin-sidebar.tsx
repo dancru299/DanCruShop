@@ -5,8 +5,10 @@ import { usePathname } from "next/navigation";
 import {
   BarChart3Icon,
   FileTextIcon,
+  MessageSquareIcon,
   PackageIcon,
   ReceiptTextIcon,
+  UsersIcon,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -31,6 +33,16 @@ const adminNavItems = [
     href: "/admin/blog",
     icon: FileTextIcon,
     label: "Blog",
+  },
+  {
+    href: "/admin/reviews",
+    icon: MessageSquareIcon,
+    label: "Reviews",
+  },
+  {
+    href: "/admin/users",
+    icon: UsersIcon,
+    label: "Customers",
   },
 ];
 

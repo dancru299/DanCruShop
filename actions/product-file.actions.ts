@@ -16,6 +16,7 @@ export type ProductFileRecord = {
   version: string | null;
   is_primary: boolean;
   download_count: number;
+  max_downloads_per_user: number | null;
   created_at: string;
 };
 
@@ -221,6 +222,7 @@ export async function getProductFiles(
           version,
           is_primary,
           download_count,
+          max_downloads_per_user,
           created_at
         `
       )
@@ -237,5 +239,51 @@ export async function getProductFiles(
   } catch (error) {
     console.error("Unexpected error while fetching product files", error);
     return [];
+  }
+}
+
+export async function updateProductFileLimit(
+  fileId: string,
+  maxDownloads: number | null
+): Promise<ProductFileActionResult> {
+  try {
+    await requireAdmin();
+
+    const normalizedFileId = normalizeText(fileId, "File id");
+
+    if (
+      maxDownloads !== null &&
+      (!Number.isInteger(maxDownloads) || maxDownloads < 1)
+    ) {
+      return { ok: false, error: "Limit must be a positive integer or empty (no limit)." };
+    }
+
+    const supabaseAdmin = createAdminClient();
+    const { data: fileRecord, error: loadError } = await supabaseAdmin
+      .from("product_files")
+      .select("product_id")
+      .eq("id", normalizedFileId)
+      .maybeSingle();
+
+    if (loadError || !fileRecord) {
+      return { ok: false, error: "File not found." };
+    }
+
+    const { error } = await supabaseAdmin
+      .from("product_files")
+      .update({ max_downloads_per_user: maxDownloads })
+      .eq("id", normalizedFileId);
+
+    if (error) {
+      console.error("Failed to update file download limit", error);
+      return { ok: false, error: error.message };
+    }
+
+    revalidateProductFiles(String(fileRecord.product_id));
+
+    return { ok: true };
+  } catch (error) {
+    console.error("Unexpected error while updating file limit", error);
+    return { ok: false, error: getErrorMessage(error) };
   }
 }

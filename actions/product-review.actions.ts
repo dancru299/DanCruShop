@@ -89,7 +89,7 @@ export async function createProductReview(
         comment,
         product_id: productId,
         rating,
-        status: "published",
+        status: "pending",
         title: title || null,
         user_id: user.id,
       },
@@ -104,7 +104,7 @@ export async function createProductReview(
 
     revalidatePath(`/products/${slug}`);
 
-    return { error: null, success: "Review published." };
+    return { error: null, success: "Review submitted and awaiting approval." };
   } catch (error) {
     console.error("Failed to create product review", error);
 

@@ -20,6 +20,12 @@ export default function DashboardLayout({
               My Products
             </Link>
             <Link
+              href="/dashboard/courses"
+              className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              My Courses
+            </Link>
+            <Link
               href="/"
               className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >

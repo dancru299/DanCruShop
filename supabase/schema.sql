@@ -149,7 +149,7 @@ create table if not exists public.product_reviews (
   constraint product_reviews_user_product_unique unique (user_id, product_id),
   constraint product_reviews_rating_check check (rating between 1 and 5),
   constraint product_reviews_status_check check (
-    status in ('published', 'hidden', 'flagged')
+    status in ('pending', 'published', 'hidden', 'flagged')
   ),
   constraint product_reviews_helpful_count_check check (helpful_count >= 0)
 );
@@ -163,7 +163,7 @@ create table if not exists public.product_review_replies (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint product_review_replies_status_check check (
-    status in ('published', 'hidden', 'flagged')
+    status in ('pending', 'published', 'hidden', 'flagged')
   )
 );
 
@@ -824,5 +824,112 @@ to service_role;
 grant execute
 on function public.is_admin()
 to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Course progress tracking (Phase 4 migration)
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.course_progress (
+  id           uuid        primary key default gen_random_uuid(),
+  user_id      uuid        not null references auth.users(id) on delete cascade,
+  lesson_id    uuid        not null references public.lessons(id) on delete cascade,
+  course_id    uuid        not null references public.courses(id) on delete cascade,
+  completed    boolean     not null default false,
+  completed_at timestamptz,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now(),
+  constraint course_progress_user_lesson_unique unique (user_id, lesson_id)
+);
+
+create index if not exists course_progress_user_course_idx
+  on public.course_progress (user_id, course_id);
+
+alter table public.course_progress enable row level security;
+
+drop policy if exists "Users can manage own course progress" on public.course_progress;
+create policy "Users can manage own course progress"
+  on public.course_progress for all to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists "Admins can manage course progress" on public.course_progress;
+create policy "Admins can manage course progress"
+  on public.course_progress for all to authenticated
+  using ((select public.is_admin()))
+  with check ((select public.is_admin()));
+
+drop trigger if exists set_course_progress_updated_at on public.course_progress;
+create trigger set_course_progress_updated_at
+  before update on public.course_progress
+  for each row execute function public.set_updated_at();
+
+grant select, insert, update, delete on public.course_progress to authenticated;
+grant all on public.course_progress to service_role;
+
+-- ---------------------------------------------------------------------------
+-- Download limits & per-user tracking (Phase 3 migration)
+-- ---------------------------------------------------------------------------
+
+alter table public.product_files
+  add column if not exists max_downloads_per_user integer;
+
+create table if not exists public.download_logs (
+  id            uuid        primary key default gen_random_uuid(),
+  user_id       uuid        not null references auth.users(id) on delete cascade,
+  product_id    uuid        not null references public.products(id) on delete cascade,
+  file_id       uuid        not null references public.product_files(id) on delete cascade,
+  downloaded_at timestamptz not null default now()
+);
+
+create index if not exists download_logs_user_file_idx
+  on public.download_logs (user_id, file_id);
+
+create index if not exists download_logs_user_product_idx
+  on public.download_logs (user_id, product_id);
+
+create index if not exists download_logs_file_id_idx
+  on public.download_logs (file_id, downloaded_at desc);
+
+-- Atomic counter increment to avoid race conditions on concurrent downloads
+create or replace function public.increment_download_count(file_id_arg uuid)
+returns void
+language sql
+security definer
+as $$
+  update public.product_files
+  set download_count = download_count + 1
+  where id = file_id_arg;
+$$;
+
+alter table public.download_logs enable row level security;
+
+drop policy if exists "Users can view own download logs" on public.download_logs;
+create policy "Users can view own download logs"
+  on public.download_logs for select to authenticated
+  using ((select auth.uid()) = user_id);
+
+drop policy if exists "Admins can manage download logs" on public.download_logs;
+create policy "Admins can manage download logs"
+  on public.download_logs for all to authenticated
+  using ((select public.is_admin()))
+  with check ((select public.is_admin()));
+
+grant select, insert on public.download_logs to authenticated;
+grant all on public.download_logs to service_role;
+
+-- ---------------------------------------------------------------------------
+-- Full-text search for products (Phase 2 migration)
+-- ---------------------------------------------------------------------------
+
+alter table public.products
+  add column if not exists search_vector tsvector
+    generated always as (
+      setweight(to_tsvector('english', coalesce(title, '')), 'A') ||
+      setweight(to_tsvector('english', coalesce(short_description, '')), 'B') ||
+      setweight(to_tsvector('english', coalesce(description, '')), 'C')
+    ) stored;
+
+create index if not exists products_search_vector_idx
+  on public.products using gin(search_vector);
 
 commit;

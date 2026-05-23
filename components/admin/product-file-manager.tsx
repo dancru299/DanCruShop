@@ -17,6 +17,7 @@ import {
 import {
   addProductFile,
   deleteProductFile,
+  updateProductFileLimit,
   type ProductFileRecord,
 } from "@/actions/product-file.actions";
 import { Badge } from "@/components/ui/badge";
@@ -213,6 +214,8 @@ export function ProductFileManager({
                 <TableHead>Name</TableHead>
                 <TableHead>Size</TableHead>
                 <TableHead>Type</TableHead>
+                <TableHead>Downloads</TableHead>
+                <TableHead>Limit / user</TableHead>
                 <TableHead>Uploaded</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
@@ -248,6 +251,13 @@ export function ProductFileManager({
                   </TableCell>
                   <TableCell>{formatBytes(file.file_size_bytes)}</TableCell>
                   <TableCell>{file.file_type ?? "Unknown"}</TableCell>
+                  <TableCell>{file.download_count}</TableCell>
+                  <TableCell>
+                    <DownloadLimitInput
+                      fileId={file.id}
+                      initialLimit={file.max_downloads_per_user}
+                    />
+                  </TableCell>
                   <TableCell>{formatDate(file.created_at)}</TableCell>
                   <TableCell className="text-right">
                     <AdminActionMenu label={`Actions for ${file.file_name}`}>
@@ -282,6 +292,61 @@ export function ProductFileManager({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function DownloadLimitInput({
+  fileId,
+  initialLimit,
+}: {
+  fileId: string;
+  initialLimit: number | null;
+}) {
+  const [value, setValue] = useState(
+    initialLimit !== null ? String(initialLimit) : ""
+  );
+  const [isSaving, startTransition] = useTransition();
+
+  function handleBlur() {
+    const parsed = value.trim() === "" ? null : parseInt(value, 10);
+
+    if (parsed === initialLimit) return;
+    if (value.trim() !== "" && (isNaN(parsed as number) || (parsed as number) < 1)) {
+      toast.error("Limit phải là số nguyên dương.");
+      setValue(initialLimit !== null ? String(initialLimit) : "");
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await updateProductFileLimit(fileId, parsed);
+
+      if (!result.ok) {
+        toast.error("Không thể cập nhật limit", { description: result.error });
+        setValue(initialLimit !== null ? String(initialLimit) : "");
+        return;
+      }
+
+      toast.success("Đã cập nhật download limit.");
+    });
+  }
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <Input
+        type="number"
+        min={1}
+        placeholder="∞"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleBlur}
+        disabled={isSaving}
+        className="w-20"
+        aria-label="Max downloads per user"
+      />
+      {isSaving && (
+        <Loader2Icon aria-hidden="true" className="size-3.5 animate-spin text-muted-foreground" />
+      )}
     </div>
   );
 }

@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 
+import {
+  checkRateLimit,
+  createRateLimiter,
+  getClientIp,
+} from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+
+const downloadLimiter = createRateLimiter({ max: 10, windowMs: 60_000 });
 
 type DownloadRouteContext = {
   params: Promise<{
@@ -16,7 +23,9 @@ type ProductAccessRecord = {
 };
 
 type ProductFileRecord = {
+  id: string;
   file_path: string;
+  max_downloads_per_user: number | null;
 };
 
 export const runtime = "nodejs";
@@ -74,7 +83,7 @@ async function getPrimaryFile(productId: string) {
   const supabaseAdmin = createAdminClient();
   const { data, error } = await supabaseAdmin
     .from("product_files")
-    .select("file_path")
+    .select("id, file_path, max_downloads_per_user")
     .eq("product_id", productId)
     .eq("is_primary", true)
     .maybeSingle();
@@ -85,6 +94,22 @@ async function getPrimaryFile(productId: string) {
   }
 
   return data as ProductFileRecord | null;
+}
+
+async function getUserDownloadCount(userId: string, fileId: string) {
+  const supabaseAdmin = createAdminClient();
+  const { count, error } = await supabaseAdmin
+    .from("download_logs")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("file_id", fileId);
+
+  if (error) {
+    console.error("Failed to check download count", error);
+    return 0;
+  }
+
+  return count ?? 0;
 }
 
 async function createDownloadUrl(filePath: string) {
@@ -101,14 +126,41 @@ async function createDownloadUrl(filePath: string) {
   return data.signedUrl;
 }
 
+async function recordDownload(
+  userId: string,
+  productId: string,
+  fileId: string
+) {
+  const supabaseAdmin = createAdminClient();
+
+  await Promise.all([
+    supabaseAdmin.from("download_logs").insert({
+      file_id: fileId,
+      product_id: productId,
+      user_id: userId,
+    }),
+    supabaseAdmin.rpc("increment_download_count", { file_id_arg: fileId }),
+  ]);
+}
+
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: DownloadRouteContext
 ) {
   const { identifier } = await params;
 
   if (!identifier) {
     return NextResponse.json({ error: "Missing product id." }, { status: 400 });
+  }
+
+  const ip = getClientIp(request.headers);
+  const { allowed } = checkRateLimit(downloadLimiter, `${ip}:${identifier}`);
+
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
   }
 
   const user = await getAuthenticatedUser();
@@ -140,7 +192,27 @@ export async function POST(
       );
     }
 
-    const downloadUrl = await createDownloadUrl(primaryFile.file_path);
+    // Enforce per-user download limit if configured
+    if (primaryFile.max_downloads_per_user !== null) {
+      const downloadCount = await getUserDownloadCount(
+        user.id,
+        primaryFile.id
+      );
+
+      if (downloadCount >= primaryFile.max_downloads_per_user) {
+        return NextResponse.json(
+          {
+            error: `Download limit reached. You have used all ${primaryFile.max_downloads_per_user} allowed downloads for this product.`,
+          },
+          { status: 403 }
+        );
+      }
+    }
+
+    const [downloadUrl] = await Promise.all([
+      createDownloadUrl(primaryFile.file_path),
+      recordDownload(user.id, product.id, primaryFile.id),
+    ]);
 
     return NextResponse.json({ download_url: downloadUrl });
   } catch (error) {
