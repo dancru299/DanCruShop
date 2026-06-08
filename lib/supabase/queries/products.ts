@@ -227,6 +227,124 @@ export async function getAdminProducts(): Promise<AdminProductListItem[]> {
   }
 }
 
+export type SearchProductsParams = {
+  query?: string;
+  category?: string;
+  type?: ProductType;
+  page?: number;
+  perPage?: number;
+};
+
+export type SearchProductsResult = {
+  products: PublishedProduct[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+};
+
+export async function getAllCategories(): Promise<ProductCategory[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("product_categories")
+      .select("name, slug")
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Failed to fetch product categories", error);
+      return [];
+    }
+
+    return (data ?? []) as ProductCategory[];
+  } catch (error) {
+    console.error("Unexpected error while fetching categories", error);
+    return [];
+  }
+}
+
+export async function searchPublishedProducts(
+  params: SearchProductsParams = {}
+): Promise<SearchProductsResult> {
+  const { query, category, type, page = 1, perPage = 12 } = params;
+  const safePage = Math.max(1, page);
+  const safePerPage = Math.min(50, Math.max(1, perPage));
+  const offset = (safePage - 1) * safePerPage;
+
+  const defaultResult: SearchProductsResult = {
+    page: safePage,
+    perPage: safePerPage,
+    products: [],
+    total: 0,
+    totalPages: 0,
+  };
+
+  try {
+    const supabase = await createClient();
+
+    // If filtering by category, get matching product IDs first
+    let categoryProductIds: string[] | null = null;
+
+    if (category) {
+      const { data: categoryMap } = await supabase
+        .from("product_category_map")
+        .select("product_id, product_categories!inner ( slug )")
+        .eq("product_categories.slug", category);
+
+      categoryProductIds = (categoryMap ?? []).map(
+        (row: { product_id: string }) => row.product_id
+      );
+
+      if (categoryProductIds.length === 0) {
+        return defaultResult;
+      }
+    }
+
+    let dbQuery = supabase
+      .from("products")
+      .select(publishedProductSelect, { count: "exact" })
+      .eq("status", "published");
+
+    if (query && query.trim().length > 0) {
+      dbQuery = dbQuery.textSearch("search_vector", query.trim(), {
+        type: "websearch",
+      });
+    }
+
+    if (type) {
+      dbQuery = dbQuery.eq("product_type", type);
+    }
+
+    if (categoryProductIds !== null) {
+      dbQuery = dbQuery.in("id", categoryProductIds);
+    }
+
+    dbQuery = dbQuery
+      .order("created_at", { ascending: false })
+      .range(offset, offset + safePerPage - 1);
+
+    const { data, error, count } = await dbQuery;
+
+    if (error) {
+      console.error("Failed to search published products", error);
+      return defaultResult;
+    }
+
+    const total = count ?? 0;
+
+    return {
+      page: safePage,
+      perPage: safePerPage,
+      products: (data ?? []) as PublishedProduct[],
+      total,
+      totalPages: Math.ceil(total / safePerPage),
+    };
+  } catch (error) {
+    console.error("Unexpected error while searching published products", error);
+    return defaultResult;
+  }
+}
+
 export async function getAdminProductById(
   id: string
 ): Promise<ProductDetail | null> {

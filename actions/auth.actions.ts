@@ -3,7 +3,14 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import {
+  checkRateLimit,
+  createRateLimiter,
+  getClientIp,
+} from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
+
+const magicLinkLimiter = createRateLimiter({ max: 5, windowMs: 60_000 });
 
 export type MagicLinkActionResult =
   | {
@@ -63,6 +70,18 @@ export async function signInWithMagicLink(
   email: string
 ): Promise<MagicLinkActionResult> {
   try {
+    const requestHeaders = await headers();
+    const ip = getClientIp(requestHeaders);
+    const { allowed } = checkRateLimit(magicLinkLimiter, ip);
+
+    if (!allowed) {
+      return {
+        error:
+          "Bạn đã gửi quá nhiều yêu cầu. Vui lòng đợi ít nhất 1 phút rồi thử lại.",
+        ok: false,
+      };
+    }
+
     const normalizedEmail = normalizeEmail(email);
 
     if (!isValidEmail(normalizedEmail)) {

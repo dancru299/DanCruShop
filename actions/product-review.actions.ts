@@ -89,7 +89,7 @@ export async function createProductReview(
         comment,
         product_id: productId,
         rating,
-        status: "published",
+        status: "pending",
         title: title || null,
         user_id: user.id,
       },

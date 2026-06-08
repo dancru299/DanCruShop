@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, DownloadIcon } from "lucide-react";
 
 import { getProductFiles } from "@/actions/product-file.actions";
 import { ProductFileManager } from "@/components/admin/product-file-manager";
@@ -57,6 +57,16 @@ export default async function ProductFilesPage({
             secure downloads.
           </p>
         </div>
+      </div>
+
+      <div className="flex items-center justify-end">
+        <Link
+          href={`/admin/products/${product.id}/downloads`}
+          className={cn(buttonVariants({ variant: "outline" }), "w-fit")}
+        >
+          <DownloadIcon aria-hidden="true" data-icon="inline-start" />
+          View Download History
+        </Link>
       </div>
 
       <ProductFileManager productId={product.id} initialFiles={files} />
