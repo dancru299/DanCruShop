@@ -19,7 +19,7 @@ type AddToCartButtonProps = {
 };
 
 export function AddToCartButton({
-  children = "Add to cart",
+  children = "Thêm vào giỏ",
   className,
   product,
   size = "default",

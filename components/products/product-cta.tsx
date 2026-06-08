@@ -55,7 +55,7 @@ export function ProductCta({
         render={<Link href={`/dashboard/products/${productId}`} />}
         nativeButton={false}
       >
-        Open in dashboard
+        Mở dashboard
         <ArrowRightIcon aria-hidden="true" data-icon="inline-end" />
       </Button>
     );
@@ -66,11 +66,11 @@ export function ProductCta({
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
         <form action={claimFreeProduct.bind(null, productId)}>
           <Button size="lg" type="submit" className="w-full">
-            Get it for free
+            Nhận miễn phí
           </Button>
         </form>
         <AddToCartButton product={cartProduct} size="lg" className="w-full">
-          Add to cart
+          Thêm vào giỏ
         </AddToCartButton>
       </div>
     );
@@ -80,22 +80,21 @@ export function ProductCta({
     <div className="grid gap-2">
       <form action={createLemonSqueezyCheckout.bind(null, productId)}>
         <Button size="lg" type="submit" className="w-full">
-          Buy now - {formatPrice(priceCents, normalizedCurrency)}
+          Mua ngay - {formatPrice(priceCents, normalizedCurrency)}
         </Button>
       </form>
 
       <AddToCartButton product={cartProduct} size="lg" className="w-full">
-        Add to cart
+        Thêm vào giỏ
       </AddToCartButton>
 
       {supportsVietQr ? (
         <form action={createVietQrOrder.bind(null, productId)}>
           <Button size="lg" type="submit" className="w-full" variant="outline">
-            Pay with VietQR
+            Thanh toán bằng VietQR
           </Button>
         </form>
       ) : null}
     </div>
   );
 }
-

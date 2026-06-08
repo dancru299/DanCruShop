@@ -6,6 +6,7 @@ import {
   BookOpenIcon,
   Code2Icon,
   DownloadIcon,
+  EyeIcon,
   FileCode2Icon,
   Layers3Icon,
   PackageIcon,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import { FavoriteButton } from "@/components/products/favorite-button";
 import type { CartProduct } from "@/components/cart/cart-provider";
 import {
   formatProductPrice as formatDisplayProductPrice,
@@ -89,13 +91,12 @@ export function ProductArtwork({
   return (
     <div
       className={cn(
-        "motion-gradient-pan absolute inset-0 overflow-hidden bg-gradient-to-br",
+        "absolute inset-0 overflow-hidden bg-gradient-to-br",
         visual.accentClassName,
         className
       )}
     >
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/30 to-transparent" />
-      <div className="motion-scanline pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-transparent via-foreground/10 to-transparent" />
       <div className="absolute -right-10 -top-10 size-40 rounded-full border border-foreground/10" />
       <div className="absolute -bottom-14 -left-10 size-44 rounded-full border border-foreground/10" />
 
@@ -123,7 +124,7 @@ export function ProductArtwork({
         <div className="flex items-end justify-between gap-4">
           <Code2Icon aria-hidden="true" className="size-8 text-foreground/45" />
           <span className="rounded-md border bg-background/70 px-2 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
-            Ready
+            Sẵn sàng
           </span>
         </div>
       </div>
@@ -132,72 +133,97 @@ export function ProductArtwork({
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const visual = productTypeVisuals[product.product_type];
+  const TypeIcon = visual.Icon;
+  const deliveryLabel = getProductDeliveryLabel(product);
+
   return (
-    <article className="group/product-card flex h-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-xl hover:shadow-foreground/10">
-      <Link
-        href={`/products/${product.slug}`}
-        className="block focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-      >
-        <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-          {product.thumbnail_url ? (
-            <img
-              src={product.thumbnail_url}
-              alt={product.title}
-              className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover/product-card:scale-105"
-            />
-          ) : (
-            <ProductArtwork product={product} />
-          )}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/35 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover/product-card:opacity-100" />
-          <div className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 skew-x-[-18deg] bg-gradient-to-r from-transparent via-foreground/15 to-transparent opacity-0 transition-all duration-700 group-hover/product-card:left-full group-hover/product-card:opacity-100" />
-        </div>
-      </Link>
-
-      <div className="flex flex-1 flex-col gap-4 p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-medium uppercase tracking-normal text-muted-foreground">
-              {productTypeLabels[product.product_type]}
-            </p>
-            <Link
-              href={`/products/${product.slug}`}
-              className="focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              <h3 className="line-clamp-2 text-base font-semibold leading-6 tracking-normal transition-colors group-hover/product-card:text-foreground/80">
-                {product.title}
-              </h3>
-            </Link>
-          </div>
-          <ArrowUpRightIcon
-            aria-hidden="true"
-            className="mt-0.5 shrink-0 text-muted-foreground transition-[color,transform] duration-300 group-hover/product-card:-translate-y-0.5 group-hover/product-card:translate-x-0.5 group-hover/product-card:text-foreground"
+    <article className="group/product-card relative flex h-full flex-col overflow-hidden rounded-xl border bg-card/65 text-card-foreground shadow-sm backdrop-blur-xl transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-xl hover:shadow-foreground/10">
+      {/* Image */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        {product.thumbnail_url ? (
+          <img
+            src={product.thumbnail_url}
+            alt={product.title}
+            className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover/product-card:scale-105"
           />
+        ) : (
+          <ProductArtwork product={product} />
+        )}
+
+        {/* bottom vignette for depth */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/45 to-transparent" />
+
+        {/* free badge (top-left) */}
+        {product.is_free ? (
+          <span className="absolute left-3 top-3 z-20 inline-flex items-center rounded-full bg-emerald-500/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm backdrop-blur">
+            Miễn phí
+          </span>
+        ) : null}
+
+        {/* wishlist (top-right) */}
+        <FavoriteButton className="absolute right-3 top-3 z-30" />
+
+        {/* hover overlay: View + Add */}
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center gap-2 bg-black/45 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover/product-card:pointer-events-auto group-hover/product-card:opacity-100">
+          <Link
+            href={`/products/${product.slug}`}
+            aria-label={`Xem ${product.title}`}
+            className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-neutral-900 shadow-lg transition before:absolute before:inset-0 before:content-[''] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          >
+            <EyeIcon aria-hidden="true" className="size-4" />
+            Xem
+          </Link>
+          <div className="relative z-10">
+            <AddToCartButton
+              product={getCartProduct(product)}
+              size="sm"
+              variant="default"
+              className="rounded-full px-4 shadow-lg"
+            >
+              Thêm
+            </AddToCartButton>
+          </div>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="flex flex-1 flex-col gap-2.5 p-4">
+        <div className="flex items-center justify-between gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+            <TypeIcon aria-hidden="true" className="size-3.5" />
+            {productTypeLabels[product.product_type]}
+          </span>
+          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="size-1.5 rounded-full bg-emerald-400" />
+            {deliveryLabel}
+          </span>
         </div>
 
-        <p className="line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-muted-foreground">
+        <Link
+          href={`/products/${product.slug}`}
+          className="focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          <h3 className="line-clamp-2 text-base font-semibold leading-6 tracking-normal transition-colors group-hover/product-card:text-foreground/80">
+            {product.title}
+          </h3>
+        </Link>
+
+        <p className="line-clamp-2 min-h-[2.5rem] text-sm leading-6 text-muted-foreground">
           {product.short_description ??
-            "A practical digital resource for builders who want to ship faster."}
+            "Tài nguyên số thực dụng cho builder muốn ship nhanh hơn."}
         </p>
 
-        <div className="mt-auto flex items-center justify-between gap-3 border-t pt-4">
-          <div className="grid gap-0.5">
-            <span className="text-sm font-semibold">
-              {formatProductPrice(product)}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {getProductDeliveryLabel(product)}
-            </span>
-          </div>
-          <AddToCartButton
-            product={getCartProduct(product)}
-            size="sm"
-            className="shrink-0"
-          >
-            Add
-          </AddToCartButton>
+        <div className="mt-auto flex items-end justify-between gap-3 border-t border-border/60 pt-3">
+          <span className="text-lg font-semibold tracking-tight">
+            {formatProductPrice(product)}
+          </span>
+          <ArrowUpRightIcon
+            aria-hidden="true"
+            className="mb-1 shrink-0 text-muted-foreground transition-[color,transform] duration-300 group-hover/product-card:-translate-y-0.5 group-hover/product-card:translate-x-0.5 group-hover/product-card:text-foreground"
+          />
         </div>
       </div>
     </article>
   );
 }
-

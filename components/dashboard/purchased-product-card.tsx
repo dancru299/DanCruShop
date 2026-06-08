@@ -6,25 +6,14 @@ import { ArrowUpRightIcon } from "lucide-react";
 import { DownloadButton } from "@/components/products/download-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { productTypeLabels } from "@/lib/products/display";
 import type { UserPurchase } from "@/lib/supabase/queries/purchases";
 
 type PurchasedProductCardProps = {
   purchase: UserPurchase;
 };
 
-const productTypeLabels: Record<
-  UserPurchase["product"]["product_type"],
-  string
-> = {
-  bundle: "Bundle",
-  course: "Course",
-  digital_download: "Download",
-  free_resource: "Resource",
-  template: "Template",
-  tool: "Tool",
-};
-
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
+const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
   dateStyle: "medium",
 });
 
@@ -51,7 +40,7 @@ export function PurchasedProductCard({ purchase }: PurchasedProductCardProps) {
             <Badge variant="secondary">
               {productTypeLabels[product.product_type]}
             </Badge>
-            {product.is_free ? <Badge variant="outline">Free</Badge> : null}
+            {product.is_free ? <Badge variant="outline">Miễn phí</Badge> : null}
           </div>
           <div className="flex flex-col gap-1">
             <Link
@@ -61,7 +50,7 @@ export function PurchasedProductCard({ purchase }: PurchasedProductCardProps) {
               {product.title}
             </Link>
             <p className="text-sm text-muted-foreground">
-              Purchased {dateFormatter.format(new Date(purchase.purchased_at))}
+              Đã mua {dateFormatter.format(new Date(purchase.purchased_at))}
             </p>
           </div>
         </div>
@@ -72,7 +61,7 @@ export function PurchasedProductCard({ purchase }: PurchasedProductCardProps) {
             render={<Link href={`/products/${product.slug}`} />}
             nativeButton={false}
           >
-            View
+            Xem chi tiết
             <ArrowUpRightIcon data-icon="inline-end" aria-hidden="true" />
           </Button>
           <DownloadButton productId={product.id} />

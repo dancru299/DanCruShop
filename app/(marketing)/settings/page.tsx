@@ -21,10 +21,10 @@ export default async function SettingsPage() {
   return (
     <section className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-10 md:py-14">
       <div className="flex flex-col gap-2">
-        <p className="text-sm text-muted-foreground">Account</p>
-        <h1 className="text-3xl font-semibold tracking-normal">Settings</h1>
+        <p className="text-sm text-muted-foreground">Tài khoản</p>
+        <h1 className="text-3xl font-semibold tracking-normal">Cài đặt</h1>
         <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-          Manage account preferences and buyer experience settings.
+          Quản lý tùy chọn tài khoản và trải nghiệm mua hàng trên DanCruShop.
         </p>
       </div>
 
@@ -32,24 +32,24 @@ export default async function SettingsPage() {
         {[
           {
             Icon: UserRoundIcon,
-            description: "Change your display name and avatar.",
+            description: "Đổi tên hiển thị và ảnh đại diện của bạn.",
             href: "/profile",
-            title: "Profile",
+            title: "Hồ sơ",
           },
           {
             Icon: BellIcon,
-            description: "Purchase receipts and product update emails.",
+            description: "Biên nhận mua hàng và email cập nhật sản phẩm.",
             href: "#",
-            title: "Notifications",
+            title: "Thông báo",
           },
           {
             Icon: ShieldCheckIcon,
-            description: "Login, access, and checkout security.",
+            description: "Đăng nhập, quyền truy cập và bảo mật thanh toán.",
             href: "#",
-            title: "Security",
+            title: "Bảo mật",
           },
         ].map((item) => (
-          <div key={item.title} className="rounded-lg border bg-card p-5 shadow-sm">
+          <div key={item.title} className="rounded-lg border bg-card/60 p-5 shadow-sm backdrop-blur-xl">
             <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
               <item.Icon aria-hidden="true" className="size-5" />
             </div>
@@ -65,11 +65,11 @@ export default async function SettingsPage() {
                 render={<Link href={item.href} />}
                 nativeButton={false}
               >
-                Open
+                Mở
               </Button>
             ) : (
-              <p className="mt-4 text-xs font-medium text-muted-foreground">
-                Coming soon
+              <p className="mt-4 text-sm font-medium text-muted-foreground">
+                Sắp có
               </p>
             )}
           </div>

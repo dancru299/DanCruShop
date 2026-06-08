@@ -81,14 +81,14 @@ function getTechStack(product: ProductDetail) {
 function getLicense(product: ProductDetail) {
   return (
     getStringFromMetadata(product.metadata, "license") ??
-    "Personal and commercial use for your own projects."
+    "Dùng cho dự án cá nhân hoặc thương mại của riêng bạn."
   );
 }
 
 function getAudience(product: ProductDetail) {
   return (
     getStringFromMetadata(product.metadata, "audience") ??
-    "Builders, makers, and developers shipping practical products."
+    "Builder, maker và developer đang ship sản phẩm thực dụng."
   );
 }
 
@@ -112,10 +112,10 @@ function getIncludedItems(product: ProductDetail) {
   }
 
   return [
-    "Instant access after successful checkout",
-    "A clean product package ready for real projects",
-    "Context, setup notes, and practical usage guidance",
-    "Future updates delivered through your buyer dashboard",
+    "Mở quyền truy cập ngay sau khi thanh toán thành công",
+    "Gói tài nguyên gọn, sẵn sàng cho dự án thật",
+    "Có context, ghi chú setup và hướng dẫn sử dụng thực tế",
+    "Bản cập nhật sau này được giao qua dashboard đã mua",
   ];
 }
 
@@ -154,7 +154,7 @@ function getProductTags(product: ProductDetail, categoryLabels: string[]) {
   const tags = [
     productTypeLabels[product.product_type],
     ...categoryLabels,
-    product.is_free ? "Free" : null,
+    product.is_free ? "Miễn phí" : null,
   ];
 
   return tags.filter((tag): tag is string => {
@@ -170,7 +170,7 @@ function getProductTags(product: ProductDetail, categoryLabels: string[]) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("vi-VN", {
     dateStyle: "medium",
   }).format(new Date(value));
 }
@@ -211,7 +211,7 @@ export async function generateMetadata({
 
   if (!product) {
     return {
-      title: "Product not found",
+      title: "Không tìm thấy sản phẩm",
     };
   }
 
@@ -219,12 +219,12 @@ export async function generateMetadata({
     title: product.title,
     description:
       product.short_description ??
-      "Explore this digital product on DanCruShop.",
+      "Khám phá sản phẩm số này trên DanCruShop.",
     openGraph: {
       title: product.title,
       description:
         product.short_description ??
-        "Explore this digital product on DanCruShop.",
+        "Khám phá sản phẩm số này trên DanCruShop.",
       images: product.thumbnail_url ? [product.thumbnail_url] : undefined,
     },
   };
@@ -252,11 +252,11 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const canReply = hasPurchased || viewer.isAdmin;
 
   return (
-    <div className="bg-background">
+    <div>
       <section className="border-b">
         <div className="mx-auto grid w-full max-w-6xl items-start gap-8 px-4 pb-10 pt-8 md:pb-14 md:pt-12 lg:grid-cols-[1.04fr_0.96fr] lg:gap-10">
           <div className="motion-fade-up flex flex-col gap-4 lg:sticky lg:top-24">
-            <div className="relative overflow-hidden rounded-lg border bg-card p-3 shadow-2xl shadow-foreground/5">
+            <div className="relative overflow-hidden rounded-lg border bg-card/60 backdrop-blur-xl p-3 shadow-2xl shadow-foreground/5">
               <div className="relative aspect-[16/11] overflow-hidden rounded-md bg-[radial-gradient(circle_at_top_left,var(--muted),transparent_34%),linear-gradient(135deg,var(--background),var(--muted))]">
                 {product.thumbnail_url ? (
                   <div className="absolute inset-5 flex items-center justify-center">
@@ -280,7 +280,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                   rel="noreferrer"
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  View live demo
+                  Xem demo
                   <ExternalLinkIcon aria-hidden="true" className="size-4" />
                 </Link>
               ) : null}
@@ -291,7 +291,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                   rel="noreferrer"
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Open preview
+                  Xem preview
                   <ExternalLinkIcon aria-hidden="true" className="size-4" />
                 </Link>
               ) : null}
@@ -323,43 +323,42 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             </div>
 
             <div className="grid gap-2 sm:grid-cols-3">
-              <div className="rounded-lg border bg-card p-2.5">
+              <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-2.5">
                 <div className="flex items-center gap-1 text-amber-400">
                   <StarIcon aria-hidden="true" className="size-4 fill-current" />
                   <span className="text-sm font-semibold text-foreground">
                     {reviewsData.summary.totalReviews > 0
                       ? reviewsData.summary.averageRating.toFixed(1)
-                      : "New"}
+                      : "Mới"}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {reviewsData.summary.totalReviews} review
-                  {reviewsData.summary.totalReviews === 1 ? "" : "s"}
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {reviewsData.summary.totalReviews} đánh giá
                 </p>
               </div>
-              <div className="rounded-lg border bg-card p-2.5">
-                <p className="text-sm font-semibold">Lifetime</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Buyer access
+              <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-2.5">
+                <p className="text-sm font-semibold">Truy cập lâu dài</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Trong dashboard đã mua
                 </p>
               </div>
-              <div className="rounded-lg border bg-card p-2.5">
+              <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-2.5">
                 <p className="text-sm font-semibold">
                   {formatDate(product.updated_at)}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">Updated</p>
+                <p className="mt-1 text-sm text-muted-foreground">Cập nhật</p>
               </div>
             </div>
 
-            <div className="rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
+            <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-4 text-card-foreground shadow-sm">
               <div className="mb-4 flex items-start justify-between gap-4 border-b pb-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Price</p>
+                  <p className="text-sm text-muted-foreground">Giá</p>
                   <p className="mt-1 text-2xl font-semibold tracking-normal">
                     {formatProductPrice(product)}
                   </p>
                 </div>
-                <Badge variant="outline">Secure checkout</Badge>
+                <Badge variant="outline">Thanh toán an toàn</Badge>
               </div>
               <ProductCta
                 currency={product.currency}
@@ -378,25 +377,25 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               {[
                 {
                   Icon: Layers3Icon,
-                  label: "Type",
+                  label: "Loại",
                   value: productTypeLabels[product.product_type],
                 },
                 {
                   Icon: ShieldCheckIcon,
-                  label: "License",
+                  label: "Bản quyền",
                   value: license,
                 },
                 {
                   Icon: Clock3Icon,
-                  label: "Access",
+                  label: "Truy cập",
                   value: product.is_free
-                    ? "Free instant access."
-                    : "Instant after checkout.",
+                    ? "Miễn phí, mở ngay."
+                    : "Mở ngay sau thanh toán.",
                 },
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="grid gap-2 rounded-lg border bg-card p-3 text-sm shadow-sm"
+                  className="grid gap-2 rounded-lg border bg-card/60 backdrop-blur-xl p-3 text-sm shadow-sm"
                 >
                   <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
                     <item.Icon aria-hidden="true" className="size-4" />
@@ -416,9 +415,9 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
       <section className="scroll-reveal mx-auto grid w-full max-w-6xl gap-8 px-4 py-12 md:py-16 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-muted-foreground">Product details</p>
+          <p className="text-sm text-muted-foreground">Chi tiết sản phẩm</p>
           <h2 className="text-3xl font-semibold tracking-normal">
-            Built for practical use, not just a download link.
+            Dùng được ngay cho dự án thật, không chỉ là một file tải về.
           </h2>
           <div className="grid gap-4 text-sm leading-7 text-muted-foreground md:text-base">
             {descriptionParagraphs.map((paragraph, index) => (
@@ -435,11 +434,11 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         </div>
 
         <div className="grid gap-4">
-          <div className="rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
+          <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-5 text-card-foreground shadow-sm">
             <div className="mb-4 flex items-center gap-2">
               <SparklesIcon aria-hidden="true" className="size-5" />
               <h3 className="text-lg font-semibold tracking-normal">
-                What you get
+                Bạn nhận được gì
               </h3>
             </div>
             <div className="grid gap-3">
@@ -458,25 +457,25 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border bg-card p-5 shadow-sm">
-              <p className="font-medium">Best for</p>
+            <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-5 shadow-sm">
+              <p className="font-medium">Phù hợp với</p>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 {getAudience(product)}
               </p>
             </div>
             <Link
               href="/cart"
-              className="group flex flex-col justify-between rounded-lg border bg-card p-5 shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-lg"
+              className="group flex flex-col justify-between rounded-lg border bg-card/60 backdrop-blur-xl p-5 shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-lg"
             >
               <div>
-                <p className="font-medium">Ready to bundle?</p>
+                <p className="font-medium">Mua kèm trong giỏ hàng?</p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  Add this product to cart and checkout with other resources in
-                  one place.
+                  Thêm sản phẩm này vào giỏ và checkout cùng các tài nguyên khác
+                  ở một nơi.
                 </p>
               </div>
               <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium">
-                Open cart
+                Mở giỏ hàng
                 <ArrowRightIcon
                   aria-hidden="true"
                   className="size-4 transition-transform group-hover:translate-x-0.5"

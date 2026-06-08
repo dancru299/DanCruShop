@@ -17,14 +17,13 @@ function formatDate(value: string | null, fallback: string) {
 
 export function BlogCoverArtwork({ post }: BlogCardProps) {
   return (
-    <div className="motion-gradient-pan absolute inset-0 overflow-hidden bg-gradient-to-br from-cyan-500/20 via-emerald-500/10 to-background">
+    <div className="absolute inset-0 overflow-hidden bg-gradient-to-br from-cyan-500/20 via-emerald-500/10 to-background">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0,transparent_calc(100%-1px),var(--border)_calc(100%-1px)),linear-gradient(to_bottom,transparent_0,transparent_calc(100%-1px),var(--border)_calc(100%-1px))] bg-[size:32px_32px] opacity-20" />
-      <div className="motion-scanline pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-transparent via-foreground/10 to-transparent" />
       <div className="relative flex h-full flex-col justify-between p-5">
         <div className="flex items-center justify-between gap-4">
           <div className="grid gap-1">
             <span className="text-xs font-medium uppercase tracking-normal text-muted-foreground">
-              DanCruShop Blog
+              DanCruShop Notes
             </span>
             <span className="line-clamp-2 text-sm font-semibold">
               {post.title}
@@ -48,7 +47,7 @@ export function BlogCard({ post }: BlogCardProps) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group/blog-card flex h-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-xl hover:shadow-foreground/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      className="group/blog-card flex h-full flex-col overflow-hidden rounded-lg border bg-card/65 text-card-foreground shadow-sm backdrop-blur-xl transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-xl hover:shadow-foreground/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       <div className="relative aspect-[16/9] overflow-hidden bg-muted">
         {post.cover_image_url ? (

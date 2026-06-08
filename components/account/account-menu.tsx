@@ -27,7 +27,7 @@ type AccountMenuProps = {
 };
 
 function getInitials(name: string, email: string | null) {
-  const source = name.trim() || email?.trim() || "User";
+  const source = name.trim() || email?.trim() || "Khách";
   const parts = source
     .split(/[\s@._-]+/)
     .filter((part) => part.length > 0)
@@ -75,7 +75,7 @@ export function AccountMenu({ user }: AccountMenuProps) {
         type="button"
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-label="Open account menu"
+        aria-label="Mở menu tài khoản"
         className={cn(
           "flex h-8 items-center gap-1 rounded-full border bg-background px-1 pr-2 text-foreground transition-colors hover:bg-muted focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
           open && "bg-muted"
@@ -118,13 +118,13 @@ export function AccountMenu({ user }: AccountMenuProps) {
 
           <div className="py-1">
             <AccountMenuLink href="/profile" icon={UserRoundIcon}>
-              Profile
+              Hồ sơ
             </AccountMenuLink>
             <AccountMenuLink href="/dashboard" icon={PackageOpenIcon}>
-              My products
+              Thư viện đã mua
             </AccountMenuLink>
             <AccountMenuLink href="/settings" icon={SettingsIcon}>
-              Settings
+              Cài đặt
             </AccountMenuLink>
           </div>
 
@@ -132,13 +132,13 @@ export function AccountMenu({ user }: AccountMenuProps) {
             <button
               role="menuitem"
               type="submit"
-              className="flex h-9 w-full items-center gap-2 rounded-md px-2.5 text-left text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus-visible:bg-destructive/10 focus-visible:outline-none"
-            >
-              <LogOutIcon aria-hidden="true" className="size-4" />
-              Logout
-            </button>
-          </form>
-        </div>
+                className="flex h-9 w-full items-center gap-2 rounded-md px-2.5 text-left text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus-visible:bg-destructive/10 focus-visible:outline-none"
+              >
+                <LogOutIcon aria-hidden="true" className="size-4" />
+                Đăng xuất
+              </button>
+            </form>
+          </div>
       ) : null}
     </div>
   );

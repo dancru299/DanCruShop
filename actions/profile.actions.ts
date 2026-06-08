@@ -38,7 +38,7 @@ function getOptionalString(formData: FormData, key: string) {
 }
 
 function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Something went wrong.";
+  return error instanceof Error ? error.message : "Đã có lỗi xảy ra.";
 }
 
 function sanitizeFileName(fileName: string) {
@@ -109,7 +109,7 @@ export async function updateProfile(
 
   if (fullName.length > 80) {
     return {
-      error: "Name must be 80 characters or fewer.",
+      error: "Tên phải có tối đa 80 ký tự.",
       success: null,
     };
   }
@@ -123,7 +123,7 @@ export async function updateProfile(
 
     if (userError || !user) {
       return {
-        error: "Please log in before updating your profile.",
+        error: "Vui lòng đăng nhập trước khi cập nhật hồ sơ.",
         success: null,
       };
     }
@@ -137,7 +137,7 @@ export async function updateProfile(
       console.error("Failed to update profile", error);
 
       return {
-        error: "Could not update profile right now.",
+        error: "Hiện không thể cập nhật hồ sơ.",
         success: null,
       };
     }
@@ -147,13 +147,13 @@ export async function updateProfile(
 
     return {
       error: null,
-      success: "Profile updated.",
+      success: "Đã cập nhật hồ sơ.",
     };
   } catch (error) {
     console.error("Unexpected error while updating profile", error);
 
     return {
-      error: "Could not update profile right now.",
+      error: "Hiện không thể cập nhật hồ sơ.",
       success: null,
     };
   }
@@ -171,7 +171,7 @@ export async function uploadProfileAvatar(
 
     if (userError || !user) {
       return {
-        error: "Please log in before uploading an avatar.",
+        error: "Vui lòng đăng nhập trước khi tải ảnh đại diện.",
         ok: false,
       };
     }
@@ -211,7 +211,7 @@ export async function uploadProfileAvatar(
       console.error("Failed to update profile avatar", profileError);
 
       return {
-        error: "Avatar uploaded but could not update profile.",
+        error: "Đã tải ảnh lên nhưng chưa thể cập nhật hồ sơ.",
         ok: false,
       };
     }

@@ -72,7 +72,7 @@ function getReadingTime(content: string | null) {
   const words = stripMarkdown(content ?? "").split(/\s+/).filter(Boolean).length;
   const minutes = Math.max(3, Math.ceil(words / 220));
 
-  return `${minutes} min read`;
+  return `${minutes} phút đọc`;
 }
 
 function slugifyHeading(value: string) {
@@ -121,7 +121,7 @@ function extractHeadings(content: string | null) {
 function getPostSummary(post: PublishedBlogPost) {
   return (
     post.excerpt ??
-    "Ghi chu thuc chien cho creator dang xay va ban san pham so."
+    "Ghi chú thực chiến cho builder đang xây và bán sản phẩm số."
   );
 }
 
@@ -131,14 +131,14 @@ function getArticleTopics(post: BlogPostDetail) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
   const topicRules = [
-    { label: "Digital product", keywords: ["product", "san pham", "template"] },
-    { label: "Creator commerce", keywords: ["creator", "shop", "storefront"] },
-    { label: "Checkout", keywords: ["checkout", "payment", "thanh toan"] },
-    { label: "Content", keywords: ["blog", "content", "bai viet"] },
-    { label: "Operations", keywords: ["admin", "dashboard", "workflow"] },
-    { label: "Launch", keywords: ["launch", "ship", "release"] },
-    { label: "Automation", keywords: ["automation", "tool", "system"] },
-    { label: "Learning", keywords: ["course", "learning", "khoa hoc"] },
+    { label: "Sản phẩm số", keywords: ["product", "san pham", "template"] },
+    { label: "Thương mại creator", keywords: ["creator", "shop", "storefront"] },
+    { label: "Thanh toán", keywords: ["checkout", "payment", "thanh toan"] },
+    { label: "Nội dung", keywords: ["blog", "content", "bai viet"] },
+    { label: "Vận hành", keywords: ["admin", "dashboard", "workflow"] },
+    { label: "Ra mắt", keywords: ["launch", "ship", "release"] },
+    { label: "Tự động hóa", keywords: ["automation", "tool", "system"] },
+    { label: "Học tập", keywords: ["course", "learning", "khoa hoc"] },
   ];
   const topics = topicRules
     .filter((topic) => topic.keywords.some((keyword) => source.includes(keyword)))
@@ -146,7 +146,7 @@ function getArticleTopics(post: BlogPostDetail) {
 
   return topics.length >= 3
     ? topics.slice(0, 5)
-    : ["Digital product", "Creator commerce", "DanCruShop notes"];
+    : ["Sản phẩm số", "Thương mại creator", "Ghi chú DanCruShop"];
 }
 
 function getHeadingIdMap(headings: ReturnType<typeof extractHeadings>) {
@@ -169,7 +169,7 @@ export async function generateMetadata({
 
   if (!post) {
     return {
-      title: "Post not found",
+      title: "Không tìm thấy bài viết",
     };
   }
 
@@ -177,7 +177,7 @@ export async function generateMetadata({
   const description =
     post.seo_description ??
     post.excerpt ??
-    "Read this article on the DanCruShop blog.";
+    "Đọc bài viết này trên DanCruShop.";
 
   return {
     title,
@@ -211,7 +211,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const readingTime = getReadingTime(post.content);
 
   return (
-    <div className="bg-background">
+    <div>
       <header className="border-b bg-card/25">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 md:py-14">
           <Link
@@ -219,7 +219,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             className={cn(buttonVariants({ variant: "ghost" }), "w-fit")}
           >
             <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-            Back to Blog
+            Quay lại Bài viết
           </Link>
 
           <div className="grid gap-7 lg:grid-cols-[minmax(0,7fr)_minmax(18rem,3fr)] lg:items-end">
@@ -227,7 +227,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline" className="h-6 gap-1.5 rounded-lg">
                   <BookOpenIcon aria-hidden="true" data-icon="inline-start" />
-                  DanCruShop Blog
+                  Bài viết DanCruShop
                 </Badge>
                 <span className="inline-flex h-6 items-center gap-1.5 rounded-lg border bg-background px-2 text-xs font-medium text-muted-foreground">
                   <Clock3Icon aria-hidden="true" className="size-3.5" />
@@ -255,10 +255,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   <SparklesIcon aria-hidden="true" className="size-5" />
                 </div>
                 <div className="grid gap-1">
-                  <p className="text-sm font-semibold">Creator insight</p>
+                  <p className="text-sm font-semibold">Góc nhìn builder</p>
                   <p className="text-sm leading-6 text-muted-foreground">
-                    Notes, tactics, and product thinking for building a sharper
-                    digital storefront.
+                    Ghi chú, chiến thuật và tư duy sản phẩm để xây một storefront sắc nét hơn.
                   </p>
                 </div>
               </div>
@@ -283,7 +282,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       </div>
 
       <main className="mx-auto grid w-full max-w-6xl items-start gap-10 px-4 pb-16 pt-2 md:pb-20 lg:grid-cols-[minmax(0,7fr)_minmax(18rem,3fr)]">
-        <article className="min-w-0 rounded-lg border bg-card p-5 shadow-sm md:p-8">
+        <article className="min-w-0 rounded-lg border bg-card/60 backdrop-blur-xl p-5 shadow-sm md:p-8">
           <ReactMarkdown
             components={{
               h2: ({ children }) => {
@@ -374,10 +373,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
         <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
           {headings.length > 0 ? (
-            <section className="rounded-lg border bg-card p-4 shadow-sm">
+            <section className="rounded-lg border bg-card/60 backdrop-blur-xl p-4 shadow-sm">
               <div className="mb-4 flex items-center gap-2">
                 <HashIcon aria-hidden="true" className="size-4" />
-                <h2 className="text-sm font-semibold">In this article</h2>
+                <h2 className="text-sm font-semibold">Trong bài viết</h2>
               </div>
               <nav className="grid gap-2">
                 {headings.map((heading) => (
@@ -396,10 +395,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             </section>
           ) : null}
 
-          <section className="rounded-lg border bg-card p-4 shadow-sm">
+          <section className="rounded-lg border bg-card/60 backdrop-blur-xl p-4 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
               <Layers3Icon aria-hidden="true" className="size-4" />
-              <h2 className="text-sm font-semibold">Related reading</h2>
+              <h2 className="text-sm font-semibold">Đọc tiếp</h2>
             </div>
             {relatedPosts.length > 0 ? (
               <div className="grid gap-3">
@@ -433,15 +432,15 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </div>
             ) : (
               <p className="text-sm leading-6 text-muted-foreground">
-                More posts will appear here when the blog grows.
+                Bài viết liên quan sẽ xuất hiện ở đây khi blog có thêm nội dung.
               </p>
             )}
           </section>
 
-          <section className="rounded-lg border bg-card p-4 shadow-sm">
+          <section className="rounded-lg border bg-card/60 backdrop-blur-xl p-4 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
               <BookOpenIcon aria-hidden="true" className="size-4" />
-              <h2 className="text-sm font-semibold">Topics</h2>
+              <h2 className="text-sm font-semibold">Chủ đề</h2>
             </div>
             <div className="flex flex-wrap gap-2">
               {topics.map((topic) => (
@@ -457,10 +456,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </section>
 
           <section className="rounded-lg border bg-foreground p-4 text-background shadow-sm">
-            <p className="text-sm font-semibold">Build with DanCruShop</p>
+            <p className="text-sm font-semibold">Xây cùng DanCruShop</p>
             <p className="mt-2 text-sm leading-6 text-background/75">
-              Turn ideas from the blog into source code, templates, and tools
-              you can ship.
+              Biến ý tưởng từ blog thành source code, template và tool có thể ship ngay.
             </p>
             <Link
               href="/products"
@@ -469,7 +467,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 "mt-4 w-full bg-background text-foreground hover:bg-background/90"
               )}
             >
-              Browse products
+              Xem sản phẩm
               <ArrowUpRightIcon aria-hidden="true" data-icon="inline-end" />
             </Link>
           </section>

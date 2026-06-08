@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { PackageOpenIcon } from "lucide-react";
 
@@ -7,21 +8,26 @@ import { getPublishedProducts } from "@/lib/supabase/queries/products";
 
 export const dynamic = "force-dynamic";
 
+export const metadata: Metadata = {
+  title: "Sản phẩm",
+  description: "Khám phá toàn bộ tool, source code và tài nguyên số trên DanCruShop.",
+};
+
 const upcomingProducts = [
   {
-    title: "Full-stack starter",
+    title: "Starter full-stack",
     type: "Source code",
     description: "Bộ code mẫu có auth, database, dashboard và payment flow.",
     className: "from-emerald-500/25 via-cyan-500/10 to-background",
   },
   {
-    title: "AI workflow notes",
-    type: "Learning notes",
+    title: "Ghi chú workflow AI",
+    type: "Tài liệu học",
     description: "Ghi chú triển khai AI app, agent workflow và cách đóng gói sản phẩm.",
     className: "from-cyan-500/25 via-amber-500/10 to-background",
   },
   {
-    title: "Creator mini tools",
+    title: "Mini tool cho builder",
     type: "Mini tool",
     description: "Công cụ nhỏ phục vụ automation, productivity và vận hành shop.",
     className: "from-rose-500/20 via-emerald-500/10 to-background",
@@ -32,18 +38,18 @@ export default async function ProductsPage() {
   const products = await getPublishedProducts();
 
   return (
-    <div className="bg-background">
+    <div>
       <section className="border-b">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-10 md:py-14">
           <p className="text-sm font-medium text-muted-foreground">
             DanCruShop
           </p>
           <h1 className="text-3xl font-semibold leading-tight tracking-normal md:text-5xl">
-            Tất cả sản phẩm
+            Kho sản phẩm
           </h1>
           <p className="max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">
-            Khám phá toàn bộ source code, template, công cụ và tài nguyên số
-            đang được phát hành.
+            Quét nhanh toàn bộ source code, template, tool và tài nguyên số
+            đang mở bán.
           </p>
         </div>
       </section>
@@ -57,7 +63,7 @@ export default async function ProductsPage() {
           </div>
         ) : (
           <div className="grid gap-6">
-            <div className="flex flex-col gap-4 rounded-lg border bg-card p-6 text-card-foreground shadow-sm md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-4 rounded-lg border bg-card/60 backdrop-blur-xl p-6 text-card-foreground shadow-sm md:flex-row md:items-center md:justify-between">
               <div className="flex max-w-2xl gap-4">
                 <div className="flex size-12 shrink-0 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
                   <PackageOpenIcon aria-hidden="true" />
@@ -67,9 +73,9 @@ export default async function ProductsPage() {
                     Sản phẩm đang được chuẩn bị
                   </h2>
                   <p className="text-sm leading-6 text-muted-foreground">
-                    Khi có sản phẩm được publish, danh sách thật sẽ xuất hiện tại
-                    đây. Trong lúc chờ dữ liệu live, đây là các kệ nội dung mà
-                    storefront được thiết kế để phục vụ.
+                    Khi có sản phẩm được publish, danh sách thật sẽ xuất hiện ở
+                    đây. Trong lúc chờ dữ liệu live, đây là các nhóm tài nguyên
+                    storefront đang được tối ưu để phục vụ.
                   </p>
                 </div>
               </div>
@@ -79,7 +85,7 @@ export default async function ProductsPage() {
                 render={<Link href="/blog" />}
                 nativeButton={false}
               >
-                Đọc blog
+                Xem bài viết
               </Button>
             </div>
 
@@ -87,7 +93,7 @@ export default async function ProductsPage() {
               {upcomingProducts.map((item) => (
                 <div
                   key={item.title}
-                  className="flex min-h-72 flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm"
+                  className="flex min-h-72 flex-col overflow-hidden rounded-lg border bg-card/60 backdrop-blur-xl text-card-foreground shadow-sm"
                 >
                   <div
                     className={`relative aspect-[16/10] bg-gradient-to-br ${item.className}`}

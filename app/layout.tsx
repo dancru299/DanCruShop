@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { CartProvider } from "@/components/cart/cart-provider";
+import { CosmicBackground } from "@/components/shared/cosmic-background";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     default: "DanCruShop",
     template: "%s | DanCruShop",
   },
-  description: "Digital product shop by DanCru.",
+  description: "Storefront tool, source code và tài nguyên số cho builder.",
 };
 
 export default function RootLayout({
@@ -34,16 +35,17 @@ export default function RootLayout({
     <html
       lang="vi"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable} dark`}
     >
       <body
         suppressHydrationWarning
         className="min-h-dvh bg-background font-sans text-foreground antialiased"
       >
+        <CosmicBackground />
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
         >
           <CartProvider>

@@ -4,858 +4,447 @@ import Link from "next/link";
 import {
   ArrowRightIcon,
   BookOpenIcon,
-  CheckCircle2Icon,
+  Clock3Icon,
   Code2Icon,
-  CpuIcon,
-  CreditCardIcon,
-  DatabaseIcon,
-  DownloadIcon,
-  GitBranchIcon,
   Layers3Icon,
-  LockKeyholeIcon,
   MonitorSmartphoneIcon,
   PackageOpenIcon,
   ShieldCheckIcon,
-  ShoppingBagIcon,
   SparklesIcon,
-  StarIcon,
-  TimerIcon,
   WrenchIcon,
   type LucideIcon,
 } from "lucide-react";
 
-import { BlogCard } from "@/components/blog/blog-card";
 import {
   formatProductPrice,
-  ProductArtwork,
-  ProductCard,
-} from "@/components/products/product-card";
-import { Button } from "@/components/ui/button";
-import { getProductDeliveryLabel, productTypeLabels } from "@/lib/products/display";
+  getProductDeliveryLabel,
+  productTypeLabels,
+} from "@/lib/products/display";
 import {
   getPublishedProducts,
   type PublishedProduct,
 } from "@/lib/supabase/queries/products";
-import { getPublishedPosts } from "@/lib/supabase/queries/blog";
+import { ProductArtwork, ProductCard } from "@/components/products/product-card";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-type IconBlock = {
+type HeroSignal = {
+  description: string;
   title: string;
+};
+
+type CategoryBlock = {
   description: string;
   Icon: LucideIcon;
-};
-
-type CategoryBlock = IconBlock & {
   label: string;
-  accentClassName: string;
+  title: string;
 };
 
-const heroStats = [
-  ["AI accounts & tools", "Tài nguyên công nghệ"],
-  ["Instant delivery", "Mở quyền sau checkout"],
-  ["Real previews", "Xem trước rồi mới mua"],
-];
+type TrustBlock = {
+  description: string;
+  Icon: LucideIcon;
+  title: string;
+};
 
-const storefrontHighlights: IconBlock[] = [
+const heroSignals: HeroSignal[] = [
   {
-    title: "Mặt hàng rõ loại",
-    description:
-      "Acc AI, source code, template, mini tool và bundle được phân loại để khách chọn nhanh.",
-    Icon: ShoppingBagIcon,
+    title: "AI tool & account",
+    description: "Tài nguyên cho workflow coding, automation và builder AI.",
   },
   {
-    title: "Preview trước khi mua",
-    description:
-      "Mỗi sản phẩm có ảnh, mô tả, giá, loại tài nguyên và cách nhận hàng ngay trên card.",
-    Icon: MonitorSmartphoneIcon,
+    title: "Source code sẵn dùng",
+    description: "Starter kit, template và mini tool để ship nhanh hơn.",
   },
   {
-    title: "Checkout một lượt",
-    description:
-      "Khách thêm nhiều món vào giỏ, thanh toán, rồi nhận quyền truy cập trong tài khoản.",
-    Icon: CreditCardIcon,
-  },
-  {
-    title: "Giao hàng bảo vệ",
-    description:
-      "File, link tải hoặc quyền truy cập được giao qua dashboard thay vì gửi rời rạc.",
-    Icon: ShieldCheckIcon,
+    title: "Giao ngay sau checkout",
+    description: "Nhận file, link tải hoặc quyền truy cập trong tài khoản.",
   },
 ];
 
-const shopCategories: CategoryBlock[] = [
+const categories: CategoryBlock[] = [
   {
     title: "AI accounts",
-    label: "Access",
-    description:
-      "Tài khoản, gói truy cập và quota phục vụ workflow AI, coding, automation.",
+    label: "Truy cập",
+    description: "Gói truy cập, quota và tài khoản phục vụ workflow AI thực chiến.",
     Icon: SparklesIcon,
-    accentClassName: "from-cyan-400 via-emerald-300 to-transparent",
   },
   {
     title: "Source code",
     label: "Code",
-    description:
-      "Starter, module, dashboard và boilerplate có thể tải về để build tiếp.",
+    description: "Starter, module và boilerplate để build tiếp thay vì làm lại từ đầu.",
     Icon: Code2Icon,
-    accentClassName: "from-emerald-400 via-cyan-300 to-transparent",
   },
   {
     title: "Templates",
-    label: "UI",
-    description:
-      "Layout, page section và template triển khai nhanh cho sản phẩm web.",
+    label: "UI kit",
+    description: "Layout, landing page và template triển khai nhanh cho sản phẩm web.",
     Icon: PackageOpenIcon,
-    accentClassName: "from-amber-300 via-emerald-300 to-transparent",
   },
   {
     title: "Mini tools",
     label: "Utility",
-    description:
-      "Tool nhỏ cho productivity, data, content, vận hành shop và automation.",
+    description: "Tool nhỏ cho productivity, content, data và vận hành nội bộ.",
     Icon: WrenchIcon,
-    accentClassName: "from-rose-300 via-cyan-300 to-transparent",
   },
   {
     title: "Courses & notes",
     label: "Learn",
-    description:
-      "Ghi chú triển khai, bài học thực chiến và tài nguyên học có cấu trúc.",
+    description: "Ghi chú triển khai, launch notes và tài nguyên học có cấu trúc.",
     Icon: BookOpenIcon,
-    accentClassName: "from-sky-300 via-emerald-300 to-transparent",
   },
   {
     title: "Bundles",
     label: "Pack",
-    description:
-      "Combo tài nguyên theo chủ đề để mua một lần và dùng cho nhiều dự án.",
+    description: "Combo tài nguyên theo use case để mua một lần và dùng cho nhiều dự án.",
     Icon: Layers3Icon,
-    accentClassName: "from-lime-300 via-cyan-300 to-transparent",
   },
 ];
 
-const deliverySteps: IconBlock[] = [
+const trustBlocks: TrustBlock[] = [
   {
-    title: "Chọn đúng món",
-    description:
-      "Lọc theo acc, tool, template, course hoặc bundle; đọc mô tả và xem preview trước.",
-    Icon: PackageOpenIcon,
+    title: "Mô tả và preview rõ ràng",
+    description: "Khách biết mình đang mua loại tài nguyên gì trước khi bấm thanh toán.",
+    Icon: MonitorSmartphoneIcon,
   },
   {
-    title: "Thanh toán gọn",
-    description:
-      "Giỏ hàng gom nhiều sản phẩm, checkout tạo đơn và theo dõi trạng thái mở quyền.",
-    Icon: CreditCardIcon,
+    title: "Giao ngay trong dashboard",
+    description: "File, link tải hoặc quyền truy cập được mở khóa ở một nơi duy nhất.",
+    Icon: Clock3Icon,
   },
   {
-    title: "Nhận trong tài khoản",
-    description:
-      "Sản phẩm đã mua nằm trong dashboard với link tải hoặc quyền truy cập được bảo vệ.",
-    Icon: DownloadIcon,
+    title: "Thanh toán gọn, cảm giác chuyên nghiệp",
+    description: "Storefront ưu tiên scan nhanh, CTA rõ và ít yếu tố gây xao nhãng.",
+    Icon: ShieldCheckIcon,
   },
 ];
 
-const techSignals: IconBlock[] = [
+const fallbackProducts = [
   {
-    title: "Stack minh bạch",
-    description: "Nêu rõ công nghệ, định dạng file, quyền sử dụng và cách nhận hàng.",
-    Icon: CpuIcon,
-  },
-  {
-    title: "Update log",
-    description: "Dễ mở rộng thành changelog để khách biết sản phẩm còn được bảo trì.",
-    Icon: GitBranchIcon,
-  },
-  {
-    title: "Delivery an toàn",
-    description: "Tách public preview khỏi tài nguyên thật để hạn chế chia sẻ link lộ.",
-    Icon: LockKeyholeIcon,
-  },
-];
-
-const buyerAssurances: IconBlock[] = [
-  {
-    title: "Thư viện riêng sau khi mua",
-    description:
-      "Khách đăng nhập để xem lại toàn bộ sản phẩm đã sở hữu và tải khi cần.",
-    Icon: DatabaseIcon,
-  },
-  {
-    title: "Thông tin sản phẩm rõ ràng",
-    description:
-      "Giá, loại tài nguyên, license, delivery và preview được đặt gần CTA mua hàng.",
-    Icon: CheckCircle2Icon,
-  },
-  {
-    title: "Sẵn sàng cho đánh giá",
-    description:
-      "Product detail đã có review, sao và bình luận để tăng niềm tin khi shop lớn hơn.",
-    Icon: StarIcon,
-  },
-];
-
-const accessHandoffItems: IconBlock[] = [
-  {
-    title: "Access / account",
-    description:
-      "Hiển thị rõ khách nhận tài khoản, license, file tải hay link kích hoạt sau khi mua.",
-    Icon: LockKeyholeIcon,
-  },
-  {
-    title: "Setup note",
-    description:
-      "Mỗi sản phẩm nên có hướng dẫn dùng nhanh, điều kiện sử dụng và lưu ý bảo mật.",
-    Icon: CheckCircle2Icon,
-  },
-  {
-    title: "Update window",
-    description:
-      "Tách phần update, trạng thái còn dùng được và ghi chú thay đổi để khách yên tâm.",
-    Icon: GitBranchIcon,
-  },
-  {
-    title: "Buyer library",
-    description:
-      "Sau checkout, mọi tài nguyên quay về một thư viện riêng thay vì bị thất lạc qua chat.",
-    Icon: DatabaseIcon,
-  },
-];
-
-const plannedShelves = [
-  {
-    title: "Claude / AI access pack",
-    type: "AI account",
-    description:
-      "Gói truy cập công cụ AI, kèm hướng dẫn sử dụng và trạng thái giao hàng rõ ràng.",
-    className: "from-cyan-500/25 via-emerald-500/10 to-background",
-  },
-  {
-    title: "Full-stack starter",
+    title: "Starter full-stack cho AI tool",
     type: "Source code",
-    description:
-      "Bộ code mẫu có auth, database, dashboard và flow checkout để build tiếp.",
-    className: "from-emerald-500/25 via-cyan-500/10 to-background",
+    description: "Auth, dashboard, billing và các flow nền tảng để bắt đầu nhanh.",
   },
   {
-    title: "Creator mini tools",
-    type: "Mini tool",
-    description:
-      "Các công cụ nhỏ phục vụ automation, productivity và vận hành shop.",
-    className: "from-rose-500/20 via-cyan-500/10 to-background",
-  },
-];
-
-const resourceMarqueeItems = [
-  ["AI accounts", "Claude, coding, automation access"],
-  ["Source code", "Next.js, Supabase, payment flows"],
-  ["Templates", "Reusable screens for real launches"],
-  ["Mini tools", "Productivity utilities and workflows"],
-  ["Learning notes", "Build logs, tutorials, implementation notes"],
-  ["Secure delivery", "Dashboard access and protected downloads"],
-];
-
-const heroActivityItems = [
-  ["Preview ready", "Product artwork rendered"],
-  ["Cart updated", "Multi-item checkout supported"],
-  ["Access unlocked", "Buyer library prepared"],
-  ["Download secured", "Protected delivery enabled"],
-];
-
-const fallbackStockRows = [
-  {
-    title: "Claude / AI account pack",
-    type: "AI access",
-    price: "Sắp mở bán",
-    status: "Preview",
-    href: "/products",
+    title: "Bộ template launch cho indie hacker",
+    type: "Template",
+    description: "Landing page, pricing, changelog và các block chuyển đổi cao.",
   },
   {
-    title: "Next.js commerce starter",
-    type: "Source code",
-    price: "Sắp mở bán",
-    status: "Docs",
-    href: "/products",
-  },
-  {
-    title: "Automation mini tool",
-    type: "Tool",
-    price: "Sắp mở bán",
-    status: "Demo",
-    href: "/products",
+    title: "Mini tool cho creator workflow",
+    type: "Utility",
+    description: "Các công cụ nhỏ giúp tăng tốc publish, automation và vận hành.",
   },
 ];
 
 export default async function HomePage() {
-  const [products, posts] = await Promise.all([
-    getPublishedProducts(6),
-    getPublishedPosts(3),
-  ]);
-  const heroProduct = products[0];
+  const products = await getPublishedProducts(6);
+  const featuredProducts = products.slice(0, 6);
+  const heroProduct = featuredProducts[0];
 
   return (
-    <div className="bg-background">
-      <section className="relative overflow-hidden border-b bg-background">
-        <div className="motion-hero-grid absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:56px_56px] opacity-[0.08]" />
+    <div>
+      <section className="relative overflow-hidden border-b border-border/80">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--primary)_0,transparent_32%),radial-gradient(circle_at_top_right,var(--muted)_0,transparent_38%)] opacity-35" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:56px_56px] opacity-[0.06]" />
 
-        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-12 md:py-14 lg:grid-cols-[0.95fr_1.05fr] lg:py-16">
-          <div className="motion-fade-up flex max-w-3xl flex-col gap-7">
-            <div className="flex flex-col gap-5">
-              <h1 className="max-w-4xl text-4xl font-semibold leading-tight tracking-normal text-balance md:text-6xl">
-                DanCruShop
+        <div className="relative mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 md:py-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:gap-12">
+          <div className="flex max-w-3xl flex-col gap-5">
+            <div className="inline-flex w-fit items-center rounded-full border border-border/80 bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
+              DanCruShop cho builder
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <h1 className="max-w-4xl text-3xl font-semibold leading-[1.05] tracking-[-0.03em] text-balance sm:text-4xl md:text-5xl lg:text-6xl">
+                Tool, source code và tài nguyên AI để ship nhanh hơn.
               </h1>
-              <p className="max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
-                Shop tài nguyên công nghệ cho builder: AI account, source code,
-                template, mini tool, khóa học và bundle thực chiến để mua nhanh,
-                nhận nhanh, dùng ngay.
+              <p className="max-w-2xl text-base leading-7 text-muted-foreground md:text-lg md:leading-8">
+                DanCruShop ưu tiên đúng một việc: giúp developer quét nhanh kho
+                hàng, hiểu rõ món cần mua và nhận tài nguyên gọn trong tài khoản
+                sau checkout.
               </p>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button
-                className="transition-transform duration-300 hover:-translate-y-0.5"
                 size="lg"
-                render={<Link href="/products" />}
+                render={<Link href="#san-pham-noi-bat" />}
                 nativeButton={false}
               >
                 Xem sản phẩm
-                <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
+                <ArrowRightIcon aria-hidden="true" data-icon="inline-end" />
               </Button>
               <Button
-                className="transition-transform duration-300 hover:-translate-y-0.5"
                 size="lg"
                 variant="outline"
-                render={<Link href="/cart" />}
+                render={<Link href="/products" />}
                 nativeButton={false}
               >
-                Mở giỏ hàng
+                Khám phá tool
               </Button>
             </div>
 
-            <div className="grid gap-3 border-t pt-6 sm:grid-cols-3">
-              {heroStats.map(([title, description]) => (
+            <div className="hidden gap-3 md:grid md:grid-cols-3">
+              {heroSignals.map((item) => (
                 <div
-                  key={title}
-                  className="grid gap-1 transition-transform duration-300 hover:-translate-y-0.5"
+                  key={item.title}
+                  className="rounded-2xl border border-border/80 bg-card/55 p-4 shadow-sm backdrop-blur-xl"
                 >
-                  <p className="text-sm font-semibold">{title}</p>
-                  <p className="text-xs leading-5 text-muted-foreground">
-                    {description}
+                  <p className="text-sm font-semibold">{item.title}</p>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    {item.description}
                   </p>
                 </div>
               ))}
             </div>
           </div>
 
-          <HeroShowcase product={heroProduct} />
+          <div className="hidden lg:block">
+            <HeroProductSpotlight product={heroProduct} />
+          </div>
         </div>
       </section>
 
-      <section className="scroll-reveal border-b bg-card">
-        <div className="mx-auto grid w-full max-w-6xl gap-5 px-4 py-8 md:grid-cols-2 lg:grid-cols-4">
-          {storefrontHighlights.map((item) => (
-            <FeatureItem key={item.title} item={item} />
-          ))}
-        </div>
-      </section>
-
-      <ResourceMarquee />
-      <ShopCategoryShelf />
-
-      <section className="scroll-reveal bg-muted/30 py-14 md:py-18">
+      <section
+        id="san-pham-noi-bat"
+        className="scroll-mt-24 border-b border-border/80 py-12 md:py-16"
+      >
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4">
           <SectionHeader
             title="Sản phẩm nổi bật"
-            description="Các tài nguyên mới nhất trong shop, ưu tiên sản phẩm có preview rõ, giá rõ và cách nhận hàng rõ."
-            actionLabel="Xem tất cả"
+            description="Các tài nguyên mở bán ngay bây giờ, ưu tiên thứ có mô tả rõ, giá rõ và nhận hàng nhanh."
+            actionLabel="Xem toàn bộ"
             actionHref="/products"
           />
 
-          {products.length > 0 ? (
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {products.map((product) => (
+          {featuredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {featuredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
           ) : (
             <div className="grid gap-5 md:grid-cols-3">
-              {plannedShelves.map((item) => (
-                <PlannedShelfCard key={item.title} item={item} />
+              {fallbackProducts.map((item) => (
+                <div
+                  key={item.title}
+                  className="flex min-h-72 flex-col rounded-2xl border border-border/80 bg-card/60 p-5 text-card-foreground shadow-sm backdrop-blur-xl"
+                >
+                  <div className="flex size-11 items-center justify-center rounded-xl border border-border/80 bg-background text-foreground shadow-sm">
+                    <PackageOpenIcon aria-hidden="true" className="size-5" />
+                  </div>
+                  <div className="mt-5 grid gap-3">
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {item.type}
+                    </span>
+                    <h3 className="text-lg font-semibold">{item.title}</h3>
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      {item.description}
+                    </p>
+                  </div>
+                  <p className="mt-auto pt-6 text-sm text-muted-foreground">
+                    Đang chuẩn bị publish
+                  </p>
+                </div>
               ))}
             </div>
           )}
         </div>
       </section>
 
-      <TechStockSection products={products} />
-      <AccessHandoffSection />
+      <section
+        id="danh-muc"
+        className="scroll-mt-24 border-b border-border/80 py-12 md:py-16"
+      >
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4">
+          <SectionHeader
+            title="Danh mục mua nhanh"
+            description="Quét nhanh loại tài nguyên bạn cần rồi đi thẳng vào kho sản phẩm thay vì đọc quá nhiều giải thích."
+            actionLabel="Mở kho hàng"
+            actionHref="/products"
+          />
 
-      <section className="scroll-reveal border-y bg-background py-14 md:py-18">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
-          <div className="flex max-w-xl flex-col gap-4">
-            <h2 className="text-2xl font-semibold leading-tight tracking-normal md:text-4xl">
-              Từ xem sản phẩm đến nhận quyền truy cập, flow phải giống một shop thật.
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {categories.map((category) => (
+              <CategoryCard key={category.title} item={category} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-12 md:py-16">
+        <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <div className="flex max-w-2xl flex-col gap-4">
+            <p className="text-sm font-medium text-muted-foreground">
+              Trải nghiệm mua hàng
+            </p>
+            <h2 className="text-3xl font-semibold tracking-[-0.02em] md:text-4xl">
+              Một storefront tốt phải giúp khách quyết định nhanh và nhận hàng rõ.
             </h2>
             <p className="text-sm leading-7 text-muted-foreground md:text-base">
-              Khách không cần biết hệ thống phía sau vận hành thế nào. Họ cần
-              thấy sản phẩm đáng mua, checkout rõ ràng và nơi nhận tài nguyên sau
-              khi thanh toán.
+              Homepage giờ tập trung vào việc bán hàng: thấy ngay sản phẩm,
+              hiểu nhanh danh mục, và tin tưởng rằng sau thanh toán mọi thứ sẽ
+              nằm gọn trong dashboard.
             </p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button
+                render={<Link href="/products" />}
+                nativeButton={false}
+              >
+                Xem kho sản phẩm
+                <ArrowRightIcon aria-hidden="true" data-icon="inline-end" />
+              </Button>
+              <Button
+                variant="outline"
+                render={<Link href="/cart" />}
+                nativeButton={false}
+              >
+                Xem giỏ hàng
+              </Button>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            {deliverySteps.map((item, index) => (
-              <WorkflowStep key={item.title} index={index + 1} item={item} />
+            {trustBlocks.map((item) => (
+              <TrustCard key={item.title} item={item} />
             ))}
           </div>
         </div>
       </section>
-
-      <section className="scroll-reveal bg-muted/30 py-14 md:py-18">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4">
-          <SectionHeader
-            title="Bài viết mới"
-            description="Blog hỗ trợ khách hiểu cách dùng tài nguyên, chọn đúng tool và theo dõi các ghi chú triển khai thực tế."
-            actionLabel="Đọc blog"
-            actionHref="/blog"
-          />
-
-          {posts.length > 0 ? (
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {posts.map((post) => (
-                <BlogCard key={post.id} post={post} />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-lg border bg-card p-6 text-card-foreground shadow-sm">
-              <div className="flex max-w-2xl flex-col gap-2">
-                <h3 className="text-lg font-semibold tracking-normal">
-                  Blog đang chờ bài đầu tiên
-                </h3>
-                <p className="text-sm leading-6 text-muted-foreground">
-                  Khi bài viết được publish từ CMS, homepage sẽ tự động kéo các
-                  bài mới nhất về đây để nối nội dung với sản phẩm.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <BuyerAssuranceSection />
     </div>
   );
 }
 
-function ResourceMarquee() {
-  const railItems = [...resourceMarqueeItems, ...resourceMarqueeItems];
+function HeroProductSpotlight({ product }: { product?: PublishedProduct }) {
+  const detailRows = [
+    {
+      label: "Loại",
+      value: product ? productTypeLabels[product.product_type] : "Marketplace",
+    },
+    {
+      label: "Giao hàng",
+      value: product ? getProductDeliveryLabel(product) : "Mở khóa trong tài khoản",
+    },
+    {
+      label: "Giá",
+      value: product ? formatProductPrice(product) : "Đang cập nhật",
+    },
+  ];
 
   return (
-    <section className="scroll-reveal border-b bg-background py-4">
-      <div className="motion-marquee overflow-hidden">
-        <div className="motion-marquee-track flex gap-3 px-4">
-          {railItems.map(([label, description], index) => (
-            <div
-              key={`${label}-${index}`}
-              className="group flex min-w-72 items-center gap-3 rounded-lg border bg-card px-4 py-3 text-card-foreground shadow-sm transition-[transform,border-color,background-color] duration-300 hover:-translate-y-0.5 hover:border-foreground/35 hover:bg-accent/60"
-            >
-              <span className="motion-pulse-dot size-2 shrink-0 rounded-full bg-emerald-400" />
-              <div className="grid gap-0.5">
-                <span className="text-sm font-semibold">{label}</span>
-                <span className="text-xs text-muted-foreground">
-                  {description}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ShopCategoryShelf() {
-  return (
-    <section className="scroll-reveal bg-background py-14 md:py-18">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4">
-        <SectionHeader
-          title="Danh mục công nghệ"
-          description="Thay vì chỉ giới thiệu hệ thống, homepage nên cho khách quét nhanh shop đang bán loại tài nguyên nào."
-          actionLabel="Vào shop"
-          actionHref="/products"
-        />
-
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {shopCategories.map((item) => {
-            const Icon = item.Icon;
-
-            return (
-              <Link
-                key={item.title}
-                href="/products"
-                className="group/category relative overflow-hidden rounded-lg border bg-card p-5 text-card-foreground shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-xl hover:shadow-foreground/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-              >
-                <div
-                  className={cn(
-                    "absolute inset-x-0 top-0 h-1 bg-gradient-to-r",
-                    item.accentClassName
-                  )}
-                />
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex size-11 shrink-0 items-center justify-center rounded-lg border bg-background text-foreground shadow-sm transition-transform duration-300 group-hover/category:-rotate-3 group-hover/category:scale-105">
-                    <Icon aria-hidden="true" className="size-5" />
-                  </div>
-                  <span className="rounded-md border bg-background px-2 py-1 text-xs font-medium text-muted-foreground">
-                    {item.label}
-                  </span>
-                </div>
-                <div className="mt-5 grid gap-2">
-                  <h3 className="text-lg font-semibold tracking-normal">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    {item.description}
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function TechStockSection({ products }: { products: PublishedProduct[] }) {
-  const rows =
-    products.length > 0
-      ? products.slice(0, 4).map((product) => ({
-          title: product.title,
-          type: productTypeLabels[product.product_type],
-          price: formatProductPrice(product),
-          status: getProductDeliveryLabel(product),
-          href: `/products/${product.slug}`,
-        }))
-      : fallbackStockRows;
-
-  return (
-    <section className="scroll-reveal border-y bg-background py-14 md:py-18">
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-        <div className="flex max-w-xl flex-col gap-5">
-          <div className="flex size-12 items-center justify-center rounded-lg border bg-card shadow-sm">
-            <CpuIcon aria-hidden="true" className="size-6" />
-          </div>
-          <div className="grid gap-4">
-            <h2 className="text-2xl font-semibold leading-tight tracking-normal md:text-4xl">
-              Một shop công nghệ cần cảm giác đang có hàng thật, trạng thái thật.
-            </h2>
-            <p className="text-sm leading-7 text-muted-foreground md:text-base">
-              Khách mua acc, tool hoặc source code thường muốn biết: sản phẩm còn
-              mở bán không, nhận được gì, giao ở đâu và có dùng được ngay không.
-            </p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-3">
-            {techSignals.map((item) => (
-              <CompactSignal key={item.title} item={item} />
-            ))}
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-lg border bg-card text-card-foreground shadow-2xl shadow-foreground/10">
-          <div className="flex items-center justify-between border-b px-4 py-3">
-            <div className="flex items-center gap-2">
-              <span className="motion-pulse-dot size-2 rounded-full bg-emerald-400" />
-              <span className="text-sm font-semibold">Live tech shelf</span>
-            </div>
-            <span className="text-xs font-medium text-muted-foreground">
-              Ready to checkout
+    <div className="relative mx-auto w-full max-w-xl">
+      <div className="absolute inset-x-10 bottom-2 top-10 rounded-full bg-primary/10 blur-3xl" />
+      <div className="relative overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/70 shadow-2xl shadow-black/25 backdrop-blur-xl">
+        <div className="flex items-center justify-between border-b border-border/80 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="size-2 rounded-full bg-emerald-400" />
+            <span className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              Đang mở bán
             </span>
           </div>
-
-          <div className="divide-y">
-            {rows.map((item) => (
-              <Link
-                key={item.title}
-                href={item.href}
-                className="group/stock grid gap-3 px-4 py-4 transition-colors hover:bg-muted/40 sm:grid-cols-[minmax(0,1fr)_7rem_7rem] sm:items-center"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">{item.title}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {item.type}
-                  </p>
-                </div>
-                <span className="text-sm font-medium sm:text-right">
-                  {item.price}
-                </span>
-                <span className="inline-flex w-fit items-center gap-1.5 rounded-md border bg-background px-2 py-1 text-xs font-medium text-muted-foreground sm:ml-auto">
-                  <span className="size-1.5 rounded-full bg-emerald-400" />
-                  {item.status}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HeroShowcase({ product }: { product?: PublishedProduct }) {
-  return (
-    <div className="motion-fade-up motion-delay-2 relative">
-      <div className="motion-float-soft relative overflow-hidden rounded-lg border bg-card text-card-foreground shadow-2xl shadow-foreground/10">
-        <div className="flex items-center justify-between border-b px-4 py-3">
-          <div className="flex items-center gap-2">
-            <span className="size-2 rounded-full bg-rose-400" />
-            <span className="size-2 rounded-full bg-amber-400" />
-            <span className="size-2 rounded-full bg-emerald-400" />
-          </div>
-          <span className="text-xs font-medium text-muted-foreground">
-            Tech shop preview
+          <span className="rounded-full border border-border/80 bg-background/80 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+            {product ? productTypeLabels[product.product_type] : "Sản phẩm mẫu"}
           </span>
         </div>
 
-        <div className="grid gap-0 md:grid-cols-[1.05fr_0.95fr]">
-          <div className="border-b p-5 md:border-b-0 md:border-r">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted">
-              {product?.thumbnail_url ? (
-                <img
-                  src={product.thumbnail_url}
-                  alt={product.title}
-                  className="absolute inset-0 size-full bg-background object-contain p-4"
-                />
-              ) : product ? (
-                <ProductArtwork product={product} />
-              ) : (
-                <EmptyProductPreview />
-              )}
-            </div>
+        <div className="grid gap-4 p-4 sm:grid-cols-[minmax(0,11rem)_1fr] sm:p-5">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-border/80 bg-muted">
+            {product?.thumbnail_url ? (
+              <img
+                src={product.thumbnail_url}
+                alt={product.title}
+                className="absolute inset-0 size-full object-cover"
+              />
+            ) : product ? (
+              <ProductArtwork product={product} className="absolute inset-0" />
+            ) : (
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--primary)_0,transparent_38%),linear-gradient(180deg,var(--muted),var(--background))] opacity-60" />
+            )}
           </div>
 
-          <div className="flex flex-col justify-between gap-5 p-5">
-            <div className="grid gap-3">
-              <p className="text-xs font-medium uppercase tracking-normal text-muted-foreground">
-                Deal đang mở bán
+          <div className="flex flex-col gap-4">
+            <div className="grid gap-2">
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Gợi ý trong tuần
               </p>
-              <div className="grid gap-2">
-                <h2 className="line-clamp-2 text-2xl font-semibold leading-tight tracking-normal">
-                  {product?.title ?? "Kệ sản phẩm đầu tiên"}
-                </h2>
-                <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-                  {product?.short_description ??
-                    "Chuẩn bị publish AI account, source code, template, mini tool và tài nguyên học tập cho builder."}
-                </p>
-              </div>
+              <h2 className="text-2xl font-semibold leading-tight tracking-[-0.02em]">
+                {product?.title ?? "Kho tool đang được cập nhật"}
+              </h2>
+              <p className="text-sm leading-6 text-muted-foreground">
+                {product?.short_description ??
+                  "Danh sách sản phẩm sẽ hiện tại đây ngay khi có món được publish từ CMS."}
+              </p>
             </div>
 
-            <div className="grid gap-3">
-              {[
-                ["Preview", product?.thumbnail_url ? "Live asset" : "Generated"],
-                ["Delivery", product ? getProductDeliveryLabel(product) : "Dashboard"],
-                ["Price", product ? formatProductPrice(product) : "Sắp mở bán"],
-              ].map(([label, value]) => (
+            <div className="grid gap-3 rounded-2xl border border-border/80 bg-background/70 p-3">
+              {detailRows.map((item) => (
                 <div
-                  key={label}
-                  className="flex items-center justify-between border-b pb-3 last:border-b-0 last:pb-0"
+                  key={item.label}
+                  className="flex items-center justify-between gap-4 text-sm"
                 >
-                  <span className="text-sm text-muted-foreground">{label}</span>
-                  <span className="text-sm font-medium">{value}</span>
+                  <span className="text-muted-foreground">{item.label}</span>
+                  <span className="text-right font-medium">{item.value}</span>
                 </div>
               ))}
             </div>
 
-            <HeroActivityFeed />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AccessHandoffSection() {
-  return (
-    <section className="scroll-reveal bg-muted/30 py-14 md:py-18">
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-        <div className="overflow-hidden rounded-lg border bg-card text-card-foreground shadow-2xl shadow-foreground/10">
-          <div className="flex items-center justify-between border-b px-4 py-3">
-            <div className="flex items-center gap-2">
-              <span className="size-2 rounded-full bg-emerald-400" />
-              <span className="text-sm font-semibold">Access handoff</span>
-            </div>
-            <span className="text-xs font-medium text-muted-foreground">
-              Buyer dashboard
-            </span>
-          </div>
-
-          <div className="grid gap-0 md:grid-cols-[0.92fr_1.08fr]">
-            <div className="border-b p-5 md:border-b-0 md:border-r">
-              <div className="motion-gradient-pan relative flex min-h-72 flex-col justify-between overflow-hidden rounded-lg border bg-gradient-to-br from-cyan-500/20 via-emerald-500/10 to-background p-5">
-                <div className="motion-scanline pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-transparent via-foreground/10 to-transparent" />
-                <div className="relative flex items-start justify-between gap-4">
-                  <div className="grid gap-1">
-                    <p className="text-xs font-medium uppercase tracking-normal text-muted-foreground">
-                      Delivery pack
-                    </p>
-                    <h3 className="text-xl font-semibold tracking-normal">
-                      Account + files + notes
-                    </h3>
-                  </div>
-                  <div className="flex size-10 items-center justify-center rounded-lg border bg-background/70 shadow-sm backdrop-blur">
-                    <LockKeyholeIcon aria-hidden="true" className="size-5" />
-                  </div>
-                </div>
-
-                <div className="relative grid gap-3 rounded-lg border bg-background/75 p-3 shadow-sm backdrop-blur">
-                  {[
-                    ["Access status", "Unlocked"],
-                    ["Delivery type", "Dashboard"],
-                    ["Support note", "Included"],
-                  ].map(([label, value]) => (
-                    <div
-                      key={label}
-                      className="flex items-center justify-between gap-4 text-sm"
-                    >
-                      <span className="text-muted-foreground">{label}</span>
-                      <span className="font-medium">{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="grid divide-y">
-              {accessHandoffItems.map((item) => {
-                const Icon = item.Icon;
-
-                return (
-                  <div key={item.title} className="flex gap-4 p-5">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
-                      <Icon aria-hidden="true" className="size-5" />
-                    </div>
-                    <div className="grid gap-1">
-                      <h3 className="text-base font-semibold tracking-normal">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm leading-6 text-muted-foreground">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex max-w-xl flex-col gap-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <DownloadIcon aria-hidden="true" className="size-4" />
-            Delivery rõ ràng
-          </div>
-          <h2 className="text-2xl font-semibold leading-tight tracking-normal md:text-4xl">
-            Với shop acc/tool, phần quan trọng không chỉ là nút mua mà là cách bàn giao.
-          </h2>
-          <p className="text-sm leading-7 text-muted-foreground md:text-base">
-            Khách mua tài nguyên công nghệ thường cần biết mình sẽ nhận chính xác
-            thứ gì: tài khoản, key, file, link kích hoạt, hướng dẫn setup hay ghi
-            chú cập nhật. Section này làm homepage giống shop thật hơn vì nói rõ
-            trải nghiệm sau khi thanh toán.
-          </p>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button render={<Link href="/products" />} nativeButton={false}>
-              Xem hàng đang bán
-              <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
-            </Button>
             <Button
-              variant="outline"
-              render={<Link href="/dashboard" />}
+              className="w-full sm:w-fit"
+              render={
+                <Link href={product ? `/products/${product.slug}` : "/products"} />
+              }
               nativeButton={false}
+              variant="secondary"
             >
-              Thư viện đã mua
+              Xem chi tiết
+              <ArrowRightIcon aria-hidden="true" data-icon="inline-end" />
             </Button>
           </div>
         </div>
       </div>
-    </section>
-  );
-}
-
-function HeroActivityFeed() {
-  return (
-    <div className="relative h-12 overflow-hidden rounded-lg border bg-background/60 px-3 text-sm shadow-sm">
-      <div className="motion-slide-column grid">
-        {heroActivityItems.map(([label, description], index) => (
-          <div
-            key={`${label}-${index}`}
-            className="flex h-12 items-center justify-between gap-4"
-          >
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="motion-pulse-dot size-2 shrink-0 rounded-full bg-emerald-400" />
-              <span className="truncate font-medium">{label}</span>
-            </div>
-            <span className="truncate text-xs text-muted-foreground">
-              {description}
-            </span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
 
-function EmptyProductPreview() {
-  return (
-    <div className="motion-gradient-pan absolute inset-0 bg-gradient-to-br from-emerald-500/25 via-cyan-500/10 to-background">
-      <div className="motion-scanline pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-transparent via-foreground/10 to-transparent" />
-      <div className="relative flex h-full flex-col justify-between p-4">
-        <div className="flex items-center justify-between">
-          <div className="grid gap-1">
-            <span className="text-xs font-medium uppercase tracking-normal text-muted-foreground">
-              DanCruShop
-            </span>
-            <span className="text-sm font-semibold">Launch shelf</span>
-          </div>
-          <Code2Icon aria-hidden="true" className="size-8 text-foreground/60" />
-        </div>
-
-        <div className="rounded-lg border bg-background/70 p-3 shadow-sm backdrop-blur">
-          <div className="grid gap-1.5 font-mono text-xs text-muted-foreground">
-            <span>const product = &#123;</span>
-            <span className="pl-4 text-foreground">
-              type: &quot;tech-resource&quot;,
-            </span>
-            <span className="pl-4 text-foreground">
-              delivery: &quot;instant&quot;,
-            </span>
-            <span>&#125;</span>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>Access + files</span>
-          <span>Ready soon</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function FeatureItem({ item }: { item: IconBlock }) {
+function CategoryCard({ item }: { item: CategoryBlock }) {
   const Icon = item.Icon;
 
   return (
-    <div className="group/feature flex gap-3 rounded-lg p-1 transition-transform duration-300 hover:-translate-y-0.5">
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border bg-background text-foreground shadow-sm transition-[transform,border-color] duration-300 group-hover/feature:-rotate-3 group-hover/feature:border-foreground/35">
-        <Icon
-          aria-hidden="true"
-          className="size-5 transition-transform duration-300 group-hover/feature:scale-110"
-        />
+    <Link
+      href="/products"
+      className="group relative overflow-hidden rounded-2xl border border-border/80 bg-card/55 p-5 text-card-foreground shadow-sm backdrop-blur-xl transition-[border-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-lg hover:shadow-black/20 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+    >
+      <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-primary/60 via-transparent to-transparent" />
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border/80 bg-background text-foreground shadow-sm">
+          <Icon aria-hidden="true" className="size-5" />
+        </div>
+        <span className="rounded-full border border-border/80 bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+          {item.label}
+        </span>
       </div>
-      <div className="grid gap-1">
-        <h2 className="text-sm font-semibold tracking-normal">{item.title}</h2>
+
+      <div className="mt-5 grid gap-2">
+        <h3 className="text-lg font-semibold">{item.title}</h3>
+        <p className="text-sm leading-6 text-muted-foreground">
+          {item.description}
+        </p>
+      </div>
+    </Link>
+  );
+}
+
+function TrustCard({ item }: { item: TrustBlock }) {
+  const Icon = item.Icon;
+
+  return (
+    <div className="rounded-2xl border border-border/80 bg-card/55 p-5 text-card-foreground shadow-sm backdrop-blur-xl">
+      <div className="flex size-11 items-center justify-center rounded-xl border border-border/80 bg-background text-foreground shadow-sm">
+        <Icon aria-hidden="true" className="size-5" />
+      </div>
+      <div className="mt-5 grid gap-2">
+        <h3 className="text-base font-semibold">{item.title}</h3>
         <p className="text-sm leading-6 text-muted-foreground">
           {item.description}
         </p>
@@ -878,177 +467,22 @@ function SectionHeader({
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
       <div className="flex max-w-2xl flex-col gap-3">
-        <h2 className="text-2xl font-semibold tracking-normal md:text-3xl">
+        <h2 className="text-3xl font-semibold tracking-[-0.02em] md:text-4xl">
           {title}
         </h2>
-        <p className="text-sm leading-6 text-muted-foreground md:text-base">
+        <p className="text-sm leading-7 text-muted-foreground md:text-base">
           {description}
         </p>
       </div>
       <Button
-        className="w-fit"
+        className={cn("w-fit")}
         variant="outline"
         render={<Link href={actionHref} />}
         nativeButton={false}
       >
         {actionLabel}
-        <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
+        <ArrowRightIcon aria-hidden="true" data-icon="inline-end" />
       </Button>
-    </div>
-  );
-}
-
-function PlannedShelfCard({
-  item,
-}: {
-  item: {
-    title: string;
-    type: string;
-    description: string;
-    className: string;
-  };
-}) {
-  return (
-    <div className="group/planned flex min-h-72 flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-xl hover:shadow-foreground/10">
-      <div
-        className={cn(
-          "motion-gradient-pan relative aspect-[16/10] overflow-hidden bg-gradient-to-br",
-          item.className
-        )}
-      >
-        <div className="motion-scanline pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-transparent via-foreground/10 to-transparent" />
-        <div className="absolute inset-x-5 top-5 flex items-center justify-between">
-          <span className="text-xs font-medium uppercase tracking-normal text-muted-foreground">
-            {item.type}
-          </span>
-          <PackageOpenIcon
-            aria-hidden="true"
-            className="size-5 text-foreground/60 transition-transform duration-300 group-hover/planned:rotate-6 group-hover/planned:scale-110"
-          />
-        </div>
-        <div className="absolute bottom-5 left-5 right-5 grid gap-2">
-          <div className="h-2 w-24 rounded-full bg-foreground/70" />
-          <div className="h-2 w-36 rounded-full bg-foreground/25" />
-          <div className="h-2 w-20 rounded-full bg-foreground/20" />
-        </div>
-        <div className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 skew-x-[-18deg] bg-gradient-to-r from-transparent via-foreground/15 to-transparent opacity-0 transition-all duration-700 group-hover/planned:left-full group-hover/planned:opacity-100" />
-      </div>
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <h3 className="text-base font-semibold leading-6 tracking-normal">
-          {item.title}
-        </h3>
-        <p className="text-sm leading-6 text-muted-foreground">
-          {item.description}
-        </p>
-        <p className="mt-auto border-t pt-4 text-sm font-medium text-muted-foreground">
-          Đang chuẩn bị publish
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function CompactSignal({ item }: { item: IconBlock }) {
-  const Icon = item.Icon;
-
-  return (
-    <div className="rounded-lg border bg-card p-3 text-card-foreground shadow-sm">
-      <Icon aria-hidden="true" className="mb-3 size-4 text-muted-foreground" />
-      <p className="text-sm font-semibold">{item.title}</p>
-      <p className="mt-1 text-xs leading-5 text-muted-foreground">
-        {item.description}
-      </p>
-    </div>
-  );
-}
-
-function WorkflowStep({
-  index,
-  item,
-}: {
-  index: number;
-  item: IconBlock;
-}) {
-  const Icon = item.Icon;
-
-  return (
-    <div className="group/workflow flex h-full flex-col gap-5 rounded-lg border bg-card p-5 text-card-foreground shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-xl hover:shadow-foreground/10">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold text-muted-foreground">
-          0{index}
-        </span>
-        <div className="flex size-10 items-center justify-center rounded-lg bg-muted text-foreground transition-transform duration-300 group-hover/workflow:-rotate-3 group-hover/workflow:scale-110">
-          <Icon aria-hidden="true" className="size-5" />
-        </div>
-      </div>
-      <div className="grid gap-2">
-        <h3 className="text-base font-semibold tracking-normal">
-          {item.title}
-        </h3>
-        <p className="text-sm leading-6 text-muted-foreground">
-          {item.description}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function BuyerAssuranceSection() {
-  return (
-    <section className="scroll-reveal bg-background py-14 md:py-18">
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="flex max-w-xl flex-col gap-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <TimerIcon aria-hidden="true" className="size-4" />
-            Sau checkout
-          </div>
-          <h2 className="text-2xl font-semibold leading-tight tracking-normal md:text-4xl">
-            Mua tài nguyên công nghệ thì phần nhận hàng phải rõ như phần bán hàng.
-          </h2>
-          <p className="text-sm leading-7 text-muted-foreground md:text-base">
-            Homepage mới tập trung vào niềm tin mua hàng: khách biết sản phẩm
-            thuộc loại nào, nhận qua đâu, và sau này có thể quay lại thư viện để
-            tải hoặc xem lại quyền truy cập.
-          </p>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button render={<Link href="/products" />} nativeButton={false}>
-              Khám phá cửa hàng
-              <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
-            </Button>
-            <Button
-              variant="outline"
-              render={<Link href="/cart" />}
-              nativeButton={false}
-            >
-              Xem giỏ hàng
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid gap-4">
-          {buyerAssurances.map((item) => (
-            <ProofRow key={item.title} item={item} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ProofRow({ item }: { item: IconBlock }) {
-  const Icon = item.Icon;
-
-  return (
-    <div className="group/proof flex gap-4 rounded-lg border bg-card p-5 text-card-foreground shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-xl hover:shadow-foreground/10">
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground transition-transform duration-300 group-hover/proof:-rotate-3 group-hover/proof:scale-110">
-        <Icon aria-hidden="true" className="size-5" />
-      </div>
-      <div className="grid gap-1">
-        <h3 className="text-base font-semibold tracking-normal">{item.title}</h3>
-        <p className="text-sm leading-6 text-muted-foreground">
-          {item.description}
-        </p>
-      </div>
     </div>
   );
 }
