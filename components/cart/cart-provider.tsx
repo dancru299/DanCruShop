@@ -13,6 +13,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import type { ProductType } from "@/lib/supabase/queries/products";
 
 const CART_STORAGE_KEY = "dancrushop-cart-v1";
@@ -215,6 +216,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
       syncItems(nextItems);
       writeStoredCart(nextItems);
+      trackAnalyticsEvent("add_to_cart", {
+        metadata: {
+          currency: product.currency,
+          is_free: product.isFree,
+          price_cents: product.priceCents,
+          product_type: product.productType,
+          slug: product.slug,
+        },
+        productId: product.id,
+      });
       toast.success("Đã thêm vào giỏ", {
         description: product.title,
         id: toastId,

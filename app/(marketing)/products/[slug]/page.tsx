@@ -8,12 +8,17 @@ import {
   CheckCircle2Icon,
   Clock3Icon,
   ExternalLinkIcon,
+  LifeBuoyIcon,
   Layers3Icon,
+  MonitorCheckIcon,
+  RotateCcwIcon,
   ShieldCheckIcon,
   SparklesIcon,
   StarIcon,
+  type LucideIcon,
 } from "lucide-react";
 
+import { ProductViewTracker } from "@/components/analytics/product-view-tracker";
 import { ProductCta } from "@/components/products/product-cta";
 import { ProductArtwork } from "@/components/products/product-card";
 import { ProductReviews } from "@/components/products/product-reviews";
@@ -23,6 +28,14 @@ import {
   productTypeDescriptions,
   productTypeLabels,
 } from "@/lib/products/display";
+import {
+  getProductCompatibility,
+  getProductIncludedItems,
+  getProductRequirements,
+  getProductSupportNote,
+  getProductUpdatePolicy,
+} from "@/lib/products/metadata";
+import { betaPolicies, getSupportEmail, getSupportMailto } from "@/lib/site-config";
 import { checkUserAccess } from "@/lib/supabase/queries/purchases";
 import { getProductReviews } from "@/lib/supabase/queries/product-reviews";
 import {
@@ -93,30 +106,7 @@ function getAudience(product: ProductDetail) {
 }
 
 function getIncludedItems(product: ProductDetail) {
-  const metadataItems =
-    getStringArrayFromMetadata(product.metadata, "includes") ??
-    getStringArrayFromMetadata(product.metadata, "features") ??
-    getStringArrayFromMetadata(product.metadata, "highlights");
-
-  if (metadataItems) {
-    return metadataItems;
-  }
-
-  const descriptionLines = product.description
-    ?.split(/\r?\n/)
-    .map((line) => line.replace(/^[-*]\s*/, "").trim())
-    .filter((line) => line.length > 0);
-
-  if (descriptionLines && descriptionLines.length >= 3) {
-    return descriptionLines.slice(0, 6);
-  }
-
-  return [
-    "Mở quyền truy cập ngay sau khi thanh toán thành công",
-    "Gói tài nguyên gọn, sẵn sàng cho dự án thật",
-    "Có context, ghi chú setup và hướng dẫn sử dụng thực tế",
-    "Bản cập nhật sau này được giao qua dashboard đã mua",
-  ];
+  return getProductIncludedItems(product);
 }
 
 function getDescriptionParagraphs(product: ProductDetail) {
@@ -246,6 +236,11 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const techStack = getTechStack(product);
   const license = getLicense(product);
   const includedItems = getIncludedItems(product);
+  const requirements = getProductRequirements(product);
+  const compatibility = getProductCompatibility(product);
+  const updatePolicy = getProductUpdatePolicy(product);
+  const supportNote = getProductSupportNote(product);
+  const supportEmail = getSupportEmail();
   const categoryLabels = getCategoryLabels(product);
   const productTags = getProductTags(product, categoryLabels);
   const descriptionParagraphs = getDescriptionParagraphs(product);
@@ -253,6 +248,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   return (
     <div>
+      <ProductViewTracker productId={product.id} slug={product.slug} />
       <section className="border-b">
         <div className="mx-auto grid w-full max-w-6xl items-start gap-8 px-4 pb-10 pt-8 md:pb-14 md:pt-12 lg:grid-cols-[1.04fr_0.96fr] lg:gap-10">
           <div className="motion-fade-up flex flex-col gap-4 lg:sticky lg:top-24">
@@ -371,6 +367,10 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                 thumbnailUrl={product.thumbnail_url}
                 title={product.title}
               />
+              <div className="mt-4 grid gap-2 border-t pt-4 text-xs leading-5 text-muted-foreground">
+                <p>{betaPolicies.delivery}</p>
+                <p>{betaPolicies.refund}</p>
+              </div>
             </div>
 
             <div className="grid gap-2 sm:grid-cols-3">
@@ -456,6 +456,39 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             </div>
           </div>
 
+          <div className="rounded-lg border bg-card/60 p-5 text-card-foreground shadow-sm backdrop-blur-xl">
+            <div className="mb-4 flex items-center gap-2">
+              <ShieldCheckIcon aria-hidden="true" className="size-5" />
+              <h3 className="text-lg font-semibold tracking-normal">
+                Trước khi mua
+              </h3>
+            </div>
+            <div className="grid gap-3">
+              <BeforeBuyingRow
+                Icon={MonitorCheckIcon}
+                title="Yêu cầu sử dụng"
+                description={requirements.join(" ")}
+              />
+              <BeforeBuyingRow
+                Icon={Layers3Icon}
+                title="Compatibility"
+                description={compatibility}
+              />
+              <BeforeBuyingRow
+                Icon={RotateCcwIcon}
+                title="Cập nhật và truy cập"
+                description={updatePolicy}
+              />
+              <BeforeBuyingRow
+                Icon={LifeBuoyIcon}
+                title="Support và hoàn tiền"
+                description={`${supportNote} ${betaPolicies.refund}`}
+                href={getSupportMailto(`Support ${product.title}`)}
+                linkLabel={supportEmail}
+              />
+            </div>
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-5 shadow-sm">
               <p className="font-medium">Phù hợp với</p>
@@ -494,6 +527,40 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         reviewsData={reviewsData}
         slug={product.slug}
       />
+    </div>
+  );
+}
+
+function BeforeBuyingRow({
+  description,
+  href,
+  Icon,
+  linkLabel,
+  title,
+}: {
+  description: string;
+  href?: string;
+  Icon: LucideIcon;
+  linkLabel?: string;
+  title: string;
+}) {
+  return (
+    <div className="grid gap-2 rounded-lg border border-border/70 bg-background/50 p-3 text-sm sm:grid-cols-[2rem_1fr]">
+      <div className="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground">
+        <Icon aria-hidden="true" className="size-4" />
+      </div>
+      <div className="grid gap-1">
+        <p className="font-medium">{title}</p>
+        <p className="leading-6 text-muted-foreground">{description}</p>
+        {href && linkLabel ? (
+          <Link
+            href={href}
+            className="w-fit text-sm font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            {linkLabel}
+          </Link>
+        ) : null}
+      </div>
     </div>
   );
 }

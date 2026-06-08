@@ -236,6 +236,33 @@ create table if not exists public.webhook_events (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.analytics_events (
+  id uuid primary key default gen_random_uuid(),
+  event_name text not null,
+  anonymous_id text,
+  user_id uuid references auth.users(id) on delete set null,
+  product_id uuid references public.products(id) on delete set null,
+  order_id uuid references public.orders(id) on delete set null,
+  path text,
+  referrer text,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  constraint analytics_events_event_name_check check (
+    event_name in (
+      'page_view',
+      'product_view',
+      'add_to_cart',
+      'favorite_toggle',
+      'checkout_start',
+      'checkout_error',
+      'vietqr_order_created',
+      'download_start',
+      'download_success',
+      'download_error'
+    )
+  )
+);
+
 -- ---------------------------------------------------------------------------
 -- Functions and triggers
 -- ---------------------------------------------------------------------------
@@ -424,6 +451,21 @@ create index if not exists blog_posts_published_at_idx
 create index if not exists webhook_events_provider_created_at_idx
   on public.webhook_events (provider, created_at desc);
 
+create index if not exists analytics_events_event_created_at_idx
+  on public.analytics_events (event_name, created_at desc);
+
+create index if not exists analytics_events_product_created_at_idx
+  on public.analytics_events (product_id, created_at desc)
+  where product_id is not null;
+
+create index if not exists analytics_events_order_created_at_idx
+  on public.analytics_events (order_id, created_at desc)
+  where order_id is not null;
+
+create index if not exists analytics_events_user_created_at_idx
+  on public.analytics_events (user_id, created_at desc)
+  where user_id is not null;
+
 -- ---------------------------------------------------------------------------
 -- Row Level Security
 -- ---------------------------------------------------------------------------
@@ -444,6 +486,7 @@ alter table public.course_modules enable row level security;
 alter table public.lessons enable row level security;
 alter table public.blog_posts enable row level security;
 alter table public.webhook_events enable row level security;
+alter table public.analytics_events enable row level security;
 
 drop policy if exists "Users can view own profile" on public.profiles;
 create policy "Users can view own profile"
@@ -817,6 +860,13 @@ to authenticated
 using ((select public.is_admin()))
 with check ((select public.is_admin()));
 
+drop policy if exists "Admins can view analytics events" on public.analytics_events;
+create policy "Admins can view analytics events"
+on public.analytics_events
+for select
+to authenticated
+using ((select public.is_admin()));
+
 -- ---------------------------------------------------------------------------
 -- API grants for Supabase anon/authenticated roles
 -- RLS policies above remain the source of truth for row access.
@@ -859,6 +909,10 @@ to authenticated;
 
 grant select, insert, delete
 on public.product_favorites
+to authenticated;
+
+grant select
+on public.analytics_events
 to authenticated;
 
 grant all

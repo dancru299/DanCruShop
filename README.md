@@ -37,7 +37,7 @@ npm run build
 
 The production build uses the local `.env.local` file when run on this machine.
 Before deploy, verify the production environment has its own Supabase, payment,
-webhook, VietQR, and email variables configured.
+webhook, VietQR, support email, and email variables configured.
 
 ## Security Notes
 

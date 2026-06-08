@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   getSupabaseErrorDetails,
   isMissingProductFavoritesTable,
+  isMissingSupabaseTable,
 } from "@/lib/supabase/errors";
 
 describe("Supabase error helpers", () => {
@@ -16,6 +17,7 @@ describe("Supabase error helpers", () => {
     };
 
     expect(isMissingProductFavoritesTable(error)).toBe(true);
+    expect(isMissingSupabaseTable(error, "product_favorites")).toBe(true);
     expect(getSupabaseErrorDetails(error)).toEqual({
       code: "PGRST205",
       details: null,

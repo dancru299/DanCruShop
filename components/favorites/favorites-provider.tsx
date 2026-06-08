@@ -11,6 +11,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { createClient } from "@/lib/supabase/client";
 import {
   getSupabaseErrorDetails,
@@ -206,6 +207,13 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
           description: product.title,
         }
       );
+      trackAnalyticsEvent("favorite_toggle", {
+        metadata: {
+          action: wasFavorite ? "remove" : "add",
+          title: product.title,
+        },
+        productId: product.id,
+      });
     },
     [favoriteIds, isSchemaReady, userId]
   );

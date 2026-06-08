@@ -5,6 +5,7 @@ import {
   createRateLimiter,
   getClientIp,
 } from "@/lib/rate-limit";
+import { recordAnalyticsEvent } from "@/lib/analytics/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -153,6 +154,26 @@ async function recordDownload(
   }
 }
 
+async function recordDownloadAnalytics({
+  eventName,
+  productId,
+  reason,
+  userId,
+}: {
+  eventName: "download_start" | "download_success" | "download_error";
+  productId: string;
+  reason?: string;
+  userId: string;
+}) {
+  await recordAnalyticsEvent({
+    eventName,
+    metadata: reason ? { reason } : {},
+    path: `/api/products/${productId}/download`,
+    productId,
+    userId,
+  });
+}
+
 export async function POST(
   request: Request,
   { params }: DownloadRouteContext
@@ -180,9 +201,20 @@ export async function POST(
   }
 
   try {
+    await recordDownloadAnalytics({
+      eventName: "download_start",
+      productId: identifier,
+      userId: user.id,
+    });
     const product = await getProduct(identifier);
 
     if (!product) {
+      await recordDownloadAnalytics({
+        eventName: "download_error",
+        productId: identifier,
+        reason: "product_not_found",
+        userId: user.id,
+      });
       return NextResponse.json({ error: "Product not found." }, { status: 404 });
     }
 
@@ -190,12 +222,24 @@ export async function POST(
       product.is_free || (await hasActivePurchase(user.id, product.id));
 
     if (!isAllowed) {
+      await recordDownloadAnalytics({
+        eventName: "download_error",
+        productId: product.id,
+        reason: "forbidden",
+        userId: user.id,
+      });
       return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const primaryFile = await getPrimaryFile(product.id);
 
     if (!primaryFile) {
+      await recordDownloadAnalytics({
+        eventName: "download_error",
+        productId: product.id,
+        reason: "missing_primary_file",
+        userId: user.id,
+      });
       return NextResponse.json(
         { error: "No downloadable file is available for this product." },
         { status: 404 }
@@ -210,6 +254,12 @@ export async function POST(
       );
 
       if (downloadCount >= primaryFile.max_downloads_per_user) {
+        await recordDownloadAnalytics({
+          eventName: "download_error",
+          productId: product.id,
+          reason: "download_limit_reached",
+          userId: user.id,
+        });
         return NextResponse.json(
           {
             error: `Download limit reached. You have used all ${primaryFile.max_downloads_per_user} allowed downloads for this product.`,
@@ -224,9 +274,21 @@ export async function POST(
       recordDownload(user.id, product.id, primaryFile.id),
     ]);
 
+    await recordDownloadAnalytics({
+      eventName: "download_success",
+      productId: product.id,
+      userId: user.id,
+    });
+
     return NextResponse.json({ download_url: downloadUrl });
   } catch (error) {
     console.error("Secure download route failed", error);
+    await recordDownloadAnalytics({
+      eventName: "download_error",
+      productId: identifier,
+      reason: "unexpected_error",
+      userId: user.id,
+    });
 
     return NextResponse.json(
       { error: "Could not prepare download." },

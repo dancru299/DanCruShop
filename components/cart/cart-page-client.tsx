@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useActionState, useMemo } from "react";
 import {
+  AlertCircleIcon,
   ArrowRightIcon,
+  CreditCardIcon,
+  LandmarkIcon,
   PackageOpenIcon,
   ShoppingCartIcon,
   Trash2Icon,
@@ -16,7 +19,12 @@ import {
 import { useCart, type CartItem } from "@/components/cart/cart-provider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  getCartCheckoutReadiness,
+  getCartCheckoutWarning,
+} from "@/lib/cart/checkout-readiness";
 import { formatPrice, productTypeLabels } from "@/lib/products/display";
+import { betaPolicies } from "@/lib/site-config";
 
 function getTotals(items: CartItem[]) {
   const totals = new Map<string, number>();
@@ -46,6 +54,11 @@ export function CartPageClient() {
     initialCheckoutState
   );
   const totals = useMemo(() => getTotals(items), [items]);
+  const checkoutReadiness = useMemo(
+    () => getCartCheckoutReadiness(items),
+    [items]
+  );
+  const checkoutWarning = useMemo(() => getCartCheckoutWarning(items), [items]);
   const productIds = useMemo(
     () => JSON.stringify(items.map((item) => item.id)),
     [items]
@@ -182,6 +195,43 @@ export function CartPageClient() {
               </div>
             )}
           </div>
+
+          <div className="grid gap-3 rounded-lg border bg-background/50 p-3">
+            <div className="flex items-start gap-3">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
+                <CreditCardIcon aria-hidden="true" className="size-4" />
+              </span>
+              <div className="grid gap-1">
+                <p className="text-sm font-medium">Thanh toán & nhận hàng</p>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  {betaPolicies.delivery}
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <CreditCardIcon aria-hidden="true" className="size-4" />
+                <span>Lemon Squeezy tự động mở khóa sau thanh toán.</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <LandmarkIcon aria-hidden="true" className="size-4" />
+                <span>
+                  VietQR áp dụng cho đơn VND
+                  {checkoutReadiness.canUseVietQr ? " trong giỏ này." : "."}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {checkoutWarning ? (
+            <p className="flex gap-2 rounded-lg border border-amber-400/30 bg-amber-400/10 p-3 text-sm leading-6 text-amber-100">
+              <AlertCircleIcon
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0"
+              />
+              {checkoutWarning}
+            </p>
+          ) : null}
 
           {checkoutState.error ? (
             <p className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm leading-6 text-destructive">

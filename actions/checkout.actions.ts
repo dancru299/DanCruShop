@@ -5,6 +5,7 @@ import crypto from "node:crypto";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { recordAnalyticsEvent } from "@/lib/analytics/server";
 import { createCheckoutSession } from "@/lib/payments/lemon-squeezy";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -297,6 +298,17 @@ async function createVietQrCartOrder(
     products.filter((product) => product.is_free),
     user.id
   );
+  await recordAnalyticsEvent({
+    eventName: "vietqr_order_created",
+    metadata: {
+      cart_size: products.length,
+      provider_order_id: providerOrderId,
+      source: "cart",
+    },
+    orderId,
+    path: "/cart",
+    userId: user.id,
+  });
 
   redirect(`/vietqr/${orderId}`);
 }
@@ -372,6 +384,18 @@ export async function createLemonSqueezyCheckout(productId: string) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  await recordAnalyticsEvent({
+    eventName: "checkout_start",
+    metadata: {
+      currency: checkoutProduct.currency,
+      provider: "lemon_squeezy",
+      slug: checkoutProduct.slug,
+      source: "product_detail",
+    },
+    path: `/products/${checkoutProduct.slug}`,
+    productId: checkoutProduct.id,
+    userId: user?.id ?? null,
+  });
   const siteUrl = await getSiteUrl();
   const redirectUrl = `${siteUrl}/checkout/success`;
   const checkoutUrl = await createCheckoutSession(
@@ -402,6 +426,17 @@ export async function createCartCheckoutFromForm(
     if (paidProducts.length === 0) {
       const user = await getRequiredAuthenticatedUser("/cart");
 
+      await recordAnalyticsEvent({
+        eventName: "checkout_start",
+        metadata: {
+          cart_size: products.length,
+          free_count: freeProducts.length,
+          paid_count: 0,
+          source: "cart_free",
+        },
+        path: "/cart",
+        userId: user.id,
+      });
       await unlockFreeProducts(freeProducts, user.id);
       redirect("/dashboard");
     }
@@ -410,6 +445,18 @@ export async function createCartCheckoutFromForm(
     const paidCurrencies = new Set(
       paidProducts.map((product) => product.currency.trim().toUpperCase())
     );
+    await recordAnalyticsEvent({
+      eventName: "checkout_start",
+      metadata: {
+        cart_size: products.length,
+        currencies: Array.from(paidCurrencies),
+        free_count: freeProducts.length,
+        paid_count: paidProducts.length,
+        source: "cart",
+      },
+      path: "/cart",
+      userId: user?.id ?? null,
+    });
     const canUseLemonSqueezy =
       paidCurrencies.size === 1 &&
       paidProducts.every((product) => product.lemon_squeezy_variant_id);
@@ -436,6 +483,14 @@ export async function createCartCheckoutFromForm(
     }
 
     console.error("Cart checkout failed", error);
+    await recordAnalyticsEvent({
+      eventName: "checkout_error",
+      metadata: {
+        message: getServerActionErrorMessage(error),
+        source: "cart",
+      },
+      path: "/cart",
+    });
 
     return {
       error: getServerActionErrorMessage(error),
@@ -544,6 +599,18 @@ export async function createVietQrOrder(productId: string) {
 
       throw new Error(`Could not create VietQR order item: ${itemError.message}`);
     }
+
+    await recordAnalyticsEvent({
+      eventName: "vietqr_order_created",
+      metadata: {
+        provider_order_id: providerOrderId,
+        source: "product_detail",
+      },
+      orderId,
+      path: `/products/${product.slug}`,
+      productId: product.id,
+      userId: user.id,
+    });
   } catch (error) {
     console.error("Failed to create VietQR order", {
       error,

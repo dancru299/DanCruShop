@@ -34,13 +34,18 @@ export function getSupabaseErrorDetails(
 }
 
 export function isMissingProductFavoritesTable(error: unknown) {
+  return isMissingSupabaseTable(error, "product_favorites");
+}
+
+export function isMissingSupabaseTable(error: unknown, tableName: string) {
   const details = getSupabaseErrorDetails(error);
   const message = details.message.toLowerCase();
+  const normalizedTableName = tableName.toLowerCase();
 
   return (
     details.code === "PGRST205" ||
     details.code === "42P01" ||
-    (message.includes("product_favorites") &&
+    (message.includes(normalizedTableName) &&
       (message.includes("schema cache") ||
         message.includes("does not exist") ||
         message.includes("could not find")))

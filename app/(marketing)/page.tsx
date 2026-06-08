@@ -6,10 +6,11 @@ import {
   BookOpenIcon,
   Clock3Icon,
   Code2Icon,
+  CreditCardIcon,
+  LifeBuoyIcon,
   Layers3Icon,
-  MonitorSmartphoneIcon,
   PackageOpenIcon,
-  ShieldCheckIcon,
+  RotateCcwIcon,
   SparklesIcon,
   WrenchIcon,
   type LucideIcon,
@@ -26,6 +27,7 @@ import {
 } from "@/lib/supabase/queries/products";
 import { ProductArtwork, ProductCard } from "@/components/products/product-card";
 import { Button } from "@/components/ui/button";
+import { betaPolicies, getSupportEmail } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -104,19 +106,24 @@ const categories: CategoryBlock[] = [
 
 const trustBlocks: TrustBlock[] = [
   {
-    title: "Mô tả và preview rõ ràng",
-    description: "Khách biết mình đang mua loại tài nguyên gì trước khi bấm thanh toán.",
-    Icon: MonitorSmartphoneIcon,
-  },
-  {
     title: "Giao ngay trong dashboard",
-    description: "File, link tải hoặc quyền truy cập được mở khóa ở một nơi duy nhất.",
+    description: betaPolicies.delivery,
     Icon: Clock3Icon,
   },
   {
-    title: "Thanh toán gọn, cảm giác chuyên nghiệp",
-    description: "Storefront ưu tiên scan nhanh, CTA rõ và ít yếu tố gây xao nhãng.",
-    Icon: ShieldCheckIcon,
+    title: "Thanh toán an toàn",
+    description: "Lemon Squeezy xử lý thẻ quốc tế; VietQR dành cho đơn VND cần duyệt thủ công.",
+    Icon: CreditCardIcon,
+  },
+  {
+    title: "Support beta trong 24h",
+    description: `Gửi email ${getSupportEmail()} nếu đơn hàng hoặc quyền truy cập chưa hiển thị.`,
+    Icon: LifeBuoyIcon,
+  },
+  {
+    title: "Hoàn tiền 7 ngày có điều kiện",
+    description: betaPolicies.refund,
+    Icon: RotateCcwIcon,
   },
 ];
 
@@ -305,7 +312,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             {trustBlocks.map((item) => (
               <TrustCard key={item.title} item={item} />
             ))}

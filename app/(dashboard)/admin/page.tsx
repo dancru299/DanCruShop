@@ -21,6 +21,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/auth/roles";
+import {
+  getSupabaseErrorDetails,
+  isMissingSupabaseTable,
+} from "@/lib/supabase/errors";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { BlogPostStatus } from "@/lib/supabase/queries/blog";
 import type {
@@ -89,6 +93,16 @@ type ProfileRow = {
   created_at: string;
 };
 
+type AnalyticsEventRow = {
+  anonymous_id: string | null;
+  created_at: string;
+  event_name: string;
+  order_id: string | null;
+  path: string | null;
+  product_id: string | null;
+  user_id: string | null;
+};
+
 type TrendPoint = {
   label: string;
   value: number;
@@ -113,6 +127,15 @@ type ActivityItem = {
   meta: string;
   timestamp: string;
   tone: Tone;
+};
+
+type BetaFunnel = {
+  addToCart: number;
+  checkoutStarts: number;
+  downloadStarts: number;
+  pageViews: number;
+  productViews: number;
+  uniqueVisitors: number;
 };
 
 type Tone = "amber" | "emerald" | "rose" | "sky" | "violet";
@@ -261,6 +284,37 @@ function buildDailyTrend(
   }));
 }
 
+function countEvents(events: AnalyticsEventRow[], eventName: string) {
+  return events.filter((event) => event.event_name === eventName).length;
+}
+
+function getUniqueVisitorCount(events: AnalyticsEventRow[]) {
+  const visitors = new Set<string>();
+
+  events.forEach((event) => {
+    const visitorId = event.user_id ?? event.anonymous_id;
+
+    if (visitorId) {
+      visitors.add(visitorId);
+    }
+  });
+
+  return visitors.size;
+}
+
+function getBetaFunnel(events: AnalyticsEventRow[]): BetaFunnel {
+  return {
+    addToCart: countEvents(events, "add_to_cart"),
+    checkoutStarts: countEvents(events, "checkout_start"),
+    downloadStarts: countEvents(events, "download_start"),
+    pageViews: countEvents(events, "page_view"),
+    productViews: countEvents(events, "product_view"),
+    uniqueVisitors: getUniqueVisitorCount(
+      events.filter((event) => event.event_name === "page_view")
+    ),
+  };
+}
+
 async function getAdminOverviewData() {
   await requireAdmin();
 
@@ -273,6 +327,7 @@ async function getAdminOverviewData() {
     purchasesResult,
     postsResult,
     profilesResult,
+    analyticsResult,
   ] = await Promise.all([
     supabaseAdmin
       .from("products")
@@ -296,6 +351,14 @@ async function getAdminOverviewData() {
       .select("id,title,slug,status,published_at,created_at")
       .order("created_at", { ascending: false }),
     supabaseAdmin.from("profiles").select("id,role,created_at"),
+    supabaseAdmin
+      .from("analytics_events")
+      .select(
+        "event_name,anonymous_id,user_id,product_id,order_id,path,created_at"
+      )
+      .gte("created_at", new Date(Date.now() - 14 * MS_PER_DAY).toISOString())
+      .order("created_at", { ascending: false })
+      .limit(5000),
   ]);
 
   const results = [
@@ -313,12 +376,31 @@ async function getAdminOverviewData() {
     }
   });
 
+  if (analyticsResult.error) {
+    if (isMissingSupabaseTable(analyticsResult.error, "analytics_events")) {
+      console.warn(
+        "Admin analytics funnel is unavailable until analytics_events is deployed.",
+        getSupabaseErrorDetails(analyticsResult.error)
+      );
+    } else {
+      console.error(
+        "Failed to fetch admin overview analytics_events",
+        analyticsResult.error
+      );
+    }
+  }
+
   const products = (productsResult.data ?? []) as ProductRow[];
   const orders = (ordersResult.data ?? []) as OrderRow[];
   const orderItems = (orderItemsResult.data ?? []) as OrderItemRow[];
   const purchases = (purchasesResult.data ?? []) as PurchaseRow[];
   const posts = (postsResult.data ?? []) as BlogPostRow[];
   const profiles = (profilesResult.data ?? []) as ProfileRow[];
+  const analyticsEvents = (analyticsResult.data ?? []) as AnalyticsEventRow[];
+  const current7AnalyticsEvents = analyticsEvents.filter((event) =>
+    isWithinDays(event.created_at, 7)
+  );
+  const betaFunnel = getBetaFunnel(current7AnalyticsEvents);
   const paidOrders = orders.filter((order) => order.status === "paid");
   const primaryCurrency = getPrimaryCurrency(paidOrders);
   const days = getLastDays(14);
@@ -406,12 +488,14 @@ async function getAdminOverviewData() {
       }))
   );
 
-  const interestTrend = buildDailyTrend(
+  const analyticsTrend = buildDailyTrend(
     days,
-    orders.map((order) => ({
-      created_at: order.created_at,
-      value: 1,
-    }))
+    analyticsEvents
+      .filter((event) => event.event_name === "page_view")
+      .map((event) => ({
+        created_at: event.created_at,
+        value: 1,
+      }))
   );
 
   const activities: ActivityItem[] = [
@@ -450,15 +534,16 @@ async function getAdminOverviewData() {
       (purchase) => purchase.access_status === "active"
     ).length,
     activity: activities,
+    analyticsTrend,
     archivedProducts: products.filter((product) => product.status === "archived")
       .length,
+    betaFunnel,
     customers: profiles.filter((profile) => profile.role === "customer").length,
     draftPosts: posts.filter((post) => post.status === "draft").length,
     draftProducts: products.filter((product) => product.status === "draft").length,
     failedOrders: orders.filter(
       (order) => order.status === "failed" || order.status === "cancelled"
     ).length,
-    interestTrend,
     newCustomers7d: profiles.filter((profile) => isWithinDays(profile.created_at, 7))
       .length,
     orders,
@@ -826,6 +911,21 @@ function CoverageRow({
   );
 }
 
+function FunnelRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b py-2.5 last:border-b-0">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm font-semibold">{formatNumber(value)}</span>
+    </div>
+  );
+}
+
 export default async function AdminOverviewPage() {
   const data = await getAdminOverviewData();
   const currentRevenue = data.totalRevenueCents7d;
@@ -942,7 +1042,7 @@ export default async function AdminOverviewPage() {
         </Panel>
 
         <Panel
-          description="Order volume is the current interest proxy until page-view tracking is connected."
+          description="Anonymous Supabase events from the last 7 days."
           title="Interest signals"
           action={<GaugeIcon aria-hidden="true" className="size-4 text-muted-foreground" />}
         >
@@ -959,14 +1059,27 @@ export default async function AdminOverviewPage() {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Visitors</p>
-                <p className="text-2xl font-semibold">--</p>
-                <p className="text-xs text-muted-foreground">Needs page_views</p>
+                <p className="text-2xl font-semibold">
+                  {formatNumber(data.betaFunnel.uniqueVisitors)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {formatNumber(data.betaFunnel.pageViews)} page views
+                </p>
               </div>
             </div>
-            <MiniBars points={data.interestTrend} tone="sky" />
-            <div className="rounded-lg border border-dashed p-3 text-xs leading-5 text-muted-foreground">
-              Next analytics table should capture page views, product views,
-              blog reads, checkout starts, and referral source.
+            <MiniBars points={data.analyticsTrend} tone="sky" />
+            <div className="rounded-lg border p-3">
+              <FunnelRow label="Product views" value={data.betaFunnel.productViews} />
+              <FunnelRow label="Add to cart" value={data.betaFunnel.addToCart} />
+              <FunnelRow
+                label="Checkout starts"
+                value={data.betaFunnel.checkoutStarts}
+              />
+              <FunnelRow label="Paid orders" value={data.paidOrders.length} />
+              <FunnelRow
+                label="Download starts"
+                value={data.betaFunnel.downloadStarts}
+              />
             </div>
           </div>
         </Panel>
@@ -1064,9 +1177,9 @@ export default async function AdminOverviewPage() {
             tone="sky"
           />
           <CoverageRow
-            description="Needs page_views and content_events to rank by actual reader interest."
+            description="Page views are live; content-level ranking can come after beta traffic stabilizes."
             label="Blog attention"
-            status="Next"
+            status="Partial"
             tone="violet"
           />
           <CoverageRow
@@ -1076,10 +1189,10 @@ export default async function AdminOverviewPage() {
             tone="amber"
           />
           <CoverageRow
-            description="Needs anonymous events for visits, sources, product views, and checkout starts."
+            description="Anonymous events now track page views, product views, cart adds, checkout starts, and downloads."
             label="Traffic analytics"
-            status="Next"
-            tone="rose"
+            status="Live"
+            tone="emerald"
           />
         </Panel>
       </div>
@@ -1161,12 +1274,11 @@ export default async function AdminOverviewPage() {
           </span>
           <div className="flex flex-col gap-1">
             <h2 className="text-base font-semibold tracking-normal">
-              Next analytics milestone
+              Beta analytics milestone
             </h2>
             <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-              Add event tracking tables for page views, product views, blog
-              reads, checkout starts, and product feedback. This overview is
-              already shaped to receive those metrics without a layout rewrite.
+              Supabase events now capture the launch funnel. Next useful step is
+              alerting on checkout, webhook, email, and download failures.
             </p>
           </div>
         </div>
