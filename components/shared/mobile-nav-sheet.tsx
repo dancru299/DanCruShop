@@ -6,12 +6,14 @@ import {
   ArrowRightIcon,
   BookOpenIcon,
   Grid2x2Icon,
+  HeartIcon,
   MenuIcon,
   ShoppingCartIcon,
   SparklesIcon,
 } from "lucide-react";
 
 import { useCart } from "@/components/cart/cart-provider";
+import { useFavorites } from "@/components/favorites/favorites-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,6 +57,12 @@ const navItems = [
     icon: ShoppingCartIcon,
     label: "Giỏ hàng",
   },
+  {
+    description: "Mở lại các sản phẩm bạn đã lưu để cân nhắc sau.",
+    href: "/favorites",
+    icon: HeartIcon,
+    label: "Yêu thích",
+  },
 ] as const;
 
 export function MobileNavSheet({
@@ -63,6 +71,7 @@ export function MobileNavSheet({
 }: MobileNavSheetProps) {
   const [open, setOpen] = useState(false);
   const { itemCount } = useCart();
+  const { favoriteCount } = useFavorites();
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -72,7 +81,7 @@ export function MobileNavSheet({
       >
         <MenuIcon />
       </SheetTrigger>
-      <SheetContent side="right" className="gap-0">
+      <SheetContent side="right" className="gap-0 bg-[var(--popover)]">
         <SheetHeader className="border-b border-border/80 pb-4">
           <SheetTitle>Khám phá DanCruShop</SheetTitle>
           <SheetDescription>
@@ -84,12 +93,13 @@ export function MobileNavSheet({
           {navItems.map((item) => {
             const Icon = item.icon;
             const isCartItem = item.href === "/cart";
+            const isFavoritesItem = item.href === "/favorites";
 
             return (
               <Link
                 key={item.label}
                 href={item.href}
-                className="group flex items-start gap-3 rounded-2xl border border-border/80 bg-card/70 px-4 py-3 text-card-foreground transition-colors hover:bg-accent/60"
+                className="group flex items-start gap-3 rounded-lg border border-border/80 bg-card px-4 py-3 text-card-foreground transition-colors hover:bg-accent"
                 onClick={() => setOpen(false)}
               >
                 <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/80 bg-background text-foreground shadow-sm">
@@ -100,6 +110,9 @@ export function MobileNavSheet({
                     <span className="text-sm font-semibold">{item.label}</span>
                     {isCartItem && itemCount > 0 ? (
                       <Badge variant="secondary">{itemCount}</Badge>
+                    ) : null}
+                    {isFavoritesItem && favoriteCount > 0 ? (
+                      <Badge variant="secondary">{favoriteCount}</Badge>
                     ) : null}
                   </div>
                   <p className="text-sm leading-6 text-muted-foreground">

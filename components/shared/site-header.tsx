@@ -3,6 +3,7 @@ import { PackageOpenIcon } from "lucide-react";
 
 import { AccountMenu, type AccountMenuUser } from "@/components/account/account-menu";
 import { CartHeaderButton } from "@/components/cart/cart-header-button";
+import { FavoritesHeaderButton } from "@/components/favorites/favorites-header-button";
 import { MobileNavSheet } from "@/components/shared/mobile-nav-sheet";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -84,6 +85,7 @@ export async function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <FavoritesHeaderButton />
           <CartHeaderButton />
           {isAdmin ? (
             <Button

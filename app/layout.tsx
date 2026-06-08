@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { CartProvider } from "@/components/cart/cart-provider";
+import { FavoritesProvider } from "@/components/favorites/favorites-provider";
 import { CosmicBackground } from "@/components/shared/cosmic-background";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -49,8 +50,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <CartProvider>
-            {children}
-            <Toaster position="top-center" richColors />
+            <FavoritesProvider>
+              {children}
+              <Toaster position="top-center" richColors />
+            </FavoritesProvider>
           </CartProvider>
         </ThemeProvider>
       </body>

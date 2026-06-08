@@ -34,7 +34,10 @@ export function AddToCartButton({
       type="button"
       size={size}
       variant={variant}
-      className={cn("transition-transform duration-300 hover:-translate-y-0.5", className)}
+      className={cn(
+        "cursor-pointer transition-transform duration-300 hover:-translate-y-0.5",
+        className
+      )}
       onClick={() => addItem(product, { sourceElement: buttonRef.current })}
     >
       <ShoppingCartIcon aria-hidden="true" data-icon="inline-start" />

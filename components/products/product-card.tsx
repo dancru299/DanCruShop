@@ -17,6 +17,7 @@ import {
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { FavoriteButton } from "@/components/products/favorite-button";
 import type { CartProduct } from "@/components/cart/cart-provider";
+import { buttonVariants } from "@/components/ui/button";
 import {
   formatProductPrice as formatDisplayProductPrice,
   getProductDeliveryLabel,
@@ -162,16 +163,23 @@ export function ProductCard({ product }: ProductCardProps) {
         ) : null}
 
         {/* wishlist (top-right) */}
-        <FavoriteButton className="absolute right-3 top-3 z-30" />
+        <FavoriteButton
+          className="absolute right-3 top-3 z-30"
+          productId={product.id}
+          productTitle={product.title}
+        />
 
         {/* hover overlay: View + Add */}
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center gap-2 bg-black/45 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover/product-card:pointer-events-auto group-hover/product-card:opacity-100">
           <Link
             href={`/products/${product.slug}`}
             aria-label={`Xem ${product.title}`}
-            className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-neutral-900 shadow-lg transition before:absolute before:inset-0 before:content-[''] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            className={cn(
+              buttonVariants({ size: "sm", variant: "secondary" }),
+              "h-8 min-w-20 rounded-full bg-white/95 px-4 text-neutral-900 shadow-lg hover:bg-white"
+            )}
           >
-            <EyeIcon aria-hidden="true" className="size-4" />
+            <EyeIcon aria-hidden="true" data-icon="inline-start" />
             Xem
           </Link>
           <div className="relative z-10">
@@ -179,7 +187,7 @@ export function ProductCard({ product }: ProductCardProps) {
               product={getCartProduct(product)}
               size="sm"
               variant="default"
-              className="rounded-full px-4 shadow-lg"
+              className="h-8 min-w-20 rounded-full px-4 shadow-lg"
             >
               Thêm
             </AddToCartButton>

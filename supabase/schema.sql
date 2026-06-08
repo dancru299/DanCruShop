@@ -73,6 +73,13 @@ create table if not exists public.product_category_map (
   primary key (product_id, category_id)
 );
 
+create table if not exists public.product_favorites (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  product_id uuid not null references public.products(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (user_id, product_id)
+);
+
 create table if not exists public.product_files (
   id uuid primary key default gen_random_uuid(),
   product_id uuid not null references public.products(id) on delete cascade,
@@ -352,6 +359,9 @@ create index if not exists products_metadata_gin_idx
 create index if not exists product_category_map_category_id_idx
   on public.product_category_map (category_id);
 
+create index if not exists product_favorites_product_id_created_at_idx
+  on public.product_favorites (product_id, created_at desc);
+
 create index if not exists product_files_product_id_idx
   on public.product_files (product_id);
 
@@ -422,6 +432,7 @@ alter table public.profiles enable row level security;
 alter table public.products enable row level security;
 alter table public.product_categories enable row level security;
 alter table public.product_category_map enable row level security;
+alter table public.product_favorites enable row level security;
 alter table public.product_files enable row level security;
 alter table public.orders enable row level security;
 alter table public.order_items enable row level security;
@@ -515,6 +526,35 @@ for all
 to authenticated
 using ((select public.is_admin()))
 with check ((select public.is_admin()));
+
+drop policy if exists "Users can view own product favorites" on public.product_favorites;
+create policy "Users can view own product favorites"
+on public.product_favorites
+for select
+to authenticated
+using ((select auth.uid()) = user_id);
+
+drop policy if exists "Users can add own product favorites" on public.product_favorites;
+create policy "Users can add own product favorites"
+on public.product_favorites
+for insert
+to authenticated
+with check (
+  (select auth.uid()) = user_id
+  and exists (
+    select 1
+    from public.products
+    where products.id = product_favorites.product_id
+      and products.status = 'published'
+  )
+);
+
+drop policy if exists "Users can remove own product favorites" on public.product_favorites;
+create policy "Users can remove own product favorites"
+on public.product_favorites
+for delete
+to authenticated
+using ((select auth.uid()) = user_id);
 
 drop policy if exists "Admins can manage product files" on public.product_files;
 create policy "Admins can manage product files"
@@ -817,6 +857,10 @@ on public.products,
    public.webhook_events
 to authenticated;
 
+grant select, insert, delete
+on public.product_favorites
+to authenticated;
+
 grant all
 on all tables in schema public
 to service_role;
@@ -937,5 +981,7 @@ alter table public.products
 
 create index if not exists products_search_vector_idx
   on public.products using gin(search_vector);
+
+notify pgrst, 'reload schema';
 
 commit;
