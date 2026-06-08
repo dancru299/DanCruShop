@@ -28,10 +28,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { CourseModule, CourseWithModules, Lesson } from "@/lib/supabase/queries/courses";
 
-function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Something went wrong.";
-}
-
 function slugify(text: string) {
   return text
     .toLowerCase()
@@ -301,14 +297,12 @@ function AddLessonForm({
 function ModuleCard({
   mod,
   productId,
-  courseId,
   totalModules,
   onDelete,
   onMove,
 }: {
   mod: CourseModule;
   productId: string;
-  courseId: string;
   totalModules: number;
   onDelete: (moduleId: string) => void;
   onMove: (moduleId: string, direction: "up" | "down") => void;
@@ -519,7 +513,6 @@ export function CourseEditor({
           key={mod.id}
           mod={mod}
           productId={productId}
-          courseId={course.id}
           totalModules={modules.length}
           onDelete={(moduleId) =>
             setModules((prev) => prev.filter((m) => m.id !== moduleId))

@@ -238,7 +238,8 @@ export function CosmicBackground({ className }: { className?: string }) {
       ctx!.restore();
     }
 
-    let stars: Star[] = [], milky: Dust[] = [], shooters: Shooter[] = [], planets: Planet[] = [];
+    let stars: Star[] = [], milky: Dust[] = [], planets: Planet[] = [];
+    const shooters: Shooter[] = [];
     let galaxy: HTMLCanvasElement | null = null, gx = 0, gy = 0;
 
     function build() {

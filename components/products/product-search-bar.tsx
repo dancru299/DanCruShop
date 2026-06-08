@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SearchIcon, XIcon } from "lucide-react";
 
@@ -8,18 +8,31 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function ProductSearchBar() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const [value, setValue] = useState(searchParams.get("q") ?? "");
+  const currentQuery = searchParams.get("q") ?? "";
+
+  return (
+    <ProductSearchForm
+      key={currentQuery}
+      initialValue={currentQuery}
+      searchParamsString={searchParams.toString()}
+    />
+  );
+}
+
+function ProductSearchForm({
+  initialValue,
+  searchParamsString,
+}: {
+  initialValue: string;
+  searchParamsString: string;
+}) {
+  const router = useRouter();
+  const [value, setValue] = useState(initialValue);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync with URL when browser back/forward navigation changes params
-  useEffect(() => {
-    setValue(searchParams.get("q") ?? "");
-  }, [searchParams]);
-
   function buildUrl(query: string) {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParamsString);
 
     if (query.trim()) {
       params.set("q", query.trim());
@@ -31,8 +44,8 @@ export function ProductSearchBar() {
     return `/products?${params.toString()}`;
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     router.push(buildUrl(value));
   }
 

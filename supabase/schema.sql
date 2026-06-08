@@ -895,11 +895,17 @@ create or replace function public.increment_download_count(file_id_arg uuid)
 returns void
 language sql
 security definer
+set search_path = ''
 as $$
   update public.product_files
   set download_count = download_count + 1
   where id = file_id_arg;
 $$;
+
+revoke all on function public.increment_download_count(uuid)
+  from public, anon, authenticated;
+grant execute on function public.increment_download_count(uuid)
+  to service_role;
 
 alter table public.download_logs enable row level security;
 

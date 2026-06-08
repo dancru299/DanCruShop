@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeftIcon, CheckCircle2Icon, CircleIcon, LockIcon, PlayCircleIcon } from "lucide-react";
+import { ArrowLeftIcon, CheckCircle2Icon, LockIcon, PlayCircleIcon } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

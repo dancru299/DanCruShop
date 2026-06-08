@@ -133,7 +133,7 @@ async function recordDownload(
 ) {
   const supabaseAdmin = createAdminClient();
 
-  await Promise.all([
+  const [logResult, counterResult] = await Promise.all([
     supabaseAdmin.from("download_logs").insert({
       file_id: fileId,
       product_id: productId,
@@ -141,6 +141,16 @@ async function recordDownload(
     }),
     supabaseAdmin.rpc("increment_download_count", { file_id_arg: fileId }),
   ]);
+
+  if (logResult.error) {
+    console.error("Failed to record download log", logResult.error);
+    throw new Error("Could not record download.");
+  }
+
+  if (counterResult.error) {
+    console.error("Failed to increment download count", counterResult.error);
+    throw new Error("Could not update download count.");
+  }
 }
 
 export async function POST(

@@ -4,7 +4,6 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   CheckCircle2Icon,
-  CircleIcon,
   PlayCircleIcon,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
