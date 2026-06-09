@@ -6,9 +6,21 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { recordAnalyticsEvent } from "@/lib/analytics/server";
+import {
+  recordCouponRedemption,
+  validateCoupon,
+  type CouponValidation,
+} from "@/lib/payments/coupons";
 import { createCheckoutSession } from "@/lib/payments/lemon-squeezy";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+
+type CouponContext = {
+  couponId: string;
+  code: string;
+  discountCents: number;
+  currency: string;
+};
 
 type CheckoutProduct = {
   id: string;
@@ -239,7 +251,8 @@ async function unlockFreeProducts(products: CheckoutProduct[], userId: string) {
 
 async function createVietQrCartOrder(
   products: CheckoutProduct[],
-  user: { email?: string | null; id: string }
+  user: { email?: string | null; id: string },
+  coupon: CouponContext | null
 ) {
   if (!user.email) {
     throw new Error("Your account must have an email before checkout.");
@@ -250,6 +263,8 @@ async function createVietQrCartOrder(
     (total, product) => total + product.price_cents,
     0
   );
+  const discountCents = coupon ? Math.min(coupon.discountCents, totalCents) : 0;
+  const finalTotalCents = Math.max(0, totalCents - discountCents);
   const currency = paidProducts[0]?.currency ?? "VND";
   const supabaseAdmin = createAdminClient();
   const providerOrderId = createVietQrOrderCode();
@@ -262,10 +277,18 @@ async function createVietQrCartOrder(
       provider_order_id: providerOrderId,
       raw_payload: {
         cart_product_ids: products.map((product) => product.id),
+        ...(coupon
+          ? {
+              coupon_code: coupon.code,
+              coupon_discount_cents: discountCents,
+              coupon_id: coupon.couponId,
+              subtotal_cents: totalCents,
+            }
+          : {}),
         provider_order_id: providerOrderId,
       },
       status: "pending",
-      total_cents: totalCents,
+      total_cents: finalTotalCents,
       user_id: user.id,
     })
     .select("id")
@@ -315,7 +338,8 @@ async function createVietQrCartOrder(
 
 async function createLemonSqueezyCartCheckout(
   products: CheckoutProduct[],
-  user: { email?: string | null; id: string } | null
+  user: { email?: string | null; id: string } | null,
+  coupon: CouponContext | null
 ) {
   const paidProducts = products.filter((product) => !product.is_free);
   const primaryProduct = paidProducts[0];
@@ -340,6 +364,8 @@ async function createLemonSqueezyCartCheckout(
     (total, product) => total + product.price_cents,
     0
   );
+  const discountCents = coupon ? Math.min(coupon.discountCents, totalCents) : 0;
+  const finalTotalCents = Math.max(0, totalCents - discountCents);
   const siteUrl = await getSiteUrl();
   const redirectUrl = `${siteUrl}/checkout/success`;
   const checkoutUrl = await createCheckoutSession(
@@ -349,13 +375,16 @@ async function createLemonSqueezyCartCheckout(
     {
       cart_product_ids: products.map((product) => product.id).join(","),
       cart_size: products.length,
+      coupon_code: coupon?.code ?? null,
+      coupon_discount_cents: coupon ? discountCents : null,
       product_id: primaryProduct.id,
       product_slug: primaryProduct.slug,
       user_email: user?.email ?? null,
       user_id: user?.id ?? null,
     },
     {
-      customPriceCents: paidProducts.length > 1 ? totalCents : undefined,
+      customPriceCents:
+        coupon || paidProducts.length > 1 ? finalTotalCents : undefined,
       productDescription: products
         .map((product) => `- ${product.title}`)
         .join("\n"),
@@ -457,6 +486,63 @@ export async function createCartCheckoutFromForm(
       path: "/cart",
       userId: user?.id ?? null,
     });
+
+    const couponCode =
+      typeof formData.get("coupon") === "string"
+        ? String(formData.get("coupon")).trim()
+        : "";
+    let coupon: CouponContext | null = null;
+
+    if (couponCode) {
+      if (paidCurrencies.size !== 1) {
+        return {
+          error: "Mã giảm giá chỉ áp dụng cho giỏ hàng dùng một loại tiền tệ.",
+        };
+      }
+
+      const currency = Array.from(paidCurrencies)[0];
+      const subtotalCents = paidProducts.reduce(
+        (total, product) => total + product.price_cents,
+        0
+      );
+      const validation: CouponValidation = await validateCoupon({
+        code: couponCode,
+        currency,
+        email: user?.email ?? null,
+        subtotalCents,
+        userId: user?.id ?? null,
+      });
+
+      if (!validation.ok) {
+        return { error: validation.error };
+      }
+
+      coupon = {
+        code: validation.coupon.code,
+        couponId: validation.coupon.id,
+        currency,
+        discountCents: validation.discountCents,
+      };
+
+      // 100%-off (or discount ≥ subtotal): no payment provider needed — unlock
+      // everything for the buyer and record the redemption directly.
+      if (validation.totalAfterCents <= 0) {
+        const requiredUser =
+          user ?? (await getRequiredAuthenticatedUser("/cart"));
+
+        await unlockFreeProducts(products, requiredUser.id);
+        await recordCouponRedemption({
+          amountDiscountedCents: validation.discountCents,
+          couponId: validation.coupon.id,
+          currency,
+          email: requiredUser.email ?? null,
+          orderId: null,
+          userId: requiredUser.id,
+        });
+        redirect("/dashboard");
+      }
+    }
+
     const canUseLemonSqueezy =
       paidCurrencies.size === 1 &&
       paidProducts.every((product) => product.lemon_squeezy_variant_id);
@@ -464,13 +550,13 @@ export async function createCartCheckoutFromForm(
       paidCurrencies.size === 1 && paidCurrencies.has("VND");
 
     if (canUseLemonSqueezy) {
-      await createLemonSqueezyCartCheckout(products, user);
+      await createLemonSqueezyCartCheckout(products, user, coupon);
     }
 
     if (canUseVietQr) {
       const requiredUser = user ?? (await getRequiredAuthenticatedUser("/cart"));
 
-      await createVietQrCartOrder(products, requiredUser);
+      await createVietQrCartOrder(products, requiredUser, coupon);
     }
 
     return {

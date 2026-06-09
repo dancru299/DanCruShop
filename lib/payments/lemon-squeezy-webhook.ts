@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { recordCouponRedemptionByCode } from "@/lib/payments/coupons";
 import {
   getOrCreateFulfillmentUser,
   normalizeFulfillmentEmail,
@@ -409,6 +410,19 @@ export async function processOrderCreatedEvent(payload: unknown) {
       orderPayload,
       buildOrderItems(products, orderData)
     );
+
+    const couponCode = getString(customData, "coupon_code");
+
+    if (couponCode) {
+      await recordCouponRedemptionByCode({
+        amountDiscountedCents: getNumber(customData, "coupon_discount_cents") ?? 0,
+        code: couponCode,
+        currency: orderData.currency,
+        email: orderData.customerEmail,
+        orderId,
+        userId: user.id,
+      });
+    }
 
     await sendPurchaseAccessEmail(
       supabaseAdmin,

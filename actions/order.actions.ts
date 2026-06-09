@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/roles";
+import { recordCouponRedemption } from "@/lib/payments/coupons";
 import {
   getOrCreateFulfillmentUser,
   normalizeFulfillmentEmail,
@@ -25,6 +26,8 @@ type VietQrOrderForApproval = {
   email: string;
   provider: string;
   status: string;
+  currency: string;
+  raw_payload: Record<string, unknown> | null;
 };
 
 type OrderItemForApproval = {
@@ -44,7 +47,7 @@ async function loadVietQrOrder(orderId: string) {
   const supabaseAdmin = createAdminClient();
   const { data, error } = await supabaseAdmin
     .from("orders")
-    .select("id, email, provider, status")
+    .select("id, email, provider, status, currency, raw_payload")
     .eq("id", orderId)
     .maybeSingle();
 
@@ -165,6 +168,24 @@ export async function approveVietQrOrder(
 
     if (purchaseError) {
       throw new Error(`Could not unlock product: ${purchaseError.message}`);
+    }
+
+    const rawPayload = order.raw_payload ?? {};
+    const couponId =
+      typeof rawPayload.coupon_id === "string" ? rawPayload.coupon_id : null;
+
+    if (couponId) {
+      await recordCouponRedemption({
+        amountDiscountedCents:
+          typeof rawPayload.coupon_discount_cents === "number"
+            ? rawPayload.coupon_discount_cents
+            : 0,
+        couponId,
+        currency: order.currency,
+        email: normalizedEmail,
+        orderId: order.id,
+        userId: user.id,
+      });
     }
 
     await sendPurchaseAccessEmail(supabaseAdmin, normalizedEmail, product.title);
