@@ -2,16 +2,10 @@ import { NextResponse } from "next/server";
 
 import { sanitizeAnalyticsPayload } from "@/lib/analytics/events";
 import { recordAnalyticsEvent } from "@/lib/analytics/server";
-import {
-  checkRateLimit,
-  createRateLimiter,
-  getClientIp,
-} from "@/lib/rate-limit";
+import { enforceRateLimit, getClientIp } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
-
-const analyticsLimiter = createRateLimiter({ max: 120, windowMs: 60_000 });
 
 async function getOptionalUserId() {
   try {
@@ -28,7 +22,10 @@ async function getOptionalUserId() {
 
 export async function POST(request: Request) {
   const ip = getClientIp(request.headers);
-  const { allowed } = checkRateLimit(analyticsLimiter, ip);
+  const { allowed } = await enforceRateLimit(`analytics:${ip}`, {
+    max: 120,
+    windowMs: 60_000,
+  });
 
   if (!allowed) {
     return NextResponse.json({ error: "Too many events." }, { status: 429 });

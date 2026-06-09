@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
 
-import {
-  checkRateLimit,
-  createRateLimiter,
-  getClientIp,
-} from "@/lib/rate-limit";
+import { enforceRateLimit, getClientIp } from "@/lib/rate-limit";
 import { recordAnalyticsEvent } from "@/lib/analytics/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-
-const downloadLimiter = createRateLimiter({ max: 10, windowMs: 60_000 });
 
 type DownloadRouteContext = {
   params: Promise<{
@@ -185,7 +179,10 @@ export async function POST(
   }
 
   const ip = getClientIp(request.headers);
-  const { allowed } = checkRateLimit(downloadLimiter, `${ip}:${identifier}`);
+  const { allowed } = await enforceRateLimit(`download:${ip}:${identifier}`, {
+    max: 10,
+    windowMs: 60_000,
+  });
 
   if (!allowed) {
     return NextResponse.json(

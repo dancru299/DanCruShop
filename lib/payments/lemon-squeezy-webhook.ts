@@ -49,6 +49,12 @@ type OrderForRefund = {
   status: string;
 };
 
+type OrderItemInput = {
+  product_id: string;
+  price_cents: number;
+  quantity: number;
+};
+
 function isRecord(value: unknown): value is JsonObject {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -272,90 +278,48 @@ async function findProductsByIds(
   return orderedProducts;
 }
 
-async function upsertPaidOrder(
+function buildOrderItems(
+  products: ProductForOrder[],
+  orderData: ExtractedOrderData
+): OrderItemInput[] {
+  const isSingleItem = products.length === 1;
+
+  return products.map((product) => ({
+    price_cents: isSingleItem ? orderData.itemPriceCents : product.price_cents,
+    product_id: product.id,
+    quantity: isSingleItem ? orderData.quantity : 1,
+  }));
+}
+
+// Persists the order, its items, and the buyer's purchases atomically via the
+// fulfill_paid_order Postgres function (see supabase/fulfill-paid-order.sql) so
+// a partial failure cannot leave an order without its unlocked purchases.
+async function fulfillPaidOrder(
   supabaseAdmin: SupabaseClient,
   orderData: ExtractedOrderData,
   userId: string,
-  payload: LemonSqueezyOrderPayload
+  payload: LemonSqueezyOrderPayload,
+  items: OrderItemInput[]
 ) {
-  const { data, error } = await supabaseAdmin
-    .from("orders")
-    .upsert(
-      {
-        currency: orderData.currency,
-        email: orderData.customerEmail,
-        provider: "lemon_squeezy",
-        provider_order_id: orderData.providerOrderId,
-        raw_payload: payload,
-        status: "paid",
-        total_cents: orderData.totalCents,
-        user_id: userId,
-      },
-      {
-        onConflict: "provider_order_id",
-      }
-    )
-    .select("id")
-    .single();
+  const { data, error } = await supabaseAdmin.rpc("fulfill_paid_order", {
+    p_currency: orderData.currency,
+    p_email: orderData.customerEmail,
+    p_items: items,
+    p_provider_order_id: orderData.providerOrderId,
+    p_raw_payload: payload,
+    p_total_cents: orderData.totalCents,
+    p_user_id: userId,
+  });
 
   if (error) {
-    throw new Error(`Could not upsert order: ${error.message}`);
+    throw new Error(`Could not fulfill paid order: ${error.message}`);
   }
 
-  return data.id as string;
-}
-
-async function replaceOrderItems(
-  supabaseAdmin: SupabaseClient,
-  orderId: string,
-  products: ProductForOrder[],
-  orderData: ExtractedOrderData
-) {
-  const { error: deleteError } = await supabaseAdmin
-    .from("order_items")
-    .delete()
-    .eq("order_id", orderId);
-
-  if (deleteError) {
-    throw new Error(`Could not reset order items: ${deleteError.message}`);
+  if (typeof data !== "string") {
+    throw new Error("fulfill_paid_order did not return an order id.");
   }
 
-  const { error } = await supabaseAdmin.from("order_items").insert(
-    products.map((product) => ({
-      order_id: orderId,
-      price_cents:
-        products.length === 1 ? orderData.itemPriceCents : product.price_cents,
-      product_id: product.id,
-      quantity: products.length === 1 ? orderData.quantity : 1,
-    }))
-  );
-
-  if (error) {
-    throw new Error(`Could not store order item: ${error.message}`);
-  }
-}
-
-async function upsertPurchases(
-  supabaseAdmin: SupabaseClient,
-  userId: string,
-  products: ProductForOrder[],
-  orderId: string
-) {
-  const { error } = await supabaseAdmin.from("purchases").upsert(
-    products.map((product) => ({
-      access_status: "active",
-      order_id: orderId,
-      product_id: product.id,
-      user_id: userId,
-    })),
-    {
-      onConflict: "user_id,product_id",
-    }
-  );
-
-  if (error) {
-    throw new Error(`Could not unlock purchased product: ${error.message}`);
-  }
+  return data;
 }
 
 async function findOrderForRefund(
@@ -438,15 +402,14 @@ export async function processOrderCreatedEvent(payload: unknown) {
       orderData.customerEmail,
       orderData.customUserId
     );
-    const orderId = await upsertPaidOrder(
+    const orderId = await fulfillPaidOrder(
       supabaseAdmin,
       orderData,
       user.id,
-      orderPayload
+      orderPayload,
+      buildOrderItems(products, orderData)
     );
 
-    await replaceOrderItems(supabaseAdmin, orderId, products, orderData);
-    await upsertPurchases(supabaseAdmin, user.id, products, orderId);
     await sendPurchaseAccessEmail(
       supabaseAdmin,
       orderData.customerEmail,
