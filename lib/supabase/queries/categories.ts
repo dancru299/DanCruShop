@@ -65,6 +65,42 @@ export async function getAdminCategories(): Promise<AdminCategory[]> {
   }
 }
 
+export type CategoryDetail = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+};
+
+export async function getCategoryById(
+  id: string
+): Promise<CategoryDetail | null> {
+  try {
+    const normalizedId = id.trim();
+
+    if (!normalizedId) {
+      return null;
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("product_categories")
+      .select("id, name, slug, description")
+      .eq("id", normalizedId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Failed to fetch category by id", error);
+      return null;
+    }
+
+    return (data as CategoryDetail | null) ?? null;
+  } catch (error) {
+    console.error("Unexpected error while fetching category by id", error);
+    return null;
+  }
+}
+
 export async function getProductCategoryIds(
   productId: string
 ): Promise<string[]> {

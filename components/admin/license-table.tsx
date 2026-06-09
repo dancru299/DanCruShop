@@ -2,13 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
-import { BanIcon, RotateCcwIcon } from "lucide-react";
+import { KeyRoundIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { setLicenseStatus } from "@/actions/license.actions";
+import {
+  AdminActionMenu,
+  AdminActionMenuButton,
+} from "@/components/admin/admin-action-menu";
+import { AdminSearchInput } from "@/components/admin/admin-search-input";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -19,7 +22,7 @@ import {
 } from "@/components/ui/table";
 import type { AdminLicenseKey } from "@/lib/supabase/queries/licenses";
 
-type LicenseManagerProps = {
+type LicenseTableProps = {
   licenses: AdminLicenseKey[];
 };
 
@@ -29,10 +32,10 @@ function formatDate(value: string) {
   );
 }
 
-export function LicenseManager({ licenses }: LicenseManagerProps) {
+export function LicenseTable({ licenses }: LicenseTableProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [query, setQuery] = useState("");
+  const [isPending, startTransition] = useTransition();
 
   const filtered = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -69,15 +72,23 @@ export function LicenseManager({ licenses }: LicenseManagerProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Input
+      <AdminSearchInput
         value={query}
-        onChange={(event) => setQuery(event.target.value)}
+        onChange={setQuery}
         placeholder="Tìm theo key, sản phẩm hoặc email..."
-        className="max-w-md"
       />
 
       <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-        {licenses.length > 0 ? (
+        <div className="flex flex-col gap-1 border-b p-5">
+          <h2 className="text-base font-semibold tracking-normal">
+            License keys
+          </h2>
+          <p className="text-sm leading-6 text-muted-foreground">
+            {filtered.length}/{licenses.length} key đang hiển thị.
+          </p>
+        </div>
+
+        {filtered.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>
@@ -112,36 +123,43 @@ export function LicenseManager({ licenses }: LicenseManagerProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleToggle(license)}
-                      disabled={isPending}
+                    <AdminActionMenu
+                      label={`Thao tác cho ${license.license_key}`}
                     >
                       {license.status === "active" ? (
-                        <>
-                          <BanIcon aria-hidden="true" data-icon="inline-start" />
+                        <AdminActionMenuButton
+                          icon="ban"
+                          tone="destructive"
+                          disabled={isPending}
+                          onClick={() => handleToggle(license)}
+                        >
                           Thu hồi
-                        </>
+                        </AdminActionMenuButton>
                       ) : (
-                        <>
-                          <RotateCcwIcon
-                            aria-hidden="true"
-                            data-icon="inline-start"
-                          />
+                        <AdminActionMenuButton
+                          icon="restore"
+                          disabled={isPending}
+                          onClick={() => handleToggle(license)}
+                        >
                           Khôi phục
-                        </>
+                        </AdminActionMenuButton>
                       )}
-                    </Button>
+                    </AdminActionMenu>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         ) : (
-          <div className="flex min-h-48 flex-col items-center justify-center gap-2 p-8 text-center">
-            <p className="text-sm font-medium">Chưa có license key</p>
+          <div className="flex min-h-56 flex-col items-center justify-center gap-3 p-8 text-center">
+            <div className="flex size-12 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
+              <KeyRoundIcon aria-hidden="true" className="size-5" />
+            </div>
+            <p className="text-sm font-medium">
+              {licenses.length === 0
+                ? "Chưa có license key"
+                : "Không tìm thấy key khớp tìm kiếm"}
+            </p>
             <p className="max-w-sm text-sm leading-6 text-muted-foreground">
               Bật “Yêu cầu license key” trong sản phẩm; key sẽ tự sinh khi khách
               mua.

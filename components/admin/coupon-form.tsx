@@ -1,17 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { Loader2Icon, PencilIcon, PlusIcon, Trash2Icon, XIcon } from "lucide-react";
+import { ArrowLeftIcon, Loader2Icon, SaveIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import {
   createCoupon,
-  deleteCoupon,
   updateCoupon,
   type CouponInput,
 } from "@/actions/coupon.actions";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -23,20 +22,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { formatPrice } from "@/lib/products/display";
 import type { CouponDiscountType } from "@/lib/payments/coupons";
 import type { AdminCoupon } from "@/lib/supabase/queries/coupons";
 
-type CouponManagerProps = {
-  coupons: AdminCoupon[];
+type CouponFormProps = {
+  mode: "create" | "edit";
+  coupon?: AdminCoupon;
 };
 
 function toCents(value: string, currency: string) {
@@ -64,79 +55,46 @@ function toLocalInput(iso: string) {
   return local.toISOString().slice(0, 16);
 }
 
-function formatDiscount(coupon: AdminCoupon) {
-  if (coupon.discount_type === "percent") {
-    return `${coupon.discount_value}%`;
-  }
-
-  return formatPrice(coupon.discount_value, coupon.currency ?? "USD");
-}
-
-export function CouponManager({ coupons }: CouponManagerProps) {
+export function CouponForm({ mode, coupon }: CouponFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const [code, setCode] = useState("");
-  const [description, setDescription] = useState("");
-  const [discountType, setDiscountType] = useState<CouponDiscountType>("percent");
-  const [percentValue, setPercentValue] = useState("10");
-  const [amountValue, setAmountValue] = useState("");
-  const [currency, setCurrency] = useState("VND");
-  const [minOrder, setMinOrder] = useState("");
-  const [maxRedemptions, setMaxRedemptions] = useState("");
-  const [perUserLimit, setPerUserLimit] = useState("");
-  const [startsAt, setStartsAt] = useState("");
-  const [expiresAt, setExpiresAt] = useState("");
-  const [isActive, setIsActive] = useState(true);
+  const couponCurrency = coupon?.currency ?? "VND";
 
-  function resetForm() {
-    setEditingId(null);
-    setCode("");
-    setDescription("");
-    setDiscountType("percent");
-    setPercentValue("10");
-    setAmountValue("");
-    setCurrency("VND");
-    setMinOrder("");
-    setMaxRedemptions("");
-    setPerUserLimit("");
-    setStartsAt("");
-    setExpiresAt("");
-    setIsActive(true);
-  }
-
-  function startEdit(coupon: AdminCoupon) {
-    const couponCurrency = coupon.currency ?? "VND";
-
-    setEditingId(coupon.id);
-    setCode(coupon.code);
-    setDescription(coupon.description ?? "");
-    setDiscountType(coupon.discount_type);
-    setPercentValue(
-      coupon.discount_type === "percent" ? String(coupon.discount_value) : "10"
-    );
-    setAmountValue(
-      coupon.discount_type === "fixed"
-        ? fromCents(coupon.discount_value, couponCurrency)
-        : ""
-    );
-    setCurrency(couponCurrency);
-    setMinOrder(
-      coupon.min_order_cents > 0
-        ? fromCents(coupon.min_order_cents, couponCurrency)
-        : ""
-    );
-    setMaxRedemptions(
-      coupon.max_redemptions != null ? String(coupon.max_redemptions) : ""
-    );
-    setPerUserLimit(
-      coupon.per_user_limit != null ? String(coupon.per_user_limit) : ""
-    );
-    setStartsAt(coupon.starts_at ? toLocalInput(coupon.starts_at) : "");
-    setExpiresAt(coupon.expires_at ? toLocalInput(coupon.expires_at) : "");
-    setIsActive(coupon.is_active);
-  }
+  const [code, setCode] = useState(coupon?.code ?? "");
+  const [description, setDescription] = useState(coupon?.description ?? "");
+  const [discountType, setDiscountType] = useState<CouponDiscountType>(
+    coupon?.discount_type ?? "percent"
+  );
+  const [percentValue, setPercentValue] = useState(
+    coupon && coupon.discount_type === "percent"
+      ? String(coupon.discount_value)
+      : "10"
+  );
+  const [amountValue, setAmountValue] = useState(
+    coupon && coupon.discount_type === "fixed"
+      ? fromCents(coupon.discount_value, couponCurrency)
+      : ""
+  );
+  const [currency, setCurrency] = useState(couponCurrency);
+  const [minOrder, setMinOrder] = useState(
+    coupon && coupon.min_order_cents > 0
+      ? fromCents(coupon.min_order_cents, couponCurrency)
+      : ""
+  );
+  const [maxRedemptions, setMaxRedemptions] = useState(
+    coupon?.max_redemptions != null ? String(coupon.max_redemptions) : ""
+  );
+  const [perUserLimit, setPerUserLimit] = useState(
+    coupon?.per_user_limit != null ? String(coupon.per_user_limit) : ""
+  );
+  const [startsAt, setStartsAt] = useState(
+    coupon?.starts_at ? toLocalInput(coupon.starts_at) : ""
+  );
+  const [expiresAt, setExpiresAt] = useState(
+    coupon?.expires_at ? toLocalInput(coupon.expires_at) : ""
+  );
+  const [isActive, setIsActive] = useState(coupon?.is_active ?? true);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -164,68 +122,40 @@ export function CouponManager({ coupons }: CouponManagerProps) {
     };
 
     startTransition(async () => {
-      const result = editingId
-        ? await updateCoupon(editingId, payload)
-        : await createCoupon(payload);
+      const result =
+        mode === "create"
+          ? await createCoupon(payload)
+          : await updateCoupon(coupon?.id ?? "", payload);
 
       if (!result.ok) {
         toast.error(result.error);
         return;
       }
 
-      toast.success(editingId ? "Đã cập nhật mã." : "Đã tạo mã giảm giá.");
-      resetForm();
-      router.refresh();
-    });
-  }
-
-  function handleDelete(coupon: AdminCoupon) {
-    if (!window.confirm(`Xóa mã "${coupon.code}"?`)) {
-      return;
-    }
-
-    startTransition(async () => {
-      const result = await deleteCoupon(coupon.id);
-
-      if (!result.ok) {
-        toast.error(result.error);
-        return;
-      }
-
-      toast.success("Đã xóa mã.");
-
-      if (editingId === coupon.id) {
-        resetForm();
-      }
-
+      toast.success(mode === "create" ? "Đã tạo mã giảm giá." : "Đã lưu mã.");
+      router.push("/admin/coupons");
       router.refresh();
     });
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[24rem_1fr]">
-      <form
-        onSubmit={handleSubmit}
-        className="flex h-fit flex-col gap-4 rounded-lg border bg-card p-5 text-card-foreground shadow-sm xl:sticky xl:top-24"
-      >
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-base font-semibold tracking-normal">
-            {editingId ? "Sửa mã giảm giá" : "Mã giảm giá mới"}
-          </h2>
-          {editingId ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={resetForm}
-              disabled={isPending}
-            >
-              <XIcon aria-hidden="true" data-icon="inline-start" />
-              Hủy
-            </Button>
-          ) : null}
-        </div>
+    <form onSubmit={handleSubmit} className="flex w-full flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <Button
+          className="w-fit"
+          variant="ghost"
+          render={<Link href="/admin/coupons" />}
+          nativeButton={false}
+        >
+          <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
+          Quay lại Coupons
+        </Button>
+        <h1 className="text-3xl font-semibold tracking-normal">
+          {mode === "create" ? "Mã giảm giá mới" : "Sửa mã giảm giá"}
+        </h1>
+      </div>
 
+      <section className="flex max-w-2xl flex-col gap-4 rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
         <Field>
           <FieldLabel htmlFor="coupon-code">Mã</FieldLabel>
           <Input
@@ -306,9 +236,7 @@ export function CouponManager({ coupons }: CouponManagerProps) {
         )}
 
         <Field>
-          <FieldLabel htmlFor="min-order">
-            Đơn tối thiểu ({currency})
-          </FieldLabel>
+          <FieldLabel htmlFor="min-order">Đơn tối thiểu ({currency})</FieldLabel>
           <Input
             id="min-order"
             type="number"
@@ -402,7 +330,17 @@ export function CouponManager({ coupons }: CouponManagerProps) {
             />
           </button>
         </label>
+      </section>
 
+      <div className="flex max-w-2xl flex-col-reverse gap-2 border-t pt-5 sm:flex-row sm:justify-end">
+        <Button
+          variant="outline"
+          render={<Link href="/admin/coupons" />}
+          nativeButton={false}
+          disabled={isPending}
+        >
+          Hủy
+        </Button>
         <Button type="submit" disabled={isPending}>
           {isPending ? (
             <Loader2Icon
@@ -411,94 +349,11 @@ export function CouponManager({ coupons }: CouponManagerProps) {
               data-icon="inline-start"
             />
           ) : (
-            <PlusIcon aria-hidden="true" data-icon="inline-start" />
+            <SaveIcon aria-hidden="true" data-icon="inline-start" />
           )}
-          {editingId ? "Lưu thay đổi" : "Tạo mã"}
+          {mode === "create" ? "Tạo mã" : "Lưu thay đổi"}
         </Button>
-      </form>
-
-      <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-        <div className="flex flex-col gap-1 border-b p-5">
-          <h2 className="text-base font-semibold tracking-normal">
-            Tất cả mã giảm giá
-          </h2>
-          <p className="text-sm leading-6 text-muted-foreground">
-            {coupons.length} mã. Áp dụng ở giỏ hàng cho cả VietQR và Lemon
-            Squeezy.
-          </p>
-        </div>
-
-        {coupons.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Mã</TableHead>
-                <TableHead>Giảm</TableHead>
-                <TableHead>Lượt dùng</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead className="text-right">Thao tác</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {coupons.map((coupon) => (
-                <TableRow key={coupon.id}>
-                  <TableCell>
-                    <p className="font-medium">{coupon.code}</p>
-                    {coupon.description ? (
-                      <p className="line-clamp-1 text-xs text-muted-foreground">
-                        {coupon.description}
-                      </p>
-                    ) : null}
-                  </TableCell>
-                  <TableCell>{formatDiscount(coupon)}</TableCell>
-                  <TableCell>
-                    {coupon.times_redeemed}
-                    {coupon.max_redemptions != null
-                      ? ` / ${coupon.max_redemptions}`
-                      : ""}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={coupon.is_active ? "default" : "secondary"}>
-                      {coupon.is_active ? "Bật" : "Tắt"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => startEdit(coupon)}
-                        disabled={isPending}
-                      >
-                        <PencilIcon aria-hidden="true" data-icon="inline-start" />
-                        Sửa
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDelete(coupon)}
-                        disabled={isPending}
-                      >
-                        <Trash2Icon aria-hidden="true" data-icon="inline-start" />
-                        Xóa
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ) : (
-          <div className="flex min-h-48 flex-col items-center justify-center gap-2 p-8 text-center">
-            <p className="text-sm font-medium">Chưa có mã giảm giá</p>
-            <p className="max-w-sm text-sm leading-6 text-muted-foreground">
-              Tạo mã đầu tiên để chạy khuyến mãi. Khách nhập mã ở trang giỏ hàng.
-            </p>
-          </div>
-        )}
       </div>
-    </div>
+    </form>
   );
 }
