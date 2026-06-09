@@ -20,6 +20,16 @@ export const metadata: Metadata = {
   title: "Sản phẩm",
   description:
     "Khám phá toàn bộ tool, source code và tài nguyên số trên DanCruShop.",
+  alternates: {
+    canonical: "/products",
+  },
+  openGraph: {
+    title: "Sản phẩm | DanCruShop",
+    description:
+      "Khám phá toàn bộ tool, source code và tài nguyên số trên DanCruShop.",
+    url: "/products",
+    type: "website",
+  },
 };
 
 type ProductsPageProps = {

@@ -17,8 +17,10 @@ import {
 } from "lucide-react";
 
 import { BlogCoverArtwork } from "@/components/blog/blog-card";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { buildArticleJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo";
 import {
   getPostBySlug,
   getPublishedPosts,
@@ -179,14 +181,28 @@ export async function generateMetadata({
     post.excerpt ??
     "Đọc bài viết này trên DanCruShop.";
 
+  const path = `/blog/${post.slug}`;
+
   return {
     title,
     description,
+    alternates: {
+      canonical: path,
+    },
     openGraph: {
       title,
       description,
+      url: path,
       images: post.cover_image_url ? [post.cover_image_url] : undefined,
       type: "article",
+      publishedTime: post.published_at ?? post.created_at,
+      modifiedTime: post.updated_at,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: post.cover_image_url ? [post.cover_image_url] : undefined,
     },
   };
 }
@@ -210,8 +226,23 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const topics = getArticleTopics(post);
   const readingTime = getReadingTime(post.content);
 
+  const articleJsonLd = buildArticleJsonLd({
+    description: post.seo_description ?? post.excerpt ?? post.title,
+    image: post.cover_image_url,
+    modifiedTime: post.updated_at,
+    publishedTime: post.published_at ?? post.created_at,
+    slug: post.slug,
+    title: post.seo_title ?? post.title,
+  });
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Trang chủ", path: "/" },
+    { name: "Bài viết", path: "/blog" },
+    { name: post.title, path: `/blog/${post.slug}` },
+  ]);
+
   return (
     <div>
+      <JsonLd data={[articleJsonLd, breadcrumbJsonLd]} />
       <header className="border-b bg-card/25">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 md:py-14">
           <Link

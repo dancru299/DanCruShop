@@ -38,7 +38,14 @@ import {
   getProductSupportNote,
   getProductUpdatePolicy,
 } from "@/lib/products/metadata";
-import { betaPolicies, getSupportEmail, getSupportMailto } from "@/lib/site-config";
+import { JsonLd } from "@/components/seo/json-ld";
+import { buildBreadcrumbJsonLd, buildProductJsonLd } from "@/lib/seo";
+import {
+  betaPolicies,
+  getSupportEmail,
+  getSupportMailto,
+  siteName,
+} from "@/lib/site-config";
 import { getBundleChildProducts } from "@/lib/supabase/queries/bundles";
 import { checkUserAccess } from "@/lib/supabase/queries/purchases";
 import { getProductReviews } from "@/lib/supabase/queries/product-reviews";
@@ -209,16 +216,29 @@ export async function generateMetadata({
     };
   }
 
+  const description =
+    product.short_description ??
+    product.description?.slice(0, 200) ??
+    `Khám phá ${product.title} trên ${siteName}.`;
+  const path = `/products/${product.slug}`;
+
   return {
     title: product.title,
-    description:
-      product.short_description ??
-      "Khám phá sản phẩm số này trên DanCruShop.",
+    description,
+    alternates: {
+      canonical: path,
+    },
     openGraph: {
+      type: "website",
+      url: path,
       title: product.title,
-      description:
-        product.short_description ??
-        "Khám phá sản phẩm số này trên DanCruShop.",
+      description,
+      images: product.thumbnail_url ? [product.thumbnail_url] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.title,
+      description,
       images: product.thumbnail_url ? [product.thumbnail_url] : undefined,
     },
   };
@@ -253,8 +273,35 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const descriptionParagraphs = getDescriptionParagraphs(product);
   const canReply = hasPurchased || viewer.isAdmin;
 
+  const productJsonLd = buildProductJsonLd({
+    category: categoryLabels[0],
+    currency: product.currency,
+    description:
+      product.short_description ??
+      product.description?.slice(0, 200) ??
+      `Khám phá ${product.title} trên ${siteName}.`,
+    image: product.thumbnail_url,
+    isFree: product.is_free,
+    name: product.title,
+    priceCents: product.price_cents,
+    rating:
+      reviewsData.summary.totalReviews > 0
+        ? {
+            count: reviewsData.summary.totalReviews,
+            value: reviewsData.summary.averageRating,
+          }
+        : null,
+    slug: product.slug,
+  });
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Trang chủ", path: "/" },
+    { name: "Sản phẩm", path: "/products" },
+    { name: product.title, path: `/products/${product.slug}` },
+  ]);
+
   return (
     <div>
+      <JsonLd data={[productJsonLd, breadcrumbJsonLd]} />
       <ProductViewTracker productId={product.id} slug={product.slug} />
       <section className="border-b">
         <div className="mx-auto grid w-full max-w-6xl items-start gap-8 px-4 pb-10 pt-8 md:pb-14 md:pt-12 lg:grid-cols-[1.04fr_0.96fr] lg:gap-10">

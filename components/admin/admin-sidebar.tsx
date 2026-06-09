@@ -16,6 +16,7 @@ import {
   UsersIcon,
 } from "lucide-react";
 
+import { DanCruShopLogo } from "@/components/shared/dancrushop-logo";
 import { cn } from "@/lib/utils";
 
 const adminNavItems = [
@@ -87,14 +88,14 @@ export function AdminSidebar() {
       <div className="mx-auto flex w-full max-w-7xl gap-2 overflow-x-auto px-4 py-3 md:sticky md:top-0 md:mx-0 md:w-60 md:flex-col md:px-4 md:py-6">
         <Link
           href="/admin"
-          className="hidden flex-col gap-1 px-3 pb-4 md:flex"
+          className="hidden px-3 pb-4 transition-colors hover:text-foreground/80 md:flex"
         >
-          <span className="text-xs font-medium text-muted-foreground">
-            Admin CMS
-          </span>
-          <span className="text-lg font-semibold tracking-normal">
-            DanCruShop
-          </span>
+          <DanCruShopLogo
+            eyebrow="Admin CMS"
+            markClassName="size-4"
+            markContainerClassName="size-8 rounded-md"
+            wordmarkClassName="text-base"
+          />
         </Link>
 
         <nav className="flex gap-1 md:flex-col">

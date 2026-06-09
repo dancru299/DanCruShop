@@ -26,7 +26,9 @@ import {
   type PublishedProduct,
 } from "@/lib/supabase/queries/products";
 import { ProductArtwork, ProductCard } from "@/components/products/product-card";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
+import { buildOrganizationJsonLd, buildWebsiteJsonLd } from "@/lib/seo";
 import { betaPolicies, getSupportEmail } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
@@ -152,6 +154,7 @@ export default async function HomePage() {
 
   return (
     <div>
+      <JsonLd data={[buildOrganizationJsonLd(), buildWebsiteJsonLd()]} />
       <section className="relative overflow-hidden border-b border-border/80">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--primary)_0,transparent_32%),radial-gradient(circle_at_top_right,var(--muted)_0,transparent_38%)] opacity-35" />
         <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:56px_56px] opacity-[0.06]" />
