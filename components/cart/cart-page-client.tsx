@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
+import { useActionState, useMemo, useState, useTransition } from "react";
 import {
   AlertCircleIcon,
   ArrowRightIcon,
@@ -35,6 +35,9 @@ type AppliedCoupon = {
   currency: string;
   discountCents: number;
   totalAfterCents: number;
+  // Snapshot of the cart the coupon was validated against, so we can drop it
+  // when the cart contents change (server re-validates on checkout anyway).
+  productIds: string;
 };
 
 function getTotals(items: CartItem[]) {
@@ -80,13 +83,11 @@ export function CartPageClient() {
   const [isApplying, startApplying] = useTransition();
 
   const singleCurrencyTotal = totals.length === 1 ? totals[0] : null;
-
-  // Reset any applied coupon when the cart contents change. The server re-validates
-  // on checkout, but this keeps the on-screen preview honest.
-  useEffect(() => {
-    setAppliedCoupon(null);
-    setCouponError(null);
-  }, [productIds]);
+  // Drop a stale coupon during render (no effect needed) when the cart changes.
+  const effectiveCoupon =
+    appliedCoupon && appliedCoupon.productIds === productIds
+      ? appliedCoupon
+      : null;
 
   function handleApplyCoupon() {
     const code = couponInput.trim();
@@ -112,6 +113,7 @@ export function CartPageClient() {
         code: result.code,
         currency: result.currency,
         discountCents: result.discountCents,
+        productIds,
         totalAfterCents: result.totalAfterCents,
       });
     });
@@ -257,12 +259,12 @@ export function CartPageClient() {
 
           {singleCurrencyTotal ? (
             <div className="grid gap-3">
-              {appliedCoupon ? (
+              {effectiveCoupon ? (
                 <div className="flex flex-col gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3">
                   <div className="flex items-center justify-between gap-3">
                     <span className="flex items-center gap-2 text-sm font-medium">
                       <TagIcon aria-hidden="true" className="size-4" />
-                      {appliedCoupon.code}
+                      {effectiveCoupon.code}
                     </span>
                     <Button
                       type="button"
@@ -279,8 +281,8 @@ export function CartPageClient() {
                     <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                       -
                       {formatPrice(
-                        appliedCoupon.discountCents,
-                        appliedCoupon.currency
+                        effectiveCoupon.discountCents,
+                        effectiveCoupon.currency
                       )}
                     </span>
                   </div>
@@ -288,8 +290,8 @@ export function CartPageClient() {
                     <span className="text-muted-foreground">Tổng sau giảm</span>
                     <span className="font-semibold">
                       {formatPrice(
-                        appliedCoupon.totalAfterCents,
-                        appliedCoupon.currency
+                        effectiveCoupon.totalAfterCents,
+                        effectiveCoupon.currency
                       )}
                     </span>
                   </div>
@@ -371,7 +373,7 @@ export function CartPageClient() {
             <input
               name="coupon"
               type="hidden"
-              value={appliedCoupon?.code ?? ""}
+              value={effectiveCoupon?.code ?? ""}
             />
             <Button type="submit" size="lg" disabled={isPending}>
               {isPending ? "Đang chuẩn bị checkout..." : "Thanh toán toàn bộ"}

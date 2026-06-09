@@ -7,6 +7,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import { DownloadButton } from "@/components/products/download-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getUserLicenseKey } from "@/lib/supabase/queries/licenses";
 import { checkUserAccess } from "@/lib/supabase/queries/purchases";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -81,6 +82,7 @@ export default async function DashboardProductPage({
     notFound();
   }
 
+  const licenseKey = await getUserLicenseKey(id);
   const thumbnailSrc = product.thumbnail_url ?? "/window.svg";
 
   return (
@@ -120,6 +122,19 @@ export default async function DashboardProductPage({
               </p>
             ) : null}
           </div>
+
+          {licenseKey ? (
+            <div className="flex flex-col gap-2 rounded-lg border bg-muted/40 p-4">
+              <p className="text-sm font-medium">License key</p>
+              <code className="select-all break-all rounded-md border bg-background px-3 py-2 font-mono text-sm">
+                {licenseKey}
+              </code>
+              <p className="text-xs text-muted-foreground">
+                Dùng key này để kích hoạt sản phẩm. Giữ kín, không chia sẻ công
+                khai.
+              </p>
+            </div>
+          ) : null}
 
           <div className="mt-auto flex flex-col gap-2 sm:flex-row">
             <DownloadButton productId={product.id} />
