@@ -10,6 +10,7 @@ import {
   PackageIcon,
   ReceiptTextIcon,
   SettingsIcon,
+  StoreIcon,
   TagIcon,
   TicketPercentIcon,
   UsersIcon,
@@ -82,14 +83,19 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="border-b bg-muted/25 md:min-h-[calc(100dvh-4rem)] md:border-r md:border-b-0 md:bg-background">
-      <div className="mx-auto flex w-full max-w-7xl gap-2 overflow-x-auto px-4 py-3 md:sticky md:top-20 md:mx-0 md:w-60 md:flex-col md:px-4 md:py-6">
-        <div className="hidden flex-col gap-1 px-3 pb-4 md:flex">
-          <p className="text-xs font-medium text-muted-foreground">
+    <aside className="border-b bg-muted/25 md:min-h-dvh md:border-r md:border-b-0 md:bg-background">
+      <div className="mx-auto flex w-full max-w-7xl gap-2 overflow-x-auto px-4 py-3 md:sticky md:top-0 md:mx-0 md:w-60 md:flex-col md:px-4 md:py-6">
+        <Link
+          href="/admin"
+          className="hidden flex-col gap-1 px-3 pb-4 md:flex"
+        >
+          <span className="text-xs font-medium text-muted-foreground">
             Admin CMS
-          </p>
-          <p className="text-lg font-semibold tracking-normal">DanCruShop</p>
-        </div>
+          </span>
+          <span className="text-lg font-semibold tracking-normal">
+            DanCruShop
+          </span>
+        </Link>
 
         <nav className="flex gap-1 md:flex-col">
           {adminNavItems.map((item) => {
@@ -113,6 +119,16 @@ export function AdminSidebar() {
             );
           })}
         </nav>
+
+        <div className="shrink-0 md:mt-3 md:border-t md:pt-3">
+          <Link
+            href="/"
+            className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <StoreIcon aria-hidden="true" className="size-4" />
+            Về cửa hàng
+          </Link>
+        </div>
       </div>
     </aside>
   );
