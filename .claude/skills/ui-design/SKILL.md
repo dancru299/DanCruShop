@@ -89,6 +89,9 @@ URL params (`ProductSearchBar`, `searchPublishedProducts`), unlike admin's local
 - Icons: `lucide-react`, `aria-hidden="true"`, `data-icon="inline-start"` inside buttons.
 - Badge variants: `default` (published/active), `secondary` (draft/off), `outline` (archived/neutral).
 - Container width: admin uses the layout's `max-w-8xl`; storefront sections `max-w-6xl`.
+- **Admin shell has no top header** — navigation is the `AdminSidebar` only (vertical on
+  desktop, horizontal scroll on mobile), with a "Về cửa hàng" link back to storefront. Do
+  not add the storefront `SiteHeader` to admin pages. Storefront/customer pages keep `SiteHeader`.
 
 ## Checklist before finishing UI work
 
