@@ -9,9 +9,12 @@ import {
   ArrowLeftIcon,
   ArrowUpRightIcon,
   ExternalLinkIcon,
+  KeyRoundIcon,
   Loader2Icon,
+  PackagePlusIcon,
   PaperclipIcon,
   SaveIcon,
+  TagIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -44,12 +47,14 @@ import {
   ProductArtwork,
   formatProductPrice,
 } from "@/components/products/product-card";
+import type { CategoryOption } from "@/lib/supabase/queries/categories";
 import type {
   ProductDetail,
   ProductStatus,
   ProductType,
   PublishedProduct,
 } from "@/lib/supabase/queries/products";
+import { cn, slugify } from "@/lib/utils";
 
 type ProductFormMode = "create" | "edit";
 
@@ -70,11 +75,14 @@ type ProductFormProduct = Pick<
   | "preview_url"
   | "lemon_squeezy_product_id"
   | "lemon_squeezy_variant_id"
+  | "requires_license"
 >;
 
 type ProductFormProps = {
   mode: ProductFormMode;
   product?: ProductFormProduct;
+  categories?: CategoryOption[];
+  selectedCategoryIds?: string[];
 };
 
 type ProductFormErrors = {
@@ -123,15 +131,6 @@ const statusBadgeVariants: Record<ProductStatus, "default" | "outline" | "second
   draft: "secondary",
   published: "default",
 };
-
-function slugify(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 function formatPriceInput(priceCents: number | undefined, currency: string) {
   if (typeof priceCents !== "number") {
@@ -298,7 +297,12 @@ function ProductPreviewPanel({
   );
 }
 
-export function ProductForm({ mode, product }: ProductFormProps) {
+export function ProductForm({
+  mode,
+  product,
+  categories = [],
+  selectedCategoryIds = [],
+}: ProductFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [title, setTitle] = useState(product?.title ?? "");
@@ -327,7 +331,19 @@ export function ProductForm({ mode, product }: ProductFormProps) {
   const [status, setStatus] = useState<ProductStatus>(
     product?.status ?? "draft"
   );
+  const [categoryIds, setCategoryIds] = useState<string[]>(selectedCategoryIds);
+  const [requiresLicense, setRequiresLicense] = useState(
+    product?.requires_license ?? false
+  );
   const [errors, setErrors] = useState<ProductFormErrors>({});
+
+  function toggleCategory(id: string) {
+    setCategoryIds((current) =>
+      current.includes(id)
+        ? current.filter((value) => value !== id)
+        : [...current, id]
+    );
+  }
 
   const submitLabel = useMemo(
     () => (mode === "create" ? "Create product" : "Save changes"),
@@ -382,6 +398,7 @@ export function ProductForm({ mode, product }: ProductFormProps) {
     }
 
     const payload: ProductInsert = {
+      categoryIds,
       currency,
       demo_url: demoUrl.trim() || null,
       description: description.trim() || null,
@@ -392,6 +409,7 @@ export function ProductForm({ mode, product }: ProductFormProps) {
       preview_url: previewUrl.trim() || null,
       price_cents: validated.priceCents,
       product_type: productType,
+      requires_license: requiresLicense,
       short_description: shortDescription.trim() || null,
       slug: validated.normalizedSlug,
       status,
@@ -638,6 +656,107 @@ export function ProductForm({ mode, product }: ProductFormProps) {
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-base font-semibold tracking-normal">
+                  Categories & licensing
+                </h2>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  Gắn category để khách lọc sản phẩm, và bật license key cho tool
+                  cần kích hoạt.
+                </p>
+              </div>
+              <TagIcon
+                aria-hidden="true"
+                className="size-4 text-muted-foreground"
+              />
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <Field>
+                <FieldLabel>Categories</FieldLabel>
+                {categories.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((category) => {
+                      const active = categoryIds.includes(category.id);
+
+                      return (
+                        <button
+                          key={category.id}
+                          type="button"
+                          onClick={() => toggleCategory(category.id)}
+                          disabled={isPending}
+                          className={cn(
+                            "inline-flex h-8 items-center rounded-lg border px-3 text-sm font-medium transition-colors",
+                            active
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+                          )}
+                        >
+                          {category.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <FieldDescription>
+                    Chưa có category nào.{" "}
+                    <Link
+                      href="/admin/categories"
+                      className="font-medium underline underline-offset-4"
+                    >
+                      Tạo category
+                    </Link>{" "}
+                    trước để gán cho sản phẩm.
+                  </FieldDescription>
+                )}
+              </Field>
+
+              <Field>
+                <button
+                  type="button"
+                  onClick={() => setRequiresLicense((value) => !value)}
+                  disabled={isPending}
+                  aria-pressed={requiresLicense}
+                  className={cn(
+                    "flex items-center justify-between gap-4 rounded-lg border p-3 text-left transition-colors",
+                    requiresLicense
+                      ? "border-primary bg-primary/5"
+                      : "bg-background hover:bg-muted"
+                  )}
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground">
+                      <KeyRoundIcon aria-hidden="true" className="size-4" />
+                    </span>
+                    <span className="grid gap-0.5">
+                      <span className="text-sm font-medium">
+                        Yêu cầu license key
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Tự sinh key kích hoạt cho mỗi người mua sản phẩm này.
+                      </span>
+                    </span>
+                  </span>
+                  <span
+                    className={cn(
+                      "inline-flex h-6 w-11 shrink-0 items-center rounded-full border p-0.5 transition-colors",
+                      requiresLicense ? "bg-primary" : "bg-muted"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "size-4 rounded-full bg-background transition-transform",
+                        requiresLicense ? "translate-x-5" : "translate-x-0"
+                      )}
+                    />
+                  </span>
+                </button>
+              </Field>
+            </div>
+          </section>
+
+          <section className="rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-base font-semibold tracking-normal">
                   Delivery and external links
                 </h2>
                 <p className="text-sm leading-6 text-muted-foreground">
@@ -720,6 +839,17 @@ export function ProductForm({ mode, product }: ProductFormProps) {
       </div>
 
       <div className="flex flex-col-reverse gap-2 border-t pt-5 sm:flex-row sm:justify-end">
+        {mode === "edit" && product && productType === "bundle" ? (
+          <Button
+            variant="outline"
+            render={<Link href={`/admin/products/${product.id}/bundle`} />}
+            nativeButton={false}
+            disabled={isPending}
+          >
+            <PackagePlusIcon aria-hidden="true" data-icon="inline-start" />
+            Manage bundle
+          </Button>
+        ) : null}
         {mode === "edit" && product ? (
           <Button
             variant="outline"

@@ -37,6 +37,7 @@ export type ProductDetail = PublishedProduct & {
   preview_url: string | null;
   lemon_squeezy_product_id: string | null;
   lemon_squeezy_variant_id: string | null;
+  requires_license: boolean;
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -85,6 +86,7 @@ const productDetailSelect = `
   preview_url,
   lemon_squeezy_product_id,
   lemon_squeezy_variant_id,
+  requires_license,
   metadata,
   created_at,
   updated_at

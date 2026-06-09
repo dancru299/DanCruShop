@@ -5,9 +5,13 @@ import { usePathname } from "next/navigation";
 import {
   BarChart3Icon,
   FileTextIcon,
+  KeyRoundIcon,
   MessageSquareIcon,
   PackageIcon,
   ReceiptTextIcon,
+  SettingsIcon,
+  TagIcon,
+  TicketPercentIcon,
   UsersIcon,
 } from "lucide-react";
 
@@ -25,9 +29,24 @@ const adminNavItems = [
     label: "Products",
   },
   {
+    href: "/admin/categories",
+    icon: TagIcon,
+    label: "Categories",
+  },
+  {
+    href: "/admin/coupons",
+    icon: TicketPercentIcon,
+    label: "Coupons",
+  },
+  {
     href: "/admin/orders",
     icon: ReceiptTextIcon,
     label: "Orders",
+  },
+  {
+    href: "/admin/licenses",
+    icon: KeyRoundIcon,
+    label: "Licenses",
   },
   {
     href: "/admin/blog",
@@ -43,6 +62,11 @@ const adminNavItems = [
     href: "/admin/users",
     icon: UsersIcon,
     label: "Customers",
+  },
+  {
+    href: "/admin/settings",
+    icon: SettingsIcon,
+    label: "Settings",
   },
 ];
 

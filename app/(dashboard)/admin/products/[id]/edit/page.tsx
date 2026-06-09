@@ -4,6 +4,10 @@ import { BookOpenIcon } from "lucide-react";
 
 import { ProductForm } from "@/components/admin/product-form";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  getCategoryOptions,
+  getProductCategoryIds,
+} from "@/lib/supabase/queries/categories";
 import { getAdminProductById } from "@/lib/supabase/queries/products";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +27,11 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     notFound();
   }
 
+  const [categories, selectedCategoryIds] = await Promise.all([
+    getCategoryOptions(),
+    getProductCategoryIds(product.id),
+  ]);
+
   return (
     <div className="flex flex-col gap-4">
       {product.product_type === "course" && (
@@ -36,7 +45,12 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
           </Link>
         </div>
       )}
-      <ProductForm mode="edit" product={product} />
+      <ProductForm
+        mode="edit"
+        product={product}
+        categories={categories}
+        selectedCategoryIds={selectedCategoryIds}
+      />
     </div>
   );
 }
