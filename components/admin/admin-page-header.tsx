@@ -10,7 +10,7 @@ type AdminPageHeaderProps = {
 /**
  * Standard heading block for admin pages: eyebrow + title + description on the
  * left, an optional primary action on the right. Mirrors the admin/products
- * header — see [[ui-design-system]].
+ * header. See .claude/skills/ui-design.
  */
 export function AdminPageHeader({
   eyebrow,

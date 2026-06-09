@@ -13,7 +13,7 @@ type AdminSearchInputProps = {
 
 /**
  * Local (client-side) search box shared by every admin list table. Filters the
- * already-loaded rows for an instant response — see [[ui-design-system]].
+ * already-loaded rows for an instant response. See .claude/skills/ui-design.
  */
 export function AdminSearchInput({
   value,
