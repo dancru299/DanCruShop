@@ -124,7 +124,13 @@ describe("processOrderCreatedEvent", () => {
           },
           error: null,
         },
+        // grantProductAccess -> issueLicenseKeys looks up licensed products.
+        { data: [], error: null },
       ],
+      // grantProductAccess -> expandBundleProductIds (no bundle children).
+      bundle_items: [{ data: [], error: null }],
+      // grantProductAccess -> purchases upsert for the unlocked products.
+      purchases: [{ error: null }],
     });
     mockAdmin.rpc.mockResolvedValue({ data: "order-1", error: null });
 

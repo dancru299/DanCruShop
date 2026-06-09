@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { grantProductAccess } from "@/lib/payments/access";
 import { recordCouponRedemptionByCode } from "@/lib/payments/coupons";
 import {
   getOrCreateFulfillmentUser,
@@ -410,6 +411,14 @@ export async function processOrderCreatedEvent(payload: unknown) {
       orderPayload,
       buildOrderItems(products, orderData)
     );
+
+    // Unlock bundle children and issue license keys for the purchased products.
+    // Parent purchases were already created atomically by fulfill_paid_order.
+    await grantProductAccess(supabaseAdmin, {
+      orderId,
+      productIds: products.map((item) => item.id),
+      userId: user.id,
+    });
 
     const couponCode = getString(customData, "coupon_code");
 

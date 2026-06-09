@@ -20,7 +20,10 @@ import {
 
 import { ProductViewTracker } from "@/components/analytics/product-view-tracker";
 import { ProductCta } from "@/components/products/product-cta";
-import { ProductArtwork } from "@/components/products/product-card";
+import {
+  ProductArtwork,
+  ProductCard,
+} from "@/components/products/product-card";
 import { ProductReviews } from "@/components/products/product-reviews";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -36,6 +39,7 @@ import {
   getProductUpdatePolicy,
 } from "@/lib/products/metadata";
 import { betaPolicies, getSupportEmail, getSupportMailto } from "@/lib/site-config";
+import { getBundleChildProducts } from "@/lib/supabase/queries/bundles";
 import { checkUserAccess } from "@/lib/supabase/queries/purchases";
 import { getProductReviews } from "@/lib/supabase/queries/product-reviews";
 import {
@@ -229,9 +233,12 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   }
 
   const viewer = await getViewerState();
-  const [hasPurchased, reviewsData] = await Promise.all([
+  const [hasPurchased, reviewsData, bundleChildren] = await Promise.all([
     viewer.userId ? checkUserAccess(viewer.userId, product.id) : false,
     getProductReviews(product.id),
+    product.product_type === "bundle"
+      ? getBundleChildProducts(product.id)
+      : Promise.resolve([]),
   ]);
   const techStack = getTechStack(product);
   const license = getLicense(product);
@@ -412,6 +419,28 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           </aside>
         </div>
       </section>
+
+      {bundleChildren.length > 0 ? (
+        <section className="border-b">
+          <div className="mx-auto w-full max-w-6xl px-4 py-12 md:py-16">
+            <div className="mb-6 flex flex-col gap-2">
+              <p className="text-sm text-muted-foreground">Bundle gồm</p>
+              <h2 className="text-3xl font-semibold tracking-normal">
+                {bundleChildren.length} sản phẩm được mở khoá khi mua bundle
+              </h2>
+              <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+                Thanh toán một lần, toàn bộ sản phẩm dưới đây sẽ xuất hiện trong
+                dashboard đã mua của bạn.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {bundleChildren.map((child) => (
+                <ProductCard key={child.id} product={child} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="scroll-reveal mx-auto grid w-full max-w-6xl gap-8 px-4 py-12 md:py-16 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="flex flex-col gap-4">

@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { recordAnalyticsEvent } from "@/lib/analytics/server";
+import { grantProductAccess } from "@/lib/payments/access";
 import {
   recordCouponRedemption,
   validateCoupon,
@@ -232,21 +233,10 @@ async function unlockFreeProducts(products: CheckoutProduct[], userId: string) {
   }
 
   const supabaseAdmin = createAdminClient();
-  const { error } = await supabaseAdmin.from("purchases").upsert(
-    products.map((product) => ({
-      access_status: "active",
-      order_id: null,
-      product_id: product.id,
-      user_id: userId,
-    })),
-    {
-      onConflict: "user_id,product_id",
-    }
-  );
-
-  if (error) {
-    throw new Error(`Could not unlock free products: ${error.message}`);
-  }
+  await grantProductAccess(supabaseAdmin, {
+    productIds: products.map((product) => product.id),
+    userId,
+  });
 }
 
 async function createVietQrCartOrder(
@@ -595,21 +585,10 @@ export async function claimFreeProduct(productId: string) {
 
   try {
     const supabaseAdmin = createAdminClient();
-    const { error } = await supabaseAdmin.from("purchases").upsert(
-      {
-        access_status: "active",
-        order_id: null,
-        product_id: product.id,
-        user_id: user.id,
-      },
-      {
-        onConflict: "user_id,product_id",
-      }
-    );
-
-    if (error) {
-      throw new Error(`Could not claim free product: ${error.message}`);
-    }
+    await grantProductAccess(supabaseAdmin, {
+      productIds: [product.id],
+      userId: user.id,
+    });
   } catch (error) {
     console.error("Failed to claim free product", {
       error,
