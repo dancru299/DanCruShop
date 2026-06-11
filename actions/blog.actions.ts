@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/roles";
+import { generatePreviewToken } from "@/lib/blog/preview-token";
+import { getSiteUrl } from "@/lib/site-config";
 import { createClient } from "@/lib/supabase/server";
 import type { BlogPostStatus } from "@/lib/supabase/queries/blog";
 
@@ -198,6 +200,14 @@ export async function createBlogPost(
     console.error("Unexpected error while creating blog post", error);
     return { ok: false, error: getErrorMessage(error) };
   }
+}
+
+export async function getBlogPreviewUrl(postId: string): Promise<string> {
+  await requireAdmin();
+
+  const token = generatePreviewToken(postId.trim());
+
+  return `${getSiteUrl()}/blog/preview/${postId.trim()}?token=${token}`;
 }
 
 export async function updateBlogPost(

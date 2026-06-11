@@ -9,6 +9,7 @@ import {
   normalizeFulfillmentEmail,
   sendPurchaseAccessEmail,
 } from "@/lib/payments/fulfillment";
+import { sendRefundNotificationEmail } from "@/lib/email/send-email";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 type JsonObject = Record<string, unknown>;
@@ -48,6 +49,7 @@ type ExtractedOrderData = {
 
 type OrderForRefund = {
   id: string;
+  email: string;
   status: string;
 };
 
@@ -330,7 +332,7 @@ async function findOrderForRefund(
 ) {
   const { data, error } = await supabaseAdmin
     .from("orders")
-    .select("id, status")
+    .select("id, email, status")
     .eq("provider", "lemon_squeezy")
     .eq("provider_order_id", providerOrderId)
     .maybeSingle();
@@ -470,6 +472,10 @@ export async function processOrderRefundedEvent(payload: unknown) {
 
     if (order.status !== "refunded") {
       await markOrderRefunded(supabaseAdmin, order.id);
+    }
+
+    if (revokedPurchaseIds.length > 0 && order.email) {
+      await sendRefundNotificationEmail(normalizeFulfillmentEmail(order.email));
     }
 
     return {
