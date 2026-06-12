@@ -37,9 +37,9 @@ Use this before deploying DanCruShop to a real domain.
 
 ## Runtime Hardening
 
-- Replace the in-memory rate limiter in `lib/rate-limit.ts` with Redis,
-  Upstash, or a database-backed limiter before running multiple serverless
-  instances.
+- Apply `supabase/rate-limits.sql` so `lib/rate-limit.ts::enforceRateLimit`
+  shares limits across serverless instances via the `consume_rate_limit`
+  Postgres function. Without it the limiter fails back to per-process memory.
 - Add monitoring for webhook failures, email failures, and download failures.
 - Add an alert when an order is paid but purchase unlock fails.
 - Confirm `/api/analytics` records page views, product views, cart adds,

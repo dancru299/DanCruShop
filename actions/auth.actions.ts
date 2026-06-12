@@ -3,14 +3,8 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import {
-  checkRateLimit,
-  createRateLimiter,
-  getClientIp,
-} from "@/lib/rate-limit";
+import { enforceRateLimit, getClientIp } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
-
-const magicLinkLimiter = createRateLimiter({ max: 5, windowMs: 60_000 });
 
 export type MagicLinkActionResult =
   | {
@@ -72,7 +66,10 @@ export async function signInWithMagicLink(
   try {
     const requestHeaders = await headers();
     const ip = getClientIp(requestHeaders);
-    const { allowed } = checkRateLimit(magicLinkLimiter, ip);
+    const { allowed } = await enforceRateLimit(`magic-link:${ip}`, {
+      max: 5,
+      windowMs: 60_000,
+    });
 
     if (!allowed) {
       return {

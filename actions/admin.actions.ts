@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
+import { slugify } from "@/lib/utils";
 import type {
   ProductStatus,
   ProductType,
@@ -39,7 +40,13 @@ export type ProductInsert = {
   preview_url?: string | null;
   lemon_squeezy_product_id?: string | null;
   lemon_squeezy_variant_id?: string | null;
+  requires_license?: boolean;
   metadata?: Record<string, unknown>;
+  /**
+   * Category ids to attach. `undefined` leaves categories untouched; an empty
+   * array clears them. Synced into product_category_map after the product write.
+   */
+  categoryIds?: string[];
 };
 
 export type ProductUpdate = Partial<ProductInsert>;
@@ -69,15 +76,6 @@ function isProductStatus(value: unknown): value is ProductStatus {
     typeof value === "string" &&
     productStatuses.includes(value as ProductStatus)
   );
-}
-
-function slugify(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 }
 
 function nullableText(value: string | null | undefined) {
@@ -140,6 +138,7 @@ function normalizeProductInsert(data: ProductInsert): ProductPayload {
     preview_url: nullableText(data.preview_url),
     lemon_squeezy_product_id: nullableText(data.lemon_squeezy_product_id),
     lemon_squeezy_variant_id: nullableText(data.lemon_squeezy_variant_id),
+    requires_license: Boolean(data.requires_license),
     metadata: data.metadata ?? {},
   };
 }
@@ -227,6 +226,10 @@ function normalizeProductUpdate(data: ProductUpdate): ProductPayload {
     );
   }
 
+  if ("requires_license" in data) {
+    payload.requires_license = Boolean(data.requires_license);
+  }
+
   if ("metadata" in data) {
     payload.metadata = data.metadata ?? {};
   }
@@ -236,6 +239,49 @@ function normalizeProductUpdate(data: ProductUpdate): ProductPayload {
   }
 
   return payload;
+}
+
+type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
+
+async function syncProductCategories(
+  supabase: SupabaseServerClient,
+  productId: string,
+  categoryIds: string[] | undefined
+) {
+  // `undefined` means "leave categories untouched"; an empty array clears them.
+  if (!Array.isArray(categoryIds)) {
+    return;
+  }
+
+  const uniqueIds = Array.from(
+    new Set(categoryIds.map((id) => id.trim()).filter((id) => id.length > 0))
+  );
+
+  const { error: deleteError } = await supabase
+    .from("product_category_map")
+    .delete()
+    .eq("product_id", productId);
+
+  if (deleteError) {
+    throw new Error(`Could not update categories: ${deleteError.message}`);
+  }
+
+  if (uniqueIds.length === 0) {
+    return;
+  }
+
+  const { error: insertError } = await supabase
+    .from("product_category_map")
+    .insert(
+      uniqueIds.map((categoryId) => ({
+        category_id: categoryId,
+        product_id: productId,
+      }))
+    );
+
+  if (insertError) {
+    throw new Error(`Could not attach categories: ${insertError.message}`);
+  }
 }
 
 function revalidateProductSurfaces(slug?: string) {
@@ -267,6 +313,8 @@ export async function createProduct(
       return { ok: false, error: error.message };
     }
 
+    await syncProductCategories(supabase, String(product.id), data.categoryIds);
+
     revalidateProductSurfaces(String(payload.slug));
 
     return { ok: true, productId: String(product.id) };
@@ -289,25 +337,32 @@ export async function updateProduct(
       throw new Error("Product id is required.");
     }
 
-    const payload = normalizeProductUpdate(data);
     const supabase = await createClient();
-    const { data: product, error } = await supabase
-      .from("products")
-      .update(payload)
-      .eq("id", productId)
-      .select("id")
-      .single();
-
-    if (error) {
-      console.error("Failed to update product", error);
-      return { ok: false, error: error.message };
-    }
-
-    revalidateProductSurfaces(
-      typeof payload.slug === "string" ? payload.slug : undefined
+    const hasProductFields = Object.keys(data).some(
+      (key) => key !== "categoryIds"
     );
 
-    return { ok: true, productId: String(product.id) };
+    if (hasProductFields) {
+      const payload = normalizeProductUpdate(data);
+      const { error } = await supabase
+        .from("products")
+        .update(payload)
+        .eq("id", productId)
+        .select("id")
+        .single();
+
+      if (error) {
+        console.error("Failed to update product", error);
+        return { ok: false, error: error.message };
+      }
+    }
+
+    await syncProductCategories(supabase, productId, data.categoryIds);
+    revalidateProductSurfaces(
+      typeof data.slug === "string" ? slugify(data.slug) : undefined
+    );
+
+    return { ok: true, productId };
   } catch (error) {
     console.error("Unexpected error while updating product", error);
     return { ok: false, error: getErrorMessage(error) };

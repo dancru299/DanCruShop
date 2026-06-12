@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { PackageOpenIcon } from "lucide-react";
 
 import { AccountMenu, type AccountMenuUser } from "@/components/account/account-menu";
 import { CartHeaderButton } from "@/components/cart/cart-header-button";
 import { FavoritesHeaderButton } from "@/components/favorites/favorites-header-button";
+import { DanCruShopLogo } from "@/components/shared/dancrushop-logo";
 import { MobileNavSheet } from "@/components/shared/mobile-nav-sheet";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -64,12 +64,10 @@ export async function SiteHeader() {
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4">
         <Link
           href="/"
-          className="flex items-center gap-3 text-base font-semibold tracking-normal transition-colors hover:text-foreground/80"
+          className="transition-colors hover:text-foreground/80"
+          aria-label="DanCruShop home"
         >
-          <span className="flex size-9 items-center justify-center rounded-xl border border-border/80 bg-card text-foreground shadow-sm shadow-black/10">
-            <PackageOpenIcon aria-hidden="true" className="size-4" />
-          </span>
-          <span>DanCruShop</span>
+          <DanCruShopLogo />
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">

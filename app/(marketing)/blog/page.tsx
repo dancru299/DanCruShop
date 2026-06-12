@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { BlogCard } from "@/components/blog/blog-card";
@@ -5,10 +6,21 @@ import { buttonVariants } from "@/components/ui/button";
 import { getPublishedPosts } from "@/lib/supabase/queries/blog";
 import { cn } from "@/lib/utils";
 
-export const metadata = {
+const blogDescription =
+  "Ghi chú triển khai, launch notes và bài viết thực tế về storefront sản phẩm số trên DanCruShop.";
+
+export const metadata: Metadata = {
   title: "Bài viết",
-  description:
-    "Ghi chú triển khai, launch notes và bài viết thực tế về storefront sản phẩm số trên DanCruShop.",
+  description: blogDescription,
+  alternates: {
+    canonical: "/blog",
+  },
+  openGraph: {
+    title: "Bài viết | DanCruShop",
+    description: blogDescription,
+    url: "/blog",
+    type: "website",
+  },
 };
 
 export const dynamic = "force-dynamic";

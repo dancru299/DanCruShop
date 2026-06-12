@@ -20,7 +20,10 @@ import {
 
 import { ProductViewTracker } from "@/components/analytics/product-view-tracker";
 import { ProductCta } from "@/components/products/product-cta";
-import { ProductArtwork } from "@/components/products/product-card";
+import {
+  ProductArtwork,
+  ProductCard,
+} from "@/components/products/product-card";
 import { ProductReviews } from "@/components/products/product-reviews";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -35,7 +38,15 @@ import {
   getProductSupportNote,
   getProductUpdatePolicy,
 } from "@/lib/products/metadata";
-import { betaPolicies, getSupportEmail, getSupportMailto } from "@/lib/site-config";
+import { JsonLd } from "@/components/seo/json-ld";
+import { buildBreadcrumbJsonLd, buildProductJsonLd } from "@/lib/seo";
+import {
+  betaPolicies,
+  getSupportEmail,
+  getSupportMailto,
+  siteName,
+} from "@/lib/site-config";
+import { getBundleChildProducts } from "@/lib/supabase/queries/bundles";
 import { checkUserAccess } from "@/lib/supabase/queries/purchases";
 import { getProductReviews } from "@/lib/supabase/queries/product-reviews";
 import {
@@ -205,16 +216,29 @@ export async function generateMetadata({
     };
   }
 
+  const description =
+    product.short_description ??
+    product.description?.slice(0, 200) ??
+    `Khám phá ${product.title} trên ${siteName}.`;
+  const path = `/products/${product.slug}`;
+
   return {
     title: product.title,
-    description:
-      product.short_description ??
-      "Khám phá sản phẩm số này trên DanCruShop.",
+    description,
+    alternates: {
+      canonical: path,
+    },
     openGraph: {
+      type: "website",
+      url: path,
       title: product.title,
-      description:
-        product.short_description ??
-        "Khám phá sản phẩm số này trên DanCruShop.",
+      description,
+      images: product.thumbnail_url ? [product.thumbnail_url] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.title,
+      description,
       images: product.thumbnail_url ? [product.thumbnail_url] : undefined,
     },
   };
@@ -229,9 +253,12 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   }
 
   const viewer = await getViewerState();
-  const [hasPurchased, reviewsData] = await Promise.all([
+  const [hasPurchased, reviewsData, bundleChildren] = await Promise.all([
     viewer.userId ? checkUserAccess(viewer.userId, product.id) : false,
     getProductReviews(product.id),
+    product.product_type === "bundle"
+      ? getBundleChildProducts(product.id)
+      : Promise.resolve([]),
   ]);
   const techStack = getTechStack(product);
   const license = getLicense(product);
@@ -246,8 +273,35 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const descriptionParagraphs = getDescriptionParagraphs(product);
   const canReply = hasPurchased || viewer.isAdmin;
 
+  const productJsonLd = buildProductJsonLd({
+    category: categoryLabels[0],
+    currency: product.currency,
+    description:
+      product.short_description ??
+      product.description?.slice(0, 200) ??
+      `Khám phá ${product.title} trên ${siteName}.`,
+    image: product.thumbnail_url,
+    isFree: product.is_free,
+    name: product.title,
+    priceCents: product.price_cents,
+    rating:
+      reviewsData.summary.totalReviews > 0
+        ? {
+            count: reviewsData.summary.totalReviews,
+            value: reviewsData.summary.averageRating,
+          }
+        : null,
+    slug: product.slug,
+  });
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Trang chủ", path: "/" },
+    { name: "Sản phẩm", path: "/products" },
+    { name: product.title, path: `/products/${product.slug}` },
+  ]);
+
   return (
     <div>
+      <JsonLd data={[productJsonLd, breadcrumbJsonLd]} />
       <ProductViewTracker productId={product.id} slug={product.slug} />
       <section className="border-b">
         <div className="mx-auto grid w-full max-w-6xl items-start gap-8 px-4 pb-10 pt-8 md:pb-14 md:pt-12 lg:grid-cols-[1.04fr_0.96fr] lg:gap-10">
@@ -412,6 +466,28 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           </aside>
         </div>
       </section>
+
+      {bundleChildren.length > 0 ? (
+        <section className="border-b">
+          <div className="mx-auto w-full max-w-6xl px-4 py-12 md:py-16">
+            <div className="mb-6 flex flex-col gap-2">
+              <p className="text-sm text-muted-foreground">Bundle gồm</p>
+              <h2 className="text-3xl font-semibold tracking-normal">
+                {bundleChildren.length} sản phẩm được mở khoá khi mua bundle
+              </h2>
+              <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+                Thanh toán một lần, toàn bộ sản phẩm dưới đây sẽ xuất hiện trong
+                dashboard đã mua của bạn.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {bundleChildren.map((child) => (
+                <ProductCard key={child.id} product={child} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="scroll-reveal mx-auto grid w-full max-w-6xl gap-8 px-4 py-12 md:py-16 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="flex flex-col gap-4">

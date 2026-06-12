@@ -29,32 +29,27 @@ async function findUserByEmail(
   email: string
 ): Promise<User | null> {
   const normalizedEmail = normalizeFulfillmentEmail(email);
-  const perPage = 1000;
+  const { data: userId, error } = await supabaseAdmin.rpc(
+    "find_user_id_by_email",
+    { p_email: normalizedEmail }
+  );
 
-  for (let page = 1; page <= 20; page += 1) {
-    const { data, error } = await supabaseAdmin.auth.admin.listUsers({
-      page,
-      perPage,
-    });
-
-    if (error) {
-      throw new Error(`Could not list users: ${error.message}`);
-    }
-
-    const foundUser = data.users.find(
-      (user) => user.email?.toLowerCase() === normalizedEmail
-    );
-
-    if (foundUser) {
-      return foundUser;
-    }
-
-    if (data.users.length < perPage) {
-      return null;
-    }
+  if (error) {
+    throw new Error(`Could not look up user by email: ${error.message}`);
   }
 
-  throw new Error("Could not find user by email within pagination limit.");
+  if (typeof userId !== "string" || userId.length === 0) {
+    return null;
+  }
+
+  const { data, error: getUserError } =
+    await supabaseAdmin.auth.admin.getUserById(userId);
+
+  if (getUserError || !data.user) {
+    return null;
+  }
+
+  return data.user;
 }
 
 async function getUserFromCustomData(

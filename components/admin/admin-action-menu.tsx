@@ -12,11 +12,15 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import {
+  BanIcon,
   ExternalLinkIcon,
+  KeyRoundIcon,
   Loader2Icon,
   MoreHorizontalIcon,
+  PackagePlusIcon,
   PaperclipIcon,
   PencilIcon,
+  RotateCcwIcon,
   Trash2Icon,
 } from "lucide-react";
 
@@ -26,10 +30,14 @@ import { cn } from "@/lib/utils";
 const MENU_WIDTH = 176;
 
 const actionMenuIcons = {
+  ban: BanIcon,
+  bundle: PackagePlusIcon,
   "external-link": ExternalLinkIcon,
+  key: KeyRoundIcon,
   loader: Loader2Icon,
   paperclip: PaperclipIcon,
   pencil: PencilIcon,
+  restore: RotateCcwIcon,
   trash: Trash2Icon,
 };
 

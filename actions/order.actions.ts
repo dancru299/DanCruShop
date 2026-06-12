@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/roles";
+import { grantProductAccess } from "@/lib/payments/access";
+import { recordCouponRedemption } from "@/lib/payments/coupons";
 import {
   getOrCreateFulfillmentUser,
   normalizeFulfillmentEmail,
@@ -25,10 +27,8 @@ type VietQrOrderForApproval = {
   email: string;
   provider: string;
   status: string;
-};
-
-type OrderItemForApproval = {
-  product_id: string;
+  currency: string;
+  raw_payload: Record<string, unknown> | null;
 };
 
 type ProductForApproval = {
@@ -44,7 +44,7 @@ async function loadVietQrOrder(orderId: string) {
   const supabaseAdmin = createAdminClient();
   const { data, error } = await supabaseAdmin
     .from("orders")
-    .select("id, email, provider, status")
+    .select("id, email, provider, status, currency, raw_payload")
     .eq("id", orderId)
     .maybeSingle();
 
@@ -59,43 +59,46 @@ async function loadVietQrOrder(orderId: string) {
   return data as VietQrOrderForApproval;
 }
 
-async function loadOrderItem(orderId: string) {
+async function loadOrderProductIds(orderId: string) {
   const supabaseAdmin = createAdminClient();
   const { data, error } = await supabaseAdmin
     .from("order_items")
     .select("product_id")
-    .eq("order_id", orderId)
-    .limit(1)
-    .maybeSingle();
+    .eq("order_id", orderId);
 
   if (error) {
-    throw new Error(`Could not load order item: ${error.message}`);
+    throw new Error(`Could not load order items: ${error.message}`);
   }
 
-  if (!data) {
+  const productIds = Array.from(
+    new Set(
+      ((data ?? []) as { product_id: string }[]).map((item) => item.product_id)
+    )
+  );
+
+  if (productIds.length === 0) {
     throw new Error("Order does not have any product item.");
   }
 
-  return data as OrderItemForApproval;
+  return productIds;
 }
 
-async function loadProduct(productId: string) {
+async function loadProducts(productIds: string[]) {
   const supabaseAdmin = createAdminClient();
   const { data, error } = await supabaseAdmin
     .from("products")
     .select("id, title")
-    .eq("id", productId)
-    .maybeSingle();
+    .in("id", productIds);
 
   if (error) {
-    throw new Error(`Could not load product: ${error.message}`);
+    throw new Error(`Could not load products: ${error.message}`);
   }
 
-  if (!data) {
-    throw new Error("Product was not found.");
+  if (!data || data.length === 0) {
+    throw new Error("Products were not found.");
   }
 
-  return data as ProductForApproval;
+  return data as ProductForApproval[];
 }
 
 export async function approveVietQrOrder(
@@ -128,8 +131,8 @@ export async function approveVietQrOrder(
       throw new Error("Only pending VietQR orders can be approved.");
     }
 
-    const orderItem = await loadOrderItem(order.id);
-    const product = await loadProduct(orderItem.product_id);
+    const productIds = await loadOrderProductIds(order.id);
+    const products = await loadProducts(productIds);
     const normalizedEmail = normalizeFulfillmentEmail(order.email);
     const user = await getOrCreateFulfillmentUser(
       supabaseAdmin,
@@ -151,23 +154,36 @@ export async function approveVietQrOrder(
       throw new Error(`Could not approve order: ${orderError.message}`);
     }
 
-    const { error: purchaseError } = await supabaseAdmin.from("purchases").upsert(
-      {
-        access_status: "active",
-        order_id: order.id,
-        product_id: product.id,
-        user_id: user.id,
-      },
-      {
-        onConflict: "user_id,product_id",
-      }
-    );
+    await grantProductAccess(supabaseAdmin, {
+      orderId: order.id,
+      productIds,
+      userId: user.id,
+    });
 
-    if (purchaseError) {
-      throw new Error(`Could not unlock product: ${purchaseError.message}`);
+    const rawPayload = order.raw_payload ?? {};
+    const couponId =
+      typeof rawPayload.coupon_id === "string" ? rawPayload.coupon_id : null;
+
+    if (couponId) {
+      await recordCouponRedemption({
+        amountDiscountedCents:
+          typeof rawPayload.coupon_discount_cents === "number"
+            ? rawPayload.coupon_discount_cents
+            : 0,
+        couponId,
+        currency: order.currency,
+        email: normalizedEmail,
+        orderId: order.id,
+        userId: user.id,
+      });
     }
 
-    await sendPurchaseAccessEmail(supabaseAdmin, normalizedEmail, product.title);
+    const emailProductName =
+      products.length === 1
+        ? products[0].title
+        : `${products.length} sản phẩm DanCruShop`;
+
+    await sendPurchaseAccessEmail(supabaseAdmin, normalizedEmail, emailProductName);
 
     revalidatePath("/admin/orders");
     revalidatePath("/dashboard");

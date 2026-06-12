@@ -8,6 +8,7 @@ import { useMemo, useState, useTransition } from "react";
 import {
   ArrowLeftIcon,
   ArrowUpRightIcon,
+  ExternalLinkIcon,
   FileTextIcon,
   Loader2Icon,
   SaveIcon,
@@ -17,6 +18,7 @@ import { toast } from "sonner";
 
 import {
   createBlogPost,
+  getBlogPreviewUrl,
   updateBlogPost,
   type BlogPostInsert,
   type BlogPostUpdate,
@@ -245,11 +247,28 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
     post?.seo_description ?? ""
   );
   const [errors, setErrors] = useState<BlogPostFormErrors>({});
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
   const submitLabel = useMemo(
     () => (mode === "create" ? "Create post" : "Save changes"),
     [mode]
   );
+
+  async function handlePreview() {
+    if (!post?.id || isLoadingPreview) return;
+
+    setIsLoadingPreview(true);
+
+    try {
+      const url = await getBlogPreviewUrl(post.id);
+
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch {
+      toast.error("Could not generate preview URL.");
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  }
 
   function handleTitleChange(value: string) {
     setTitle(value);
@@ -549,6 +568,25 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
         >
           Cancel
         </Button>
+        {mode === "edit" && post?.id ? (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isPending || isLoadingPreview}
+            onClick={handlePreview}
+          >
+            {isLoadingPreview ? (
+              <Loader2Icon
+                aria-hidden="true"
+                className="animate-spin"
+                data-icon="inline-start"
+              />
+            ) : (
+              <ExternalLinkIcon aria-hidden="true" data-icon="inline-start" />
+            )}
+            {isLoadingPreview ? "Generating..." : "Preview"}
+          </Button>
+        ) : null}
         <Button type="submit" disabled={isPending}>
           {isPending ? (
             <Loader2Icon

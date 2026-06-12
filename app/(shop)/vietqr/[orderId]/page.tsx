@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/shared/site-footer";
 import { SiteHeader } from "@/components/shared/site-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getStoreSettings, isVietQrConfigured } from "@/lib/store/settings";
 import { getCurrentUserVietQrOrder } from "@/lib/supabase/queries/orders";
 import { createClient } from "@/lib/supabase/server";
 
@@ -16,19 +17,6 @@ type VietQrOrderPageProps = {
     orderId: string;
   }>;
 };
-
-function getVietQrConfig() {
-  const bankBin = process.env.VIETQR_BANK_BIN?.trim();
-  const accountNo = process.env.VIETQR_ACCOUNT_NO?.trim();
-  const template = process.env.VIETQR_TEMPLATE?.trim() || "compact2";
-
-  return {
-    accountNo,
-    bankBin,
-    isConfigured: Boolean(bankBin && accountNo),
-    template,
-  };
-}
 
 function formatAmount(total: number, currency: string) {
   const normalizedCurrency = currency.trim().toUpperCase() || "VND";
@@ -79,15 +67,16 @@ export default async function VietQrOrderPage({ params }: VietQrOrderPageProps) 
     notFound();
   }
 
-  const config = getVietQrConfig();
+  const { vietqr } = await getStoreSettings();
+  const isConfigured = isVietQrConfigured(vietqr);
   const orderCode = order.provider_order_id ?? order.id;
   const transferAmount = order.currency === "VND" ? order.total_cents : 0;
   const qrUrl =
-    config.isConfigured && transferAmount > 0
+    isConfigured && transferAmount > 0
       ? createQrUrl(
-          config.bankBin ?? "",
-          config.accountNo ?? "",
-          config.template,
+          vietqr.bankBin ?? "",
+          vietqr.accountNo ?? "",
+          vietqr.template,
           transferAmount,
           orderCode
         )
@@ -164,16 +153,22 @@ export default async function VietQrOrderPage({ params }: VietQrOrderPageProps) 
                 <span className="text-muted-foreground">Email</span>
                 <span className="font-semibold">{order.email}</span>
               </div>
-              {config.bankBin ? (
+              {vietqr.bankBin ? (
                 <div className="flex items-center justify-between gap-4 border-b pb-3">
                   <span className="text-muted-foreground">Ngân hàng</span>
-                  <span className="font-semibold">{config.bankBin}</span>
+                  <span className="font-semibold">{vietqr.bankBin}</span>
                 </div>
               ) : null}
-              {config.accountNo ? (
-                <div className="flex items-center justify-between gap-4">
+              {vietqr.accountNo ? (
+                <div className="flex items-center justify-between gap-4 border-b pb-3">
                   <span className="text-muted-foreground">Số tài khoản</span>
-                  <span className="font-semibold">{config.accountNo}</span>
+                  <span className="font-semibold">{vietqr.accountNo}</span>
+                </div>
+              ) : null}
+              {vietqr.accountName ? (
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted-foreground">Chủ tài khoản</span>
+                  <span className="font-semibold">{vietqr.accountName}</span>
                 </div>
               ) : null}
             </div>

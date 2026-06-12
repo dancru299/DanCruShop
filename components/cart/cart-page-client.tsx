@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useMemo } from "react";
+import { useActionState, useMemo, useState, useTransition } from "react";
 import {
   AlertCircleIcon,
   ArrowRightIcon,
@@ -9,22 +9,36 @@ import {
   LandmarkIcon,
   PackageOpenIcon,
   ShoppingCartIcon,
+  TagIcon,
   Trash2Icon,
+  XIcon,
 } from "lucide-react";
 
 import {
   createCartCheckoutFromForm,
   type CartCheckoutState,
 } from "@/actions/checkout.actions";
+import { applyCouponToCart } from "@/actions/coupon.actions";
 import { useCart, type CartItem } from "@/components/cart/cart-provider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   getCartCheckoutReadiness,
   getCartCheckoutWarning,
 } from "@/lib/cart/checkout-readiness";
 import { formatPrice, productTypeLabels } from "@/lib/products/display";
 import { betaPolicies } from "@/lib/site-config";
+
+type AppliedCoupon = {
+  code: string;
+  currency: string;
+  discountCents: number;
+  totalAfterCents: number;
+  // Snapshot of the cart the coupon was validated against, so we can drop it
+  // when the cart contents change (server re-validates on checkout anyway).
+  productIds: string;
+};
 
 function getTotals(items: CartItem[]) {
   const totals = new Map<string, number>();
@@ -63,6 +77,53 @@ export function CartPageClient() {
     () => JSON.stringify(items.map((item) => item.id)),
     [items]
   );
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [isApplying, startApplying] = useTransition();
+
+  const singleCurrencyTotal = totals.length === 1 ? totals[0] : null;
+  // Drop a stale coupon during render (no effect needed) when the cart changes.
+  const effectiveCoupon =
+    appliedCoupon && appliedCoupon.productIds === productIds
+      ? appliedCoupon
+      : null;
+
+  function handleApplyCoupon() {
+    const code = couponInput.trim();
+
+    if (!code) {
+      return;
+    }
+
+    setCouponError(null);
+    startApplying(async () => {
+      const result = await applyCouponToCart({
+        code,
+        productIds: items.map((item) => item.id),
+      });
+
+      if (!result.ok) {
+        setAppliedCoupon(null);
+        setCouponError(result.error);
+        return;
+      }
+
+      setAppliedCoupon({
+        code: result.code,
+        currency: result.currency,
+        discountCents: result.discountCents,
+        productIds,
+        totalAfterCents: result.totalAfterCents,
+      });
+    });
+  }
+
+  function handleRemoveCoupon() {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponError(null);
+  }
 
   if (items.length === 0) {
     return (
@@ -196,6 +257,74 @@ export function CartPageClient() {
             )}
           </div>
 
+          {singleCurrencyTotal ? (
+            <div className="grid gap-3">
+              {effectiveCoupon ? (
+                <div className="flex flex-col gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="flex items-center gap-2 text-sm font-medium">
+                      <TagIcon aria-hidden="true" className="size-4" />
+                      {effectiveCoupon.code}
+                    </span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={handleRemoveCoupon}
+                    >
+                      <XIcon aria-hidden="true" data-icon="inline-start" />
+                      Bỏ
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Giảm giá</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                      -
+                      {formatPrice(
+                        effectiveCoupon.discountCents,
+                        effectiveCoupon.currency
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Tổng sau giảm</span>
+                    <span className="font-semibold">
+                      {formatPrice(
+                        effectiveCoupon.totalAfterCents,
+                        effectiveCoupon.currency
+                      )}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid gap-2">
+                  <div className="flex gap-2">
+                    <Input
+                      value={couponInput}
+                      onChange={(event) =>
+                        setCouponInput(event.target.value.toUpperCase())
+                      }
+                      placeholder="Mã giảm giá"
+                      disabled={isApplying}
+                      className="uppercase"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleApplyCoupon}
+                      disabled={isApplying || !couponInput.trim()}
+                    >
+                      {isApplying ? "Đang áp..." : "Áp dụng"}
+                    </Button>
+                  </div>
+                  {couponError ? (
+                    <p className="text-sm text-destructive">{couponError}</p>
+                  ) : null}
+                </div>
+              )}
+            </div>
+          ) : null}
+
           <div className="grid gap-3 rounded-lg border bg-background/50 p-3">
             <div className="flex items-start gap-3">
               <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
@@ -241,6 +370,11 @@ export function CartPageClient() {
 
           <form action={checkoutAction} className="grid gap-3">
             <input name="productIds" type="hidden" value={productIds} />
+            <input
+              name="coupon"
+              type="hidden"
+              value={effectiveCoupon?.code ?? ""}
+            />
             <Button type="submit" size="lg" disabled={isPending}>
               {isPending ? "Đang chuẩn bị checkout..." : "Thanh toán toàn bộ"}
               <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
