@@ -38,7 +38,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (pathname === "/login" && isAuthenticated) {
+  const isAuthPage =
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/forgot-password";
+
+  if (isAuthPage && isAuthenticated) {
     const dashboardUrl = request.nextUrl.clone();
     dashboardUrl.pathname = "/dashboard";
     dashboardUrl.search = "";

@@ -5,7 +5,14 @@ import { Resend } from "resend";
 
 import PurchaseSuccessEmail from "@/emails/purchase-success";
 import RefundNotificationEmail from "@/emails/refund-notification";
+import VerificationCodeEmail from "@/emails/verification-code";
+import type { VerificationPurpose } from "@/lib/auth/verification-code";
 import { getSupportEmail } from "@/lib/site-config";
+
+const VERIFICATION_SUBJECT: Record<VerificationPurpose, string> = {
+  signup: "Mã kích hoạt tài khoản DanCruShop",
+  password_reset: "Mã đặt lại mật khẩu DanCruShop",
+};
 
 function getResendClient() {
   const apiKey = process.env.RESEND_API_KEY;
@@ -51,6 +58,32 @@ export async function sendPurchaseSuccessEmail(
     });
 
     throw new Error("Could not send purchase success email.");
+  }
+
+  return data;
+}
+
+export async function sendVerificationCodeEmail(
+  email: string,
+  code: string,
+  purpose: VerificationPurpose
+) {
+  const resend = getResendClient();
+  const { data, error } = await resend.emails.send({
+    from: getFromEmail(),
+    to: email,
+    subject: VERIFICATION_SUBJECT[purpose],
+    react: createElement(VerificationCodeEmail, { code, purpose }),
+  });
+
+  if (error) {
+    console.error("Failed to send verification code email", {
+      email,
+      error,
+      purpose,
+    });
+
+    throw new Error("Could not send verification code email.");
   }
 
   return data;
