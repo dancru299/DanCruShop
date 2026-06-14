@@ -8,7 +8,18 @@ export type CategoryOption = {
 
 export type AdminCategory = CategoryOption & {
   description: string | null;
+  icon: string | null;
+  image_url: string | null;
+  position: number;
   product_count: number;
+};
+
+export type HomeCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
+  image_url: string | null;
 };
 
 type AdminCategoryRow = {
@@ -16,6 +27,9 @@ type AdminCategoryRow = {
   name: string;
   slug: string;
   description: string | null;
+  icon: string | null;
+  image_url: string | null;
+  position: number | null;
   product_category_map: { count: number }[] | null;
 };
 
@@ -25,7 +39,7 @@ export async function getCategoryOptions(): Promise<CategoryOption[]> {
     const { data, error } = await supabase
       .from("product_categories")
       .select("id, name, slug")
-      .order("name", { ascending: true });
+      .order("position", { ascending: true });
 
     if (error) {
       console.error("Failed to fetch category options", error);
@@ -44,8 +58,10 @@ export async function getAdminCategories(): Promise<AdminCategory[]> {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("product_categories")
-      .select("id, name, slug, description, product_category_map(count)")
-      .order("name", { ascending: true });
+      .select(
+        "id, name, slug, description, icon, image_url, position, product_category_map(count)"
+      )
+      .order("position", { ascending: true });
 
     if (error) {
       console.error("Failed to fetch admin categories", error);
@@ -54,8 +70,11 @@ export async function getAdminCategories(): Promise<AdminCategory[]> {
 
     return ((data ?? []) as AdminCategoryRow[]).map((row) => ({
       description: row.description,
+      icon: row.icon,
       id: row.id,
+      image_url: row.image_url,
       name: row.name,
+      position: row.position ?? 0,
       product_count: row.product_category_map?.[0]?.count ?? 0,
       slug: row.slug,
     }));
@@ -65,11 +84,34 @@ export async function getAdminCategories(): Promise<AdminCategory[]> {
   }
 }
 
+export async function getHomeCategories(): Promise<HomeCategory[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("product_categories")
+      .select("id, name, slug, icon, image_url")
+      .order("position", { ascending: true });
+
+    if (error) {
+      console.error("Failed to fetch home categories", error);
+      return [];
+    }
+
+    return (data ?? []) as HomeCategory[];
+  } catch (error) {
+    console.error("Unexpected error while fetching home categories", error);
+    return [];
+  }
+}
+
 export type CategoryDetail = {
   id: string;
   name: string;
   slug: string;
   description: string | null;
+  icon: string | null;
+  image_url: string | null;
+  position: number;
 };
 
 export async function getCategoryById(
@@ -85,7 +127,7 @@ export async function getCategoryById(
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("product_categories")
-      .select("id, name, slug, description")
+      .select("id, name, slug, description, icon, image_url, position")
       .eq("id", normalizedId)
       .maybeSingle();
 

@@ -6,6 +6,7 @@ import {
   BarChart3Icon,
   FileTextIcon,
   KeyRoundIcon,
+  LayoutDashboardIcon,
   MessageSquareIcon,
   PackageIcon,
   ReceiptTextIcon,
@@ -24,6 +25,11 @@ const adminNavItems = [
     href: "/admin",
     icon: BarChart3Icon,
     label: "Overview",
+  },
+  {
+    href: "/admin/home",
+    icon: LayoutDashboardIcon,
+    label: "Home layout",
   },
   {
     href: "/admin/products",

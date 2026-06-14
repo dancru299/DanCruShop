@@ -29,6 +29,8 @@ export type CategoryInput = {
   name: string;
   slug?: string | null;
   description?: string | null;
+  icon?: string | null;
+  imageUrl?: string | null;
 };
 
 function getErrorMessage(error: unknown) {
@@ -56,6 +58,8 @@ function normalizeCategory(data: CategoryInput) {
 
   return {
     description: nullableText(data.description),
+    icon: nullableText(data.icon),
+    image_url: nullableText(data.imageUrl),
     name,
     slug,
   };
@@ -75,9 +79,19 @@ export async function createCategory(
 
     const payload = normalizeCategory(data);
     const supabase = await createClient();
+
+    // Append new categories to the end of the current ordering.
+    const { data: last } = await supabase
+      .from("product_categories")
+      .select("position")
+      .order("position", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const nextPosition = ((last?.position as number | null) ?? -1) + 1;
+
     const { data: category, error } = await supabase
       .from("product_categories")
-      .insert(payload)
+      .insert({ ...payload, position: nextPosition })
       .select("id")
       .single();
 
@@ -127,6 +141,77 @@ export async function updateCategory(
     return { categoryId: String(category.id), ok: true };
   } catch (error) {
     console.error("Unexpected error while updating category", error);
+    return { error: getErrorMessage(error), ok: false };
+  }
+}
+
+export async function moveCategory(
+  id: string,
+  direction: "up" | "down"
+): Promise<CategoryDeleteResult> {
+  try {
+    await requireAdmin();
+
+    const categoryId = id.trim();
+
+    if (!categoryId) {
+      throw new Error("Category id is required.");
+    }
+
+    const supabase = await createClient();
+    const { data: rows, error } = await supabase
+      .from("product_categories")
+      .select("id, position")
+      .order("position", { ascending: true });
+
+    if (error) {
+      console.error("Failed to load categories for reorder", error);
+      return { error: error.message, ok: false };
+    }
+
+    const ordered = (rows ?? []) as { id: string; position: number }[];
+    const index = ordered.findIndex((row) => row.id === categoryId);
+
+    if (index === -1) {
+      return { error: "Không tìm thấy category.", ok: false };
+    }
+
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+
+    if (swapIndex < 0 || swapIndex >= ordered.length) {
+      // Already at the edge — nothing to do.
+      return { ok: true };
+    }
+
+    const current = ordered[index];
+    const neighbor = ordered[swapIndex];
+
+    // Swap the two positions with separate updates (position has no unique
+    // constraint, so a brief duplicate during the swap is fine).
+    const [first, second] = await Promise.all([
+      supabase
+        .from("product_categories")
+        .update({ position: neighbor.position })
+        .eq("id", current.id),
+      supabase
+        .from("product_categories")
+        .update({ position: current.position })
+        .eq("id", neighbor.id),
+    ]);
+
+    if (first.error || second.error) {
+      console.error("Failed to reorder categories", first.error ?? second.error);
+      return {
+        error: (first.error ?? second.error)?.message ?? "Reorder failed.",
+        ok: false,
+      };
+    }
+
+    revalidateCategorySurfaces();
+
+    return { ok: true };
+  } catch (error) {
+    console.error("Unexpected error while reordering categories", error);
     return { error: getErrorMessage(error), ok: false };
   }
 }

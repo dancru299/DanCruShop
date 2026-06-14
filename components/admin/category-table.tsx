@@ -2,10 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
-import { TagIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, TagIcon } from "lucide-react";
 import { toast } from "sonner";
 
-import { deleteCategory } from "@/actions/category.actions";
+import { deleteCategory, moveCategory } from "@/actions/category.actions";
 import {
   AdminActionMenu,
   AdminActionMenuButton,
@@ -13,6 +13,7 @@ import {
 } from "@/components/admin/admin-action-menu";
 import { AdminSearchInput } from "@/components/admin/admin-search-input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -45,6 +46,21 @@ export function CategoryTable({ categories }: CategoryTableProps) {
         category.slug.toLowerCase().includes(term)
     );
   }, [categories, query]);
+
+  const isSearching = query.trim().length > 0;
+
+  function handleMove(category: AdminCategory, direction: "up" | "down") {
+    startTransition(async () => {
+      const result = await moveCategory(category.id, direction);
+
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+
+      router.refresh();
+    });
+  }
 
   function handleDelete(category: AdminCategory) {
     if (
@@ -96,7 +112,12 @@ export function CategoryTable({ categories }: CategoryTableProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((category) => (
+              {filtered.map((category) => {
+                const orderIndex = categories.findIndex(
+                  (item) => item.id === category.id
+                );
+
+                return (
                 <TableRow key={category.id}>
                   <TableCell>
                     <p className="font-medium">{category.name}</p>
@@ -108,7 +129,30 @@ export function CategoryTable({ categories }: CategoryTableProps) {
                     <Badge variant="secondary">{category.product_count}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <AdminActionMenu label={`Thao tác cho ${category.name}`}>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Đưa ${category.name} lên`}
+                        disabled={isPending || isSearching || orderIndex <= 0}
+                        onClick={() => handleMove(category, "up")}
+                      >
+                        <ChevronUpIcon aria-hidden="true" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Đưa ${category.name} xuống`}
+                        disabled={
+                          isPending ||
+                          isSearching ||
+                          orderIndex === categories.length - 1
+                        }
+                        onClick={() => handleMove(category, "down")}
+                      >
+                        <ChevronDownIcon aria-hidden="true" />
+                      </Button>
+                      <AdminActionMenu label={`Thao tác cho ${category.name}`}>
                       <AdminActionMenuLink
                         href={`/admin/categories/${category.id}/edit`}
                         icon="pencil"
@@ -123,10 +167,12 @@ export function CategoryTable({ categories }: CategoryTableProps) {
                       >
                         Xóa
                       </AdminActionMenuButton>
-                    </AdminActionMenu>
+                      </AdminActionMenu>
+                    </div>
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         ) : (

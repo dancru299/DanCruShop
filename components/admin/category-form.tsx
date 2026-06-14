@@ -29,6 +29,8 @@ export function CategoryForm({ mode, category }: CategoryFormProps) {
   const [slug, setSlug] = useState(category?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(mode === "edit");
   const [description, setDescription] = useState(category?.description ?? "");
+  const [icon, setIcon] = useState(category?.icon ?? "");
+  const [imageUrl, setImageUrl] = useState(category?.image_url ?? "");
 
   function handleNameChange(value: string) {
     setName(value);
@@ -49,6 +51,8 @@ export function CategoryForm({ mode, category }: CategoryFormProps) {
     startTransition(async () => {
       const payload = {
         description: description.trim() || null,
+        icon: icon.trim() || null,
+        imageUrl: imageUrl.trim() || null,
         name: name.trim(),
         slug: slug.trim() || undefined,
       };
@@ -123,6 +127,35 @@ export function CategoryForm({ mode, category }: CategoryFormProps) {
             placeholder="Mô tả ngắn (tùy chọn)."
             disabled={isPending}
           />
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="category-icon">Icon</FieldLabel>
+          <Input
+            id="category-icon"
+            value={icon}
+            onChange={(event) => setIcon(event.target.value)}
+            placeholder="Sparkles"
+            disabled={isPending}
+          />
+          <FieldDescription>
+            Tên icon lucide (vd: Sparkles, Code2, BookOpen). Dùng cho section
+            danh mục ở trang chủ khi không có ảnh.
+          </FieldDescription>
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="category-image">Ảnh (URL)</FieldLabel>
+          <Input
+            id="category-image"
+            value={imageUrl}
+            onChange={(event) => setImageUrl(event.target.value)}
+            placeholder="https://..."
+            disabled={isPending}
+          />
+          <FieldDescription>
+            Ảnh đại diện danh mục (tùy chọn). Nếu có sẽ ưu tiên hơn icon.
+          </FieldDescription>
         </Field>
       </section>
 
