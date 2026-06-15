@@ -20,7 +20,7 @@ import type { CartProduct } from "@/components/cart/cart-provider";
 import { buttonVariants } from "@/components/ui/button";
 import {
   formatProductPrice as formatDisplayProductPrice,
-  getProductDeliveryLabel,
+  getProductDiscount,
   productTypeLabels,
 } from "@/lib/products/display";
 import type { PublishedProduct } from "@/lib/supabase/queries/products";
@@ -136,7 +136,7 @@ export function ProductArtwork({
 export function ProductCard({ product }: ProductCardProps) {
   const visual = productTypeVisuals[product.product_type];
   const TypeIcon = visual.Icon;
-  const deliveryLabel = getProductDeliveryLabel(product);
+  const discount = getProductDiscount(product);
 
   return (
     <article className="group/product-card relative flex h-full flex-col overflow-hidden rounded-xl border bg-card/65 text-card-foreground shadow-sm backdrop-blur-xl transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-xl hover:shadow-foreground/10">
@@ -153,18 +153,22 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
 
         {/* bottom vignette for depth */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/45 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/45 to-transparent" />
 
-        {/* free badge (top-left) */}
+        {/* status badge (top-left): free takes precedence over discount */}
         {product.is_free ? (
-          <span className="absolute left-3 top-3 z-20 inline-flex items-center rounded-full bg-emerald-500/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm backdrop-blur">
+          <span className="absolute left-2.5 top-2.5 z-20 inline-flex items-center rounded-full bg-emerald-500/90 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm backdrop-blur">
             Miễn phí
+          </span>
+        ) : discount ? (
+          <span className="absolute left-2.5 top-2.5 z-20 inline-flex items-center rounded-full bg-rose-500 px-2 py-0.5 text-[11px] font-bold text-white shadow-sm">
+            -{discount.percent}%
           </span>
         ) : null}
 
         {/* wishlist (top-right) */}
         <FavoriteButton
-          className="absolute right-3 top-3 z-30"
+          className="absolute right-2.5 top-2.5 z-30"
           productId={product.id}
           productTitle={product.title}
         />
@@ -195,40 +199,36 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </div>
 
-      {/* Body */}
-      <div className="flex flex-1 flex-col gap-2.5 p-4">
-        <div className="flex items-center justify-between gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-            <TypeIcon aria-hidden="true" className="size-3.5" />
-            {productTypeLabels[product.product_type]}
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-emerald-400" />
-            {deliveryLabel}
-          </span>
-        </div>
+      {/* Body — compact: type tag, title, price */}
+      <div className="flex flex-1 flex-col gap-2 p-3">
+        <span className="inline-flex w-fit items-center gap-1 rounded-full border border-border/70 bg-muted/40 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+          <TypeIcon aria-hidden="true" className="size-3" />
+          {productTypeLabels[product.product_type]}
+        </span>
 
         <Link
           href={`/products/${product.slug}`}
           className="focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
-          <h3 className="line-clamp-2 text-base font-semibold leading-6 tracking-normal transition-colors group-hover/product-card:text-foreground/80">
+          <h3 className="line-clamp-2 min-h-10 text-sm font-semibold leading-5 tracking-normal transition-colors group-hover/product-card:text-foreground/80">
             {product.title}
           </h3>
         </Link>
 
-        <p className="line-clamp-2 min-h-[2.5rem] text-sm leading-6 text-muted-foreground">
-          {product.short_description ??
-            "Tài nguyên số thực dụng cho builder muốn ship nhanh hơn."}
-        </p>
-
-        <div className="mt-auto flex items-end justify-between gap-3 border-t border-border/60 pt-3">
-          <span className="text-lg font-semibold tracking-tight">
-            {formatProductPrice(product)}
-          </span>
+        <div className="mt-auto flex items-end justify-between gap-2 pt-1">
+          <div className="flex min-w-0 flex-col leading-tight">
+            {discount ? (
+              <span className="text-xs text-muted-foreground line-through">
+                {discount.originalLabel}
+              </span>
+            ) : null}
+            <span className="text-base font-bold tracking-tight text-primary">
+              {formatProductPrice(product)}
+            </span>
+          </div>
           <ArrowUpRightIcon
             aria-hidden="true"
-            className="mb-1 shrink-0 text-muted-foreground transition-[color,transform] duration-300 group-hover/product-card:-translate-y-0.5 group-hover/product-card:translate-x-0.5 group-hover/product-card:text-foreground"
+            className="mb-0.5 shrink-0 text-muted-foreground transition-[color,transform] duration-300 group-hover/product-card:-translate-y-0.5 group-hover/product-card:translate-x-0.5 group-hover/product-card:text-foreground"
           />
         </div>
       </div>

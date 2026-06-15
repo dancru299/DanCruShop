@@ -4,7 +4,13 @@
 
 export const HOME_LAYOUT_KEY = "home.layout";
 
-export type SectionType = "hero" | "featured_products" | "categories";
+export type SectionType =
+  | "hero"
+  | "featured_products"
+  | "categories"
+  | "keywords"
+  | "flash_sale"
+  | "banner_grid";
 
 export type CtaConfig = { label: string; href: string };
 
@@ -53,21 +59,62 @@ export type CategoriesSection = {
   columns: ColumnCount;
 };
 
+export type KeywordItem = { label: string; href: string };
+
+export type KeywordsSection = {
+  id: string;
+  type: "keywords";
+  enabled: boolean;
+  title: string;
+  description: string;
+  items: KeywordItem[];
+};
+
+export type FlashSaleSection = {
+  id: string;
+  type: "flash_sale";
+  enabled: boolean;
+  title: string;
+  // ISO datetime the countdown targets. Section auto-hides once it passes.
+  endsAt: string;
+  actionLabel: string;
+  actionHref: string;
+  limit: number;
+};
+
+export type BannerItem = { imageUrl: string; href: string; title: string };
+
+export type BannerGridSection = {
+  id: string;
+  type: "banner_grid";
+  enabled: boolean;
+  items: BannerItem[];
+};
+
 export type HomeSection =
   | HeroSection
   | FeaturedProductsSection
-  | CategoriesSection;
+  | CategoriesSection
+  | KeywordsSection
+  | FlashSaleSection
+  | BannerGridSection;
 
 export const SECTION_LABELS: Record<SectionType, string> = {
   hero: "Hero",
   featured_products: "Sản phẩm nổi bật",
   categories: "Danh mục",
+  keywords: "Từ khóa nổi bật",
+  flash_sale: "Flash Sale",
+  banner_grid: "Lưới banner",
 };
 
 export const SECTION_TYPES: SectionType[] = [
   "hero",
+  "banner_grid",
+  "flash_sale",
   "featured_products",
   "categories",
+  "keywords",
 ];
 
 function newId() {
@@ -142,6 +189,40 @@ export function createSection(type: SectionType): HomeSection {
         layout: "grid",
         columns: 3,
       };
+    case "keywords":
+      return {
+        id: newId(),
+        type: "keywords",
+        enabled: true,
+        title: "Từ khóa nổi bật",
+        description: "Bấm để đi nhanh tới nhóm sản phẩm bạn đang tìm.",
+        items: [
+          { label: "Công cụ AI", href: "/products?q=AI" },
+          { label: "Kinh doanh", href: "/products?q=kinh%20doanh" },
+          { label: "Giải trí", href: "/products?q=giải%20trí" },
+          { label: "Học tập", href: "/products?q=học%20tập" },
+          { label: "Thiết kế", href: "/products?q=thiết%20kế" },
+          { label: "Bảo mật", href: "/products?q=bảo%20mật" },
+        ],
+      };
+    case "flash_sale":
+      return {
+        id: newId(),
+        type: "flash_sale",
+        enabled: true,
+        title: "Flash Sale",
+        endsAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        actionLabel: "Xem tất cả",
+        actionHref: "/products",
+        limit: 5,
+      };
+    case "banner_grid":
+      return {
+        id: newId(),
+        type: "banner_grid",
+        enabled: true,
+        items: [],
+      };
   }
 }
 
@@ -187,7 +268,14 @@ function normalizeSection(value: unknown): HomeSection | null {
   const record = (value ?? {}) as Record<string, unknown>;
   const type = record.type;
 
-  if (type !== "hero" && type !== "featured_products" && type !== "categories") {
+  if (
+    type !== "hero" &&
+    type !== "featured_products" &&
+    type !== "categories" &&
+    type !== "keywords" &&
+    type !== "flash_sale" &&
+    type !== "banner_grid"
+  ) {
     return null;
   }
 
@@ -218,6 +306,69 @@ function normalizeSection(value: unknown): HomeSection | null {
       secondaryCta: asCta(record.secondaryCta, base.secondaryCta),
       showSpotlight: asBool(record.showSpotlight, base.showSpotlight),
       signals,
+    };
+  }
+
+  if (base.type === "keywords") {
+    const items = Array.isArray(record.items)
+      ? record.items
+          .map((item) => {
+            const r = (item ?? {}) as Record<string, unknown>;
+            return {
+              label: asString(r.label, ""),
+              href: asString(r.href, ""),
+            };
+          })
+          .filter((item) => item.label.length > 0)
+      : base.items;
+
+    return {
+      ...base,
+      id,
+      enabled,
+      title: asString(record.title, base.title),
+      description: asString(record.description, base.description),
+      items,
+    };
+  }
+
+  if (base.type === "flash_sale") {
+    const rawLimit = Number(record.limit);
+    const limit = Number.isFinite(rawLimit)
+      ? Math.min(12, Math.max(1, Math.trunc(rawLimit)))
+      : base.limit;
+
+    return {
+      ...base,
+      id,
+      enabled,
+      title: asString(record.title, base.title),
+      endsAt: asString(record.endsAt, base.endsAt),
+      actionLabel: asString(record.actionLabel, base.actionLabel),
+      actionHref: asString(record.actionHref, base.actionHref),
+      limit,
+    };
+  }
+
+  if (base.type === "banner_grid") {
+    const items = Array.isArray(record.items)
+      ? record.items
+          .map((item) => {
+            const r = (item ?? {}) as Record<string, unknown>;
+            return {
+              imageUrl: asString(r.imageUrl, ""),
+              href: asString(r.href, ""),
+              title: asString(r.title, ""),
+            };
+          })
+          .filter((item) => item.imageUrl.length > 0)
+      : base.items;
+
+    return {
+      ...base,
+      id,
+      enabled,
+      items,
     };
   }
 

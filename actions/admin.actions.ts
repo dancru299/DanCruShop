@@ -33,6 +33,7 @@ export type ProductInsert = {
   product_type: ProductType;
   status: ProductStatus;
   price_cents: number;
+  compare_at_price_cents?: number | null;
   currency?: string;
   is_free?: boolean;
   thumbnail_url?: string | null;
@@ -92,6 +93,27 @@ function validatePriceCents(value: unknown) {
   return Number(value);
 }
 
+// Optional "original" price: null clears it; when present it must be a whole
+// number strictly above the live price (matches the DB check constraint).
+function normalizeCompareAtPrice(
+  value: number | null | undefined,
+  priceCents?: number
+): number | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (!Number.isInteger(value) || Number(value) <= 0) {
+    throw new Error("Original price must be a whole number greater than 0.");
+  }
+
+  if (typeof priceCents === "number" && Number(value) <= priceCents) {
+    throw new Error("Original price must be greater than the current price.");
+  }
+
+  return Number(value);
+}
+
 function normalizeCurrency(value: string | null | undefined) {
   const normalized = value?.trim().toUpperCase();
 
@@ -128,6 +150,10 @@ function normalizeProductInsert(data: ProductInsert): ProductPayload {
     product_type: data.product_type,
     status: data.status,
     price_cents: priceCents,
+    compare_at_price_cents: normalizeCompareAtPrice(
+      data.compare_at_price_cents,
+      priceCents
+    ),
     currency: normalizeCurrency(data.currency),
     is_free:
       typeof data.is_free === "boolean"
@@ -192,6 +218,15 @@ function normalizeProductUpdate(data: ProductUpdate): ProductPayload {
 
   if ("price_cents" in data) {
     payload.price_cents = validatePriceCents(data.price_cents);
+  }
+
+  if ("compare_at_price_cents" in data) {
+    const price =
+      "price_cents" in data ? validatePriceCents(data.price_cents) : undefined;
+    payload.compare_at_price_cents = normalizeCompareAtPrice(
+      data.compare_at_price_cents,
+      price
+    );
   }
 
   if ("currency" in data) {

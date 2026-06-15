@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 
 import { updateHomeLayout } from "@/actions/home-layout.actions";
+import { AdminMediaUploadField } from "@/components/admin/media-upload-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,10 +22,13 @@ import {
   SECTION_LABELS,
   SECTION_TYPES,
   createSection,
+  type BannerGridSection,
   type CategoriesSection,
   type FeaturedProductsSection,
+  type FlashSaleSection,
   type HeroSection,
   type HomeSection,
+  type KeywordsSection,
   type SectionType,
 } from "@/lib/store/home-layout";
 import { cn } from "@/lib/utils";
@@ -517,6 +521,268 @@ function CategoriesEditor({
   );
 }
 
+function KeywordsEditor({
+  section,
+  onChange,
+}: {
+  section: KeywordsSection;
+  onChange: (patch: Record<string, unknown>) => void;
+}) {
+  function updateItem(
+    index: number,
+    patch: Partial<KeywordsSection["items"][number]>
+  ) {
+    const items = section.items.map((item, i) =>
+      i === index ? { ...item, ...patch } : item
+    );
+    onChange({ items });
+  }
+
+  return (
+    <div className="grid gap-4">
+      <LabeledField label="Tiêu đề">
+        <Input
+          value={section.title}
+          onChange={(event) => onChange({ title: event.target.value })}
+        />
+      </LabeledField>
+      <LabeledField label="Mô tả">
+        <Textarea
+          value={section.description}
+          onChange={(event) => onChange({ description: event.target.value })}
+        />
+      </LabeledField>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium">Danh sách từ khóa</span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              onChange({
+                items: [...section.items, { label: "", href: "/products" }],
+              })
+            }
+          >
+            <PlusIcon data-icon="inline-start" aria-hidden="true" />
+            Thêm
+          </Button>
+        </div>
+        {section.items.map((item, index) => (
+          <div
+            key={index}
+            className="flex flex-col gap-2 rounded-lg border bg-muted/20 p-3 sm:flex-row sm:items-center"
+          >
+            <Input
+              value={item.label}
+              placeholder="Nhãn (vd: Công cụ AI)"
+              onChange={(event) => updateItem(index, { label: event.target.value })}
+            />
+            <Input
+              value={item.href}
+              placeholder="Link (vd: /products?q=AI)"
+              onChange={(event) => updateItem(index, { href: event.target.value })}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Xóa từ khóa"
+              onClick={() =>
+                onChange({
+                  items: section.items.filter((_, i) => i !== index),
+                })
+              }
+            >
+              <Trash2Icon aria-hidden="true" />
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function isoToLocalInput(iso: string) {
+  const date = new Date(iso);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const pad = (value: number) => String(value).padStart(2, "0");
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate()
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function localInputToIso(value: string) {
+  const date = new Date(value);
+
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString();
+}
+
+function FlashSaleEditor({
+  section,
+  onChange,
+}: {
+  section: FlashSaleSection;
+  onChange: (patch: Record<string, unknown>) => void;
+}) {
+  return (
+    <div className="grid gap-4">
+      <LabeledField label="Tiêu đề">
+        <Input
+          value={section.title}
+          onChange={(event) => onChange({ title: event.target.value })}
+        />
+      </LabeledField>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <LabeledField label="Thời điểm kết thúc">
+          <Input
+            type="datetime-local"
+            value={isoToLocalInput(section.endsAt)}
+            onChange={(event) =>
+              onChange({ endsAt: localInputToIso(event.target.value) })
+            }
+          />
+        </LabeledField>
+        <LabeledField label="Số sản phẩm">
+          <Input
+            type="number"
+            min={1}
+            max={12}
+            value={section.limit}
+            onChange={(event) =>
+              onChange({ limit: Number(event.target.value) || 1 })
+            }
+          />
+        </LabeledField>
+        <LabeledField label="Nút — nhãn">
+          <Input
+            value={section.actionLabel}
+            onChange={(event) => onChange({ actionLabel: event.target.value })}
+          />
+        </LabeledField>
+        <LabeledField label="Nút — link">
+          <Input
+            value={section.actionHref}
+            onChange={(event) => onChange({ actionHref: event.target.value })}
+          />
+        </LabeledField>
+      </div>
+      <p className="text-xs leading-5 text-muted-foreground">
+        Flash Sale tự lấy các sản phẩm đang có &quot;Giá gốc&quot; (đang giảm
+        giá). Section sẽ tự ẩn khi hết giờ hoặc khi chưa có sản phẩm nào giảm
+        giá.
+      </p>
+    </div>
+  );
+}
+
+function BannerGridEditor({
+  section,
+  onChange,
+}: {
+  section: BannerGridSection;
+  onChange: (patch: Record<string, unknown>) => void;
+}) {
+  function updateItem(
+    index: number,
+    patch: Partial<BannerGridSection["items"][number]>
+  ) {
+    const items = section.items.map((item, i) =>
+      i === index ? { ...item, ...patch } : item
+    );
+    onChange({ items });
+  }
+
+  return (
+    <div className="grid gap-4">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">Danh sách banner</span>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            onChange({
+              items: [
+                ...section.items,
+                { imageUrl: "", href: "", title: "" },
+              ],
+            })
+          }
+        >
+          <PlusIcon data-icon="inline-start" aria-hidden="true" />
+          Thêm banner
+        </Button>
+      </div>
+
+      {section.items.length === 0 ? (
+        <p className="text-xs text-muted-foreground">
+          Chưa có banner nào. Banner đầu tiên sẽ là ô lớn của lưới.
+        </p>
+      ) : null}
+
+      {section.items.map((item, index) => (
+        <div
+          key={index}
+          className="flex flex-col gap-3 rounded-lg border bg-muted/20 p-3"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-muted-foreground">
+              Banner {index + 1}
+              {index === 0 ? " (ô lớn)" : ""}
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Xóa banner"
+              onClick={() =>
+                onChange({
+                  items: section.items.filter((_, i) => i !== index),
+                })
+              }
+            >
+              <Trash2Icon aria-hidden="true" />
+            </Button>
+          </div>
+
+          <AdminMediaUploadField
+            folder="products"
+            id={`banner-${section.id}-${index}`}
+            label="Ảnh banner"
+            description="Khuyến nghị ảnh ngang, rõ nét."
+            placeholder="https://... hoặc bấm Upload"
+            value={item.imageUrl}
+            onChange={(value) => updateItem(index, { imageUrl: value })}
+          />
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Input
+              value={item.href}
+              placeholder="Link khi bấm (vd: /products?q=...)"
+              onChange={(event) => updateItem(index, { href: event.target.value })}
+            />
+            <Input
+              value={item.title}
+              placeholder="Tiêu đề trên banner (tùy chọn)"
+              onChange={(event) =>
+                updateItem(index, { title: event.target.value })
+              }
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ---- main builder ----
 
 export function HomeLayoutBuilder({
@@ -697,10 +963,25 @@ export function HomeLayoutBuilder({
                       categories={categories}
                       onChange={(patch) => patchSection(section.id, patch)}
                     />
-                  ) : (
+                  ) : section.type === "categories" ? (
                     <CategoriesEditor
                       section={section}
                       categories={categories}
+                      onChange={(patch) => patchSection(section.id, patch)}
+                    />
+                  ) : section.type === "keywords" ? (
+                    <KeywordsEditor
+                      section={section}
+                      onChange={(patch) => patchSection(section.id, patch)}
+                    />
+                  ) : section.type === "flash_sale" ? (
+                    <FlashSaleEditor
+                      section={section}
+                      onChange={(patch) => patchSection(section.id, patch)}
+                    />
+                  ) : (
+                    <BannerGridEditor
+                      section={section}
                       onChange={(patch) => patchSection(section.id, patch)}
                     />
                   )}

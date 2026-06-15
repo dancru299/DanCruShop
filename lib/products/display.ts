@@ -53,3 +53,36 @@ export function formatProductPrice(product: PricedProduct) {
 export function getProductDeliveryLabel(product: Pick<PublishedProduct, "is_free">) {
   return product.is_free ? "Nhận miễn phí" : "Giao ngay";
 }
+
+type DiscountProduct = Pick<
+  PublishedProduct | ProductDetail,
+  "currency" | "is_free" | "price_cents" | "compare_at_price_cents"
+>;
+
+/**
+ * Returns discount badge data (percent off + formatted original price) when the
+ * product has a valid higher "compare at" price, otherwise null.
+ */
+export function getProductDiscount(product: DiscountProduct) {
+  const original = product.compare_at_price_cents;
+
+  if (
+    product.is_free ||
+    original == null ||
+    original <= product.price_cents ||
+    product.price_cents <= 0
+  ) {
+    return null;
+  }
+
+  const percent = Math.round((1 - product.price_cents / original) * 100);
+
+  if (percent <= 0) {
+    return null;
+  }
+
+  return {
+    percent,
+    originalLabel: formatPrice(original, product.currency),
+  };
+}

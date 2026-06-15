@@ -21,6 +21,7 @@ export type PublishedProduct = {
   slug: string;
   short_description: string | null;
   price_cents: number;
+  compare_at_price_cents: number | null;
   currency: string;
   thumbnail_url: string | null;
   product_type: ProductType;
@@ -64,6 +65,7 @@ const publishedProductSelect = `
   slug,
   short_description,
   price_cents,
+  compare_at_price_cents,
   currency,
   thumbnail_url,
   product_type,
@@ -79,6 +81,7 @@ const productDetailSelect = `
   product_type,
   status,
   price_cents,
+  compare_at_price_cents,
   currency,
   is_free,
   thumbnail_url,
@@ -166,6 +169,44 @@ export async function getPublishedProducts(
     return (data ?? []) as PublishedProduct[];
   } catch (error) {
     console.error("Unexpected error while fetching published products", error);
+    return [];
+  }
+}
+
+// Published products that currently carry a higher "compare at" price, i.e. are
+// on discount. Backs the Flash Sale home section.
+export async function getDiscountedProducts(
+  limit?: number
+): Promise<PublishedProduct[]> {
+  try {
+    const supabase = await createClient();
+    let query = supabase
+      .from("products")
+      .select(publishedProductSelect)
+      .eq("status", "published")
+      .eq("is_free", false)
+      .not("compare_at_price_cents", "is", null)
+      .order("created_at", { ascending: false });
+
+    if (typeof limit === "number" && limit > 0) {
+      query = query.limit(limit);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Failed to fetch discounted products", error);
+      return [];
+    }
+
+    // Guard against rows where compare price is not actually above the price.
+    return ((data ?? []) as PublishedProduct[]).filter(
+      (product) =>
+        product.compare_at_price_cents != null &&
+        product.compare_at_price_cents > product.price_cents
+    );
+  } catch (error) {
+    console.error("Unexpected error while fetching discounted products", error);
     return [];
   }
 }

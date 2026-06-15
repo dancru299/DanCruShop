@@ -66,6 +66,7 @@ type ProductFormProduct = Pick<
   | "short_description"
   | "description"
   | "price_cents"
+  | "compare_at_price_cents"
   | "currency"
   | "product_type"
   | "status"
@@ -87,6 +88,7 @@ type ProductFormProps = {
 
 type ProductFormErrors = {
   priceUsd?: string;
+  comparePriceUsd?: string;
   slug?: string;
   title?: string;
 };
@@ -163,6 +165,7 @@ function ProductPreviewPanel({
   description,
   demoUrl,
   priceCents,
+  compareCents,
   productType,
   previewUrl,
   shortDescription,
@@ -175,6 +178,7 @@ function ProductPreviewPanel({
   description: string;
   demoUrl: string;
   priceCents: number;
+  compareCents: number | null;
   productType: ProductType;
   previewUrl: string;
   shortDescription: string;
@@ -188,6 +192,7 @@ function ProductPreviewPanel({
     id: "preview",
     is_free: priceCents === 0 || productType === "free_resource",
     price_cents: priceCents,
+    compare_at_price_cents: compareCents,
     product_type: productType,
     short_description: shortDescription.trim() || null,
     slug: slug || "product-slug",
@@ -325,6 +330,11 @@ export function ProductForm({
   const [priceUsd, setPriceUsd] = useState(
     formatPriceInput(product?.price_cents, product?.currency ?? "USD")
   );
+  const [comparePriceUsd, setComparePriceUsd] = useState(
+    product?.compare_at_price_cents != null
+      ? formatPriceInput(product.compare_at_price_cents, product?.currency ?? "USD")
+      : ""
+  );
   const [productType, setProductType] = useState<ProductType>(
     product?.product_type ?? "digital_download"
   );
@@ -350,6 +360,9 @@ export function ProductForm({
     [mode]
   );
   const previewPriceCents = parsePriceCents(priceUsd, currency) ?? 0;
+  const previewCompareCents = comparePriceUsd.trim()
+    ? parsePriceCents(comparePriceUsd, currency)
+    : null;
 
   function handleTitleChange(value: string) {
     setTitle(value);
@@ -376,6 +389,19 @@ export function ProductForm({
       nextErrors.priceUsd = "Price must be greater than or equal to 0.";
     }
 
+    const hasCompare = comparePriceUsd.trim().length > 0;
+    const compareCents = hasCompare
+      ? parsePriceCents(comparePriceUsd, currency)
+      : null;
+
+    if (hasCompare) {
+      if (compareCents === null || compareCents <= 0) {
+        nextErrors.comparePriceUsd = "Giá gốc phải là số lớn hơn 0.";
+      } else if (priceCents !== null && compareCents <= priceCents) {
+        nextErrors.comparePriceUsd = "Giá gốc phải lớn hơn giá bán.";
+      }
+    }
+
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0 || priceCents === null) {
@@ -385,6 +411,7 @@ export function ProductForm({
     return {
       normalizedSlug,
       priceCents,
+      compareCents,
     };
   }
 
@@ -408,6 +435,7 @@ export function ProductForm({
       lemon_squeezy_variant_id: lemonVariantId.trim() || null,
       preview_url: previewUrl.trim() || null,
       price_cents: validated.priceCents,
+      compare_at_price_cents: validated.compareCents,
       product_type: productType,
       requires_license: requiresLicense,
       short_description: shortDescription.trim() || null,
@@ -582,6 +610,27 @@ export function ProductForm({
                     disabled={isPending}
                   />
                   <FieldError>{errors.priceUsd}</FieldError>
+                </Field>
+
+                <Field data-invalid={Boolean(errors.comparePriceUsd)}>
+                  <FieldLabel htmlFor="compare-price">
+                    Giá gốc ({currency})
+                  </FieldLabel>
+                  <Input
+                    id="compare-price"
+                    type="number"
+                    min="0"
+                    step={currency === "VND" ? "1" : "0.01"}
+                    value={comparePriceUsd}
+                    onChange={(event) => setComparePriceUsd(event.target.value)}
+                    placeholder="Bỏ trống nếu không giảm giá"
+                    aria-invalid={Boolean(errors.comparePriceUsd)}
+                    disabled={isPending}
+                  />
+                  <FieldDescription>
+                    Để hiện giá gạch ngang + badge giảm giá. Phải lớn hơn giá bán.
+                  </FieldDescription>
+                  <FieldError>{errors.comparePriceUsd}</FieldError>
                 </Field>
 
                 <Field>
@@ -828,6 +877,7 @@ export function ProductForm({
           description={description}
           demoUrl={demoUrl}
           priceCents={previewPriceCents}
+          compareCents={previewCompareCents}
           productType={productType}
           previewUrl={previewUrl}
           shortDescription={shortDescription}
