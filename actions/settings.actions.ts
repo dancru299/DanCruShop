@@ -18,6 +18,19 @@ export type StoreSettingsInput = {
     storeName: string;
     supportEmail: string;
   };
+  contact: {
+    zalo: { url: string; icon: string };
+    telegram: { url: string; icon: string };
+    messenger: { url: string; icon: string };
+    phone: { url: string; icon: string };
+  };
+  promo: {
+    leftImage: string;
+    leftHref: string;
+    rightImage: string;
+    rightHref: string;
+  };
+  socials: Array<{ label: string; url: string; iconUrl: string }>;
 };
 
 export type SettingsActionResult =
@@ -62,6 +75,40 @@ export async function updateStoreSettings(
           value: {
             store_name: cleanText(input.store.storeName),
             support_email: email,
+          },
+        },
+        {
+          key: STORE_SETTINGS_KEYS.contact,
+          value: {
+            zalo: cleanText(input.contact.zalo.url),
+            zalo_icon: cleanText(input.contact.zalo.icon),
+            telegram: cleanText(input.contact.telegram.url),
+            telegram_icon: cleanText(input.contact.telegram.icon),
+            messenger: cleanText(input.contact.messenger.url),
+            messenger_icon: cleanText(input.contact.messenger.icon),
+            phone: cleanText(input.contact.phone.url),
+            phone_icon: cleanText(input.contact.phone.icon),
+          },
+        },
+        {
+          key: STORE_SETTINGS_KEYS.promo,
+          value: {
+            left_image: cleanText(input.promo.leftImage),
+            left_href: cleanText(input.promo.leftHref),
+            right_image: cleanText(input.promo.rightImage),
+            right_href: cleanText(input.promo.rightHref),
+          },
+        },
+        {
+          key: STORE_SETTINGS_KEYS.socials,
+          value: {
+            items: input.socials
+              .map((item) => ({
+                label: cleanText(item.label),
+                url: cleanText(item.url),
+                iconUrl: cleanText(item.iconUrl),
+              }))
+              .filter((item) => item.iconUrl && item.url),
           },
         },
       ],
