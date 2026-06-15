@@ -17,32 +17,38 @@ export function DanCruShopMark({
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      {/* D-shaped cart body (counter cut out via even-odd) */}
       <path
         clipRule="evenodd"
-        d="M14 16h20.5C46.6 16 56 25 56 37c0 12.4-9.6 19-21.5 19H14V16Zm7.2 6.7v26.6h13.1c8.4 0 14.4-5 14.4-12.2 0-7.7-6.1-14.4-14.4-14.4H21.2Z"
+        d="M12 13 20 8H34C48 8 56 18 56 30 56 42 48 52 34 52H12Z M22 18H33C43 18 47 24 47 30 47 36 43 42 33 42H22Z"
         fill="currentColor"
         fillRule="evenodd"
       />
+      {/* </> code glyph inside the counter */}
       <path
-        d="M58 11v7.2H47.2c-2.5 0-3.5 1.1-4.1 3.3L34 56h-8l10.3-38.6C37.5 13 41 11 46.2 11H58Z"
-        fill="currentColor"
-      />
-      <path
-        d="M29.2 28L21.4 34.4L29.2 40.8"
+        d="M30 24 25.5 30 30 36"
         stroke="currentColor"
-        strokeLinecap="butt"
-        strokeLinejoin="miter"
-        strokeWidth="4.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="4"
       />
       <path
-        d="M42.2 28L50 34.4L42.2 40.8"
+        d="M37.5 23 31.5 37"
         stroke="currentColor"
-        strokeLinecap="butt"
-        strokeLinejoin="miter"
-        strokeWidth="4.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="4"
       />
+      <path
+        d="M39 24 43.5 30 39 36"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="4"
+      />
+      {/* cart wheels */}
       <circle cx="22" cy="64" r="4.6" fill="currentColor" />
-      <circle cx="40" cy="64" r="4.6" fill="currentColor" />
+      <circle cx="44" cy="64" r="4.6" fill="currentColor" />
     </svg>
   );
 }
