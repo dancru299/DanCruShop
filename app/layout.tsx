@@ -4,7 +4,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import { CartProvider } from "@/components/cart/cart-provider";
 import { FavoritesProvider } from "@/components/favorites/favorites-provider";
-import { CosmicBackground } from "@/components/shared/cosmic-background";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { getSiteUrl, siteName } from "@/lib/site-config";
@@ -63,16 +62,15 @@ export default function RootLayout({
     <html
       lang="vi"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} dark`}
+      className={`${geistSans.variable} ${geistMono.variable}`}
     >
       <body
         suppressHydrationWarning
         className="min-h-dvh bg-background font-sans text-foreground antialiased"
       >
-        <CosmicBackground />
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="light"
           enableSystem={false}
           disableTransitionOnChange
         >

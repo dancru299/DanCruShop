@@ -1,11 +1,14 @@
 import Link from "next/link";
+import { BookOpenIcon, GiftIcon, HeadphonesIcon, SparklesIcon } from "lucide-react";
 
 import { AccountMenu, type AccountMenuUser } from "@/components/account/account-menu";
 import { CartHeaderButton } from "@/components/cart/cart-header-button";
 import { FavoritesHeaderButton } from "@/components/favorites/favorites-header-button";
 import { DanCruShopLogo } from "@/components/shared/dancrushop-logo";
+import { HeaderSearch } from "@/components/shared/header-search";
 import { MobileNavSheet } from "@/components/shared/mobile-nav-sheet";
 import { Button } from "@/components/ui/button";
+import { getSupportMailto } from "@/lib/site-config";
 import { createClient } from "@/lib/supabase/server";
 
 async function getViewerState() {
@@ -60,17 +63,53 @@ export async function SiteHeader() {
   const { isAuthenticated, isAdmin, user } = await getViewerState();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/80 bg-background/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4">
-        <Link
-          href="/"
-          className="transition-colors hover:text-foreground/80"
-          aria-label="DanCruShop home"
-        >
-          <DanCruShopLogo />
-        </Link>
+    <>
+      {/* Top utility bar — trust links, scrolls away above the sticky header. */}
+      <div className="hidden border-b border-border/70 bg-muted/40 md:block">
+        <div className="mx-auto flex h-9 w-full max-w-6xl items-center justify-between px-4 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <SparklesIcon aria-hidden="true" className="size-3.5 text-primary" />
+            Tài nguyên số chính hãng — giao ngay sau thanh toán
+          </span>
+          <nav className="flex items-center gap-5">
+            <Link
+              href="/support"
+              className="flex items-center gap-1.5 transition-colors hover:text-foreground"
+            >
+              <BookOpenIcon aria-hidden="true" className="size-3.5" />
+              Hướng dẫn mua hàng
+            </Link>
+            <Link
+              href="/products"
+              className="flex items-center gap-1.5 transition-colors hover:text-foreground"
+            >
+              <GiftIcon aria-hidden="true" className="size-3.5" />
+              Ưu đãi khách hàng
+            </Link>
+            <Link
+              href={getSupportMailto("DanCruShop support")}
+              className="flex items-center gap-1.5 transition-colors hover:text-foreground"
+            >
+              <HeadphonesIcon aria-hidden="true" className="size-3.5" />
+              Liên hệ hỗ trợ
+            </Link>
+          </nav>
+        </div>
+      </div>
 
-        <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
+      <header className="sticky top-0 z-50 border-b border-border/80 bg-background/70 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-4 px-4">
+          <Link
+            href="/"
+            className="shrink-0 transition-colors hover:text-foreground/80"
+            aria-label="DanCruShop home"
+          >
+            <DanCruShopLogo />
+          </Link>
+
+          <HeaderSearch className="hidden max-w-md flex-1 md:block" />
+
+        <nav className="ml-auto hidden shrink-0 items-center gap-5 text-sm text-muted-foreground lg:flex">
           <Link href="/products" className="transition-colors hover:text-foreground">
             Sản phẩm
           </Link>
@@ -117,6 +156,7 @@ export async function SiteHeader() {
           />
         </div>
       </div>
-    </header>
+      </header>
+    </>
   );
 }
