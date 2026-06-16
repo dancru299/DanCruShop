@@ -116,7 +116,7 @@ export async function HeroSection({ section }: { section: HeroSectionConfig }) {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--primary)_0,transparent_32%),radial-gradient(circle_at_top_right,var(--muted)_0,transparent_38%)] opacity-35" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:56px_56px] opacity-[0.06]" />
 
-      <div className="relative mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 md:py-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:gap-12">
+      <div className="relative mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 md:py-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-stretch lg:gap-12">
         <div className="flex max-w-3xl flex-col gap-5">
           {section.eyebrow ? (
             <div className="inline-flex w-fit items-center rounded-full border border-border/80 bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
@@ -140,7 +140,7 @@ export async function HeroSection({ section }: { section: HeroSectionConfig }) {
         </div>
 
         {section.showSpotlight ? (
-          <div className="hidden lg:block">
+          <div className="hidden lg:block lg:h-full">
             <HeroProductSpotlight product={product} />
           </div>
         ) : null}
@@ -166,9 +166,9 @@ function HeroProductSpotlight({ product }: { product?: PublishedProduct }) {
   ];
 
   return (
-    <div className="relative mx-auto w-full max-w-xl">
+    <div className="relative mx-auto w-full max-w-xl lg:h-full">
       <div className="absolute inset-x-10 bottom-2 top-10 rounded-full bg-primary/10 blur-3xl" />
-      <div className="relative overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/70 shadow-2xl shadow-black/25 backdrop-blur-xl">
+      <div className="relative overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/70 shadow-2xl shadow-black/25 backdrop-blur-xl lg:flex lg:h-full lg:flex-col">
         <div className="flex items-center justify-between border-b border-border/80 px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="size-2 rounded-full bg-emerald-400" />
@@ -181,8 +181,8 @@ function HeroProductSpotlight({ product }: { product?: PublishedProduct }) {
           </span>
         </div>
 
-        <div className="grid gap-4 p-4 sm:grid-cols-[minmax(0,11rem)_1fr] sm:p-5">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-border/80 bg-muted">
+        <div className="grid gap-4 p-4 sm:grid-cols-[minmax(0,12rem)_1fr] sm:p-5 lg:flex-1 lg:gap-5 lg:p-6">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-border/80 bg-muted lg:aspect-auto lg:h-full lg:min-h-56">
             {product?.thumbnail_url ? (
               <img
                 src={product.thumbnail_url}
@@ -196,7 +196,7 @@ function HeroProductSpotlight({ product }: { product?: PublishedProduct }) {
             )}
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 lg:justify-between">
             <div className="grid gap-2">
               <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 Gợi ý trong tuần

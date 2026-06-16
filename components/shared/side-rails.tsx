@@ -20,7 +20,10 @@ function RailBanner({
   return (
     <div
       className={cn(
-        "pointer-events-none fixed top-1/2 z-30 hidden w-40 -translate-y-1/2 2xl:block",
+        // Rails sit in the gutter beside the max-w-6xl content. That gutter widens
+        // with the viewport, so scale the banner up on bigger screens instead of
+        // leaving it stranded at a tiny fixed width.
+        "pointer-events-none fixed top-1/2 z-30 hidden w-40 -translate-y-1/2 2xl:block min-[1700px]:w-56 min-[1920px]:w-72",
         side === "left" ? "left-4" : "right-4"
       )}
     >
