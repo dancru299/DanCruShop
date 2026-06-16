@@ -12,7 +12,6 @@ import {
   KeyRoundIcon,
   Loader2Icon,
   PackagePlusIcon,
-  PaperclipIcon,
   SaveIcon,
   TagIcon,
 } from "lucide-react";
@@ -25,6 +24,8 @@ import {
   type ProductUpdate,
 } from "@/actions/admin.actions";
 import { AdminMediaUploadField } from "@/components/admin/media-upload-field";
+import { MarkdownEditor } from "@/components/admin/markdown-editor";
+import { ProductFilesDialog } from "@/components/admin/product-files-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -312,7 +313,13 @@ export function ProductForm({
   const [isPending, startTransition] = useTransition();
   const [title, setTitle] = useState(product?.title ?? "");
   const [slug, setSlug] = useState(product?.slug ?? "");
-  const [slugTouched, setSlugTouched] = useState(mode === "edit");
+  // Keep auto-syncing the slug from the title unless it was customised. An
+  // existing product whose slug already matches its title is treated as "in
+  // sync", so renaming the product updates the slug too.
+  const [slugTouched, setSlugTouched] = useState(
+    mode === "edit" &&
+      (product?.slug ?? "") !== slugify(product?.title ?? "")
+  );
   const [shortDescription, setShortDescription] = useState(
     product?.short_description ?? ""
   );
@@ -550,14 +557,17 @@ export function ProductForm({
 
               <Field>
                 <FieldLabel htmlFor="description">Full description</FieldLabel>
-                <Textarea
+                <MarkdownEditor
                   id="description"
                   value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                  placeholder="Explain what the buyer gets, who it is for, and what is included."
-                  className="min-h-40"
+                  onChange={setDescription}
+                  placeholder="Mô tả khách nhận được gì, dành cho ai, gồm những gì. Hỗ trợ định dạng Markdown."
                   disabled={isPending}
                 />
+                <FieldDescription>
+                  Dùng thanh công cụ để in đậm, tạo tiêu đề, danh sách... Nội
+                  dung hiển thị có định dạng ở trang sản phẩm.
+                </FieldDescription>
               </Field>
             </FieldGroup>
           </section>
@@ -901,15 +911,11 @@ export function ProductForm({
           </Button>
         ) : null}
         {mode === "edit" && product ? (
-          <Button
-            variant="outline"
-            render={<Link href={`/admin/products/${product.id}/files`} />}
-            nativeButton={false}
+          <ProductFilesDialog
+            productId={product.id}
+            productTitle={product.title}
             disabled={isPending}
-          >
-            <PaperclipIcon aria-hidden="true" data-icon="inline-start" />
-            Manage files
-          </Button>
+          />
         ) : null}
         <Button
           variant="outline"

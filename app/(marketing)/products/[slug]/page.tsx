@@ -17,6 +17,7 @@ import {
   StarIcon,
   type LucideIcon,
 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 import { ProductViewTracker } from "@/components/analytics/product-view-tracker";
 import { ProductCta } from "@/components/products/product-cta";
@@ -495,11 +496,17 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           <h2 className="text-3xl font-semibold tracking-normal">
             Dùng được ngay cho dự án thật, không chỉ là một file tải về.
           </h2>
-          <div className="grid gap-4 text-sm leading-7 text-muted-foreground md:text-base">
-            {descriptionParagraphs.map((paragraph, index) => (
-              <p key={`${paragraph}-${index}`}>{paragraph}</p>
-            ))}
-          </div>
+          {product.description ? (
+            <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary">
+              <ReactMarkdown>{product.description}</ReactMarkdown>
+            </div>
+          ) : (
+            <div className="grid gap-4 text-sm leading-7 text-muted-foreground md:text-base">
+              {descriptionParagraphs.map((paragraph, index) => (
+                <p key={`${paragraph}-${index}`}>{paragraph}</p>
+              ))}
+            </div>
+          )}
           <div className="flex flex-wrap gap-2 pt-2">
             {techStack.map((item) => (
               <Badge key={item} variant="outline">

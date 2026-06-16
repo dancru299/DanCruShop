@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import {
   FileIcon,
   Loader2Icon,
@@ -17,6 +16,7 @@ import {
 import {
   addProductFile,
   deleteProductFile,
+  getProductFiles,
   updateProductFileLimit,
   type ProductFileRecord,
 } from "@/actions/product-file.actions";
@@ -40,7 +40,8 @@ import { uploadProductFile } from "@/lib/supabase/storage";
 
 type ProductFileManagerProps = {
   productId: string;
-  initialFiles: ProductFileRecord[];
+  /** Provided by the standalone page; omit to load on mount (e.g. in a modal). */
+  initialFiles?: ProductFileRecord[];
 };
 
 function getErrorMessage(error: unknown) {
@@ -79,13 +80,43 @@ export function ProductFileManager({
   productId,
   initialFiles,
 }: ProductFileManagerProps) {
-  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [files, setFiles] = useState<ProductFileRecord[]>(initialFiles ?? []);
+  const [isLoading, setIsLoading] = useState(!initialFiles);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
   const [isDeletePending, startDeleteTransition] = useTransition();
   const isBusy = isUploading || isDeletePending;
+
+  const reload = useCallback(async () => {
+    const next = await getProductFiles(productId);
+    setFiles(next);
+  }, [productId]);
+
+  useEffect(() => {
+    // When no files were passed in (modal usage), load them on mount.
+    if (initialFiles) {
+      return;
+    }
+
+    let active = true;
+    getProductFiles(productId)
+      .then((next) => {
+        if (active) {
+          setFiles(next);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [initialFiles, productId]);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -117,7 +148,7 @@ export function ProductFileManager({
 
       setUploadProgress(100);
       toast.success("File uploaded.");
-      router.refresh();
+      await reload();
     } catch (error) {
       console.error("Product file upload failed", error);
       toast.error(getErrorMessage(error));
@@ -152,7 +183,7 @@ export function ProductFileManager({
         }
 
         toast.success("File deleted.");
-        router.refresh();
+        await reload();
       } catch (error) {
         console.error("Product file delete failed", error);
         toast.error(getErrorMessage(error));
@@ -207,7 +238,12 @@ export function ProductFileManager({
       </div>
 
       <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-        {initialFiles.length > 0 ? (
+        {isLoading ? (
+          <div className="flex min-h-64 items-center justify-center gap-2 p-8 text-sm text-muted-foreground">
+            <Loader2Icon aria-hidden="true" className="size-4 animate-spin" />
+            Đang tải danh sách file...
+          </div>
+        ) : files.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>
@@ -221,7 +257,7 @@ export function ProductFileManager({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {initialFiles.map((file) => (
+              {files.map((file) => (
                 <TableRow key={file.id}>
                   <TableCell>
                     <div className="flex min-w-0 items-center gap-3">
