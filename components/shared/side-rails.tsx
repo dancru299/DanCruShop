@@ -1,36 +1,95 @@
 /* eslint-disable @next/next/no-img-element */
+"use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 
 type RailConfig = { imageUrl: string | null; href: string | null };
 
+// The rails are promo banners that belong to the hero region. They start at
+// full opacity and fade linearly as the page scrolls down, so they are most
+// prominent at the hero and fully gone by the time #product-showcase reaches
+// the top of the viewport — reading as a top-of-page ad, not a permanent
+// fixture. On pages without the showcase we fall back to scroll distance.
+function useRailOpacity() {
+  const [opacity, setOpacity] = useState(1);
+
+  useEffect(() => {
+    let raf = 0;
+    const compute = () => {
+      raf = 0;
+      const viewport = window.innerHeight;
+      const scrolled = window.scrollY;
+      const anchor = document.getElementById("product-showcase");
+      let next: number;
+      if (anchor) {
+        // Absolute offset of the showcase from the top of the document; the
+        // fade finishes a little before it so the rails clear the showcase.
+        const anchorTop = anchor.getBoundingClientRect().top + scrolled;
+        const fadeEnd = Math.max(1, anchorTop - viewport * 0.3);
+        next = 1 - scrolled / fadeEnd;
+      } else {
+        next = 1 - scrolled / (viewport * 0.6);
+      }
+      setOpacity(Math.min(1, Math.max(0, next)));
+    };
+    const onScroll = () => {
+      if (!raf) {
+        raf = requestAnimationFrame(compute);
+      }
+    };
+
+    compute();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) {
+        cancelAnimationFrame(raf);
+      }
+    };
+  }, []);
+
+  return opacity;
+}
+
 function RailBanner({
   rail,
   side,
+  opacity,
 }: {
   rail: RailConfig;
   side: "left" | "right";
+  opacity: number;
 }) {
   if (!rail.imageUrl) {
     return null;
   }
 
+  const faded = opacity <= 0.02;
+
   return (
     <div
+      style={{ opacity }}
+      aria-hidden={faded}
       className={cn(
         // Rails sit in the gutter beside the max-w-6xl content. That gutter widens
         // with the viewport, so scale the banner up on bigger screens instead of
-        // leaving it stranded at a tiny fixed width.
-        "pointer-events-none fixed top-1/2 z-30 hidden w-40 -translate-y-1/2 2xl:block min-[1700px]:w-56 min-[1920px]:w-72",
+        // leaving it stranded at a tiny fixed width. Pinned near the top so they
+        // line up with the hero instead of floating dead-center.
+        "pointer-events-none fixed top-36 z-30 hidden w-40 2xl:block min-[1700px]:w-56 min-[1920px]:w-72",
         side === "left" ? "left-4" : "right-4"
       )}
     >
       <Link
         href={rail.href || "#"}
         aria-label={`Khuyến mãi ${side === "left" ? "bên trái" : "bên phải"}`}
-        className="pointer-events-auto block overflow-hidden rounded-xl border border-border/80 bg-card shadow-lg transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        tabIndex={faded ? -1 : undefined}
+        style={{ pointerEvents: faded ? "none" : "auto" }}
+        className="block overflow-hidden rounded-xl border border-border/80 bg-card shadow-lg transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <img src={rail.imageUrl} alt="" className="block w-full" />
       </Link>
@@ -43,14 +102,16 @@ export function SideRails({
 }: {
   promo: { leftRail: RailConfig; rightRail: RailConfig };
 }) {
+  const opacity = useRailOpacity();
+
   if (!promo.leftRail.imageUrl && !promo.rightRail.imageUrl) {
     return null;
   }
 
   return (
     <>
-      <RailBanner rail={promo.leftRail} side="left" />
-      <RailBanner rail={promo.rightRail} side="right" />
+      <RailBanner rail={promo.leftRail} side="left" opacity={opacity} />
+      <RailBanner rail={promo.rightRail} side="right" opacity={opacity} />
     </>
   );
 }

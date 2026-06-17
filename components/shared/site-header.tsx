@@ -124,20 +124,9 @@ export async function SiteHeader() {
         <div className="flex items-center gap-2">
           <FavoritesHeaderButton />
           <CartHeaderButton />
-          {isAdmin ? (
-            <Button
-              className="hidden md:inline-flex"
-              size="sm"
-              variant="secondary"
-              render={<Link href="/admin" />}
-              nativeButton={false}
-            >
-              Quản trị
-            </Button>
-          ) : null}
           {isAuthenticated ? (
             <>
-              {user ? <AccountMenu user={user} /> : null}
+              {user ? <AccountMenu user={user} isAdmin={isAdmin} /> : null}
             </>
           ) : (
             <Button

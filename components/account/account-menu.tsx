@@ -10,6 +10,7 @@ import {
   LogOutIcon,
   PackageOpenIcon,
   SettingsIcon,
+  ShieldCheckIcon,
   UserRoundIcon,
 } from "lucide-react";
 
@@ -24,6 +25,7 @@ export type AccountMenuUser = {
 
 type AccountMenuProps = {
   user: AccountMenuUser;
+  isAdmin?: boolean;
 };
 
 function getInitials(name: string, email: string | null) {
@@ -36,7 +38,7 @@ function getInitials(name: string, email: string | null) {
   return parts.map((part) => part[0]?.toUpperCase()).join("") || "U";
 }
 
-export function AccountMenu({ user }: AccountMenuProps) {
+export function AccountMenu({ user, isAdmin = false }: AccountMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const initials = getInitials(user.name, user.email);
@@ -116,6 +118,14 @@ export function AccountMenu({ user }: AccountMenuProps) {
             ) : null}
           </div>
 
+          {isAdmin ? (
+            <div className="border-b py-1">
+              <AccountMenuLink href="/admin" icon={ShieldCheckIcon} emphasis>
+                Quản trị viên
+              </AccountMenuLink>
+            </div>
+          ) : null}
+
           <div className="py-1">
             <AccountMenuLink href="/profile" icon={UserRoundIcon}>
               Hồ sơ
@@ -148,10 +158,12 @@ function AccountMenuLink({
   children,
   href,
   icon: Icon,
+  emphasis = false,
 }: {
   children: ReactNode;
   href: string;
   icon: LucideIcon;
+  emphasis?: boolean;
 }) {
   return (
     <Link
@@ -159,7 +171,10 @@ function AccountMenuLink({
       href={href}
       className="flex h-9 w-full items-center gap-2 rounded-md px-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
     >
-      <Icon aria-hidden="true" className="size-4 text-muted-foreground" />
+      <Icon
+        aria-hidden="true"
+        className={cn("size-4 text-muted-foreground", emphasis && "text-primary")}
+      />
       <span>{children}</span>
     </Link>
   );

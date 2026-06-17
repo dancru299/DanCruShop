@@ -1,18 +1,7 @@
 import Link from "next/link";
 import { SparklesIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import type { KeywordsSection as KeywordsConfig } from "@/lib/store/home-layout";
-
-// Rotating accent gradients so each pill stands out, like the reference design.
-const PILL_GRADIENTS = [
-  "from-violet-500 to-fuchsia-500",
-  "from-blue-500 to-cyan-500",
-  "from-emerald-500 to-teal-500",
-  "from-amber-500 to-orange-500",
-  "from-rose-500 to-pink-500",
-  "from-slate-600 to-slate-800",
-];
 
 export function KeywordsSection({ section }: { section: KeywordsConfig }) {
   const items = section.items.filter((item) => item.label.trim().length > 0);
@@ -35,17 +24,17 @@ export function KeywordsSection({ section }: { section: KeywordsConfig }) {
           ) : null}
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2.5">
           {items.map((item, index) => (
             <Link
               key={`${item.label}-${index}`}
               href={item.href || "/products"}
-              className={cn(
-                "inline-flex items-center gap-2 rounded-xl bg-gradient-to-r px-5 py-3 text-sm font-semibold text-white shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                PILL_GRADIENTS[index % PILL_GRADIENTS.length]
-              )}
+              className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:border-foreground/20 hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
-              <SparklesIcon aria-hidden="true" className="size-4" />
+              <SparklesIcon
+                aria-hidden="true"
+                className="size-4 text-muted-foreground"
+              />
               {item.label}
             </Link>
           ))}

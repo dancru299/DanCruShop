@@ -48,6 +48,11 @@ export type ProductInsert = {
    * array clears them. Synced into product_category_map after the product write.
    */
   categoryIds?: string[];
+  /**
+   * Tech-stack icon ids to attach, in display order. `undefined` leaves them
+   * untouched; an empty array clears them. Synced into product_tech_icons.
+   */
+  techIconIds?: string[];
 };
 
 export type ProductUpdate = Partial<ProductInsert>;
@@ -319,6 +324,49 @@ async function syncProductCategories(
   }
 }
 
+async function syncProductTechIcons(
+  supabase: SupabaseServerClient,
+  productId: string,
+  techIconIds: string[] | undefined
+) {
+  // `undefined` means "leave icons untouched"; an empty array clears them.
+  if (!Array.isArray(techIconIds)) {
+    return;
+  }
+
+  // Preserve the order the admin picked them in (deduped) as the badge order.
+  const orderedIds = Array.from(
+    new Set(techIconIds.map((id) => id.trim()).filter((id) => id.length > 0))
+  );
+
+  const { error: deleteError } = await supabase
+    .from("product_tech_icons")
+    .delete()
+    .eq("product_id", productId);
+
+  if (deleteError) {
+    throw new Error(`Could not update tech icons: ${deleteError.message}`);
+  }
+
+  if (orderedIds.length === 0) {
+    return;
+  }
+
+  const { error: insertError } = await supabase
+    .from("product_tech_icons")
+    .insert(
+      orderedIds.map((techIconId, index) => ({
+        product_id: productId,
+        tech_icon_id: techIconId,
+        position: index,
+      }))
+    );
+
+  if (insertError) {
+    throw new Error(`Could not attach tech icons: ${insertError.message}`);
+  }
+}
+
 function revalidateProductSurfaces(slug?: string) {
   revalidatePath("/");
   revalidatePath("/products");
@@ -349,6 +397,7 @@ export async function createProduct(
     }
 
     await syncProductCategories(supabase, String(product.id), data.categoryIds);
+    await syncProductTechIcons(supabase, String(product.id), data.techIconIds);
 
     revalidateProductSurfaces(String(payload.slug));
 
@@ -374,7 +423,7 @@ export async function updateProduct(
 
     const supabase = await createClient();
     const hasProductFields = Object.keys(data).some(
-      (key) => key !== "categoryIds"
+      (key) => key !== "categoryIds" && key !== "techIconIds"
     );
 
     if (hasProductFields) {
@@ -393,6 +442,7 @@ export async function updateProduct(
     }
 
     await syncProductCategories(supabase, productId, data.categoryIds);
+    await syncProductTechIcons(supabase, productId, data.techIconIds);
     revalidateProductSurfaces(
       typeof data.slug === "string" ? slugify(data.slug) : undefined
     );
