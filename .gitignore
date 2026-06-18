@@ -30,6 +30,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# next dev logs
+*.log
+
+# template reference (keep only for local dev)
+RepoTemplate/
+
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
