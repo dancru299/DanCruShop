@@ -75,7 +75,7 @@ export async function CategoriesSection({
   }
 
   return (
-    <section className="scroll-mt-24 border-b border-border/80 py-12 md:py-16">
+    <section id="danh-muc" className="scroll-mt-24 border-b border-border/80 py-12 md:py-16">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4">
         <SectionHeader
           title={section.title}

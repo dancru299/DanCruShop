@@ -26,6 +26,8 @@ import {
 import type { PublishedProduct } from "@/lib/supabase/queries/products";
 import { cn } from "@/lib/utils";
 
+import { TiltSpotlight } from "@/components/ui/tilt-spotlight";
+
 type ProductCardProps = {
   product: PublishedProduct;
 };
@@ -125,7 +127,7 @@ export function ProductArtwork({
         <div className="flex items-end justify-between gap-4">
           <Code2Icon aria-hidden="true" className="size-8 text-foreground/45" />
           <span className="rounded-md border bg-background/70 px-2 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
-            Sẵn sàng
+            Ready
           </span>
         </div>
       </div>
@@ -139,7 +141,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const discount = getProductDiscount(product);
 
   return (
-    <article className="group/product-card relative flex h-full flex-col overflow-hidden rounded-xl border bg-card/65 text-card-foreground shadow-sm backdrop-blur-xl transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-xl hover:shadow-foreground/10">
+    <TiltSpotlight className="group/product-card flex h-full flex-col backdrop-blur-xl">
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {product.thumbnail_url ? (
@@ -158,7 +160,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* status badge (top-left): free takes precedence over discount */}
         {product.is_free ? (
           <span className="absolute left-2.5 top-2.5 z-20 inline-flex items-center rounded-full bg-emerald-500/90 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm backdrop-blur">
-            Miễn phí
+            Free
           </span>
         ) : discount ? (
           <span className="absolute left-2.5 top-2.5 z-20 inline-flex items-center rounded-full bg-rose-500 px-2 py-0.5 text-[11px] font-bold text-white shadow-sm">
@@ -177,14 +179,14 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center gap-2 bg-black/45 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover/product-card:pointer-events-auto group-hover/product-card:opacity-100">
           <Link
             href={`/products/${product.slug}`}
-            aria-label={`Xem ${product.title}`}
+            aria-label={`View ${product.title}`}
             className={cn(
               buttonVariants({ size: "sm", variant: "secondary" }),
               "h-8 min-w-20 rounded-full bg-white/95 px-4 text-neutral-900 shadow-lg hover:bg-white"
             )}
           >
             <EyeIcon aria-hidden="true" data-icon="inline-start" />
-            Xem
+            View
           </Link>
           <div className="relative z-10">
             <AddToCartButton
@@ -193,7 +195,7 @@ export function ProductCard({ product }: ProductCardProps) {
               variant="default"
               className="h-8 min-w-20 rounded-full px-4 shadow-lg"
             >
-              Thêm
+              Add
             </AddToCartButton>
           </div>
         </div>
@@ -232,6 +234,6 @@ export function ProductCard({ product }: ProductCardProps) {
           />
         </div>
       </div>
-    </article>
+    </TiltSpotlight>
   );
 }

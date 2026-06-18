@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRightIcon } from "lucide-react";
 
 import { HeroProductSlider } from "@/components/home/hero-product-slider";
+import { DynamicHeroBg } from "@/components/home/dynamic-hero-bg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { buildHeroSpotlightCards } from "@/lib/store/hero-spotlight";
@@ -65,7 +66,7 @@ export async function HeroSection({ section }: { section: HeroSectionConfig }) {
 
     return (
       <section className="relative overflow-hidden border-b border-border/80">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,var(--primary)_0,transparent_40%)] opacity-25" />
+        <DynamicHeroBg />
         <div
           className={cn(
             "relative mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-12 md:py-16",
@@ -106,8 +107,7 @@ export async function HeroSection({ section }: { section: HeroSectionConfig }) {
 
   return (
     <section className="relative overflow-hidden border-b border-border/80">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--primary)_0,transparent_32%),radial-gradient(circle_at_top_right,var(--muted)_0,transparent_38%)] opacity-35" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:56px_56px] opacity-[0.06]" />
+      <DynamicHeroBg />
 
       <div className="relative mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 md:py-10 lg:grid-cols-[1fr_27rem] lg:items-start lg:gap-10">
         <div className="flex max-w-xl flex-col gap-4">
