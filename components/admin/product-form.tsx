@@ -61,7 +61,6 @@ import {
   type SpecFieldType,
 } from "@/lib/products/specs";
 import type { CategoryOption } from "@/lib/supabase/queries/categories";
-import type { TechIconOption } from "@/lib/supabase/queries/tech-icons";
 import type {
   ProductDetail,
   ProductStatus,
@@ -99,8 +98,6 @@ type ProductFormProps = {
   product?: ProductFormProduct;
   categories?: CategoryOption[];
   selectedCategoryIds?: string[];
-  techIcons?: TechIconOption[];
-  selectedTechIconIds?: string[];
 };
 
 type ProductFormErrors = {
@@ -324,8 +321,6 @@ export function ProductForm({
   product,
   categories = [],
   selectedCategoryIds = [],
-  techIcons = [],
-  selectedTechIconIds = [],
 }: ProductFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -367,7 +362,6 @@ export function ProductForm({
     product?.status ?? "draft"
   );
   const [categoryIds, setCategoryIds] = useState<string[]>(selectedCategoryIds);
-  const [techIconIds, setTechIconIds] = useState<string[]>(selectedTechIconIds);
   const [requiresLicense, setRequiresLicense] = useState(
     product?.requires_license ?? false
   );
@@ -440,15 +434,6 @@ export function ProductForm({
 
   function toggleCategory(id: string) {
     setCategoryIds((current) =>
-      current.includes(id)
-        ? current.filter((value) => value !== id)
-        : [...current, id]
-    );
-  }
-
-  function toggleTechIcon(id: string) {
-    // Appending on select keeps the click order, which becomes the badge order.
-    setTechIconIds((current) =>
       current.includes(id)
         ? current.filter((value) => value !== id)
         : [...current, id]
@@ -539,9 +524,11 @@ export function ProductForm({
       delete nextMetadata.specs;
     }
 
+    // tech_stack is obsolete — specs now serve all tech surfaces
+    delete nextMetadata.tech_stack;
+
     const payload: ProductInsert = {
       categoryIds,
-      techIconIds,
       currency,
       metadata: nextMetadata,
       demo_url: demoUrl.trim() || null,
@@ -876,51 +863,6 @@ export function ProductForm({
                     trước để gán cho sản phẩm.
                   </FieldDescription>
                 )}
-              </Field>
-
-              <Field>
-                <FieldLabel>Tech stack</FieldLabel>
-                {techIcons.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {techIcons.map((icon) => {
-                      const active = techIconIds.includes(icon.id);
-
-                      return (
-                        <button
-                          key={icon.id}
-                          type="button"
-                          onClick={() => toggleTechIcon(icon.id)}
-                          disabled={isPending}
-                          aria-pressed={active}
-                          className={cn(
-                            "inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-sm font-medium transition-colors",
-                            active
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
-                          )}
-                        >
-                          {icon.icon_url ? (
-                            <img
-                              alt=""
-                              src={icon.icon_url}
-                              className="size-4 object-contain"
-                            />
-                          ) : null}
-                          {icon.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <FieldDescription>
-                    Chưa có icon nào trong thư viện. Thêm bản ghi vào bảng
-                    tech_icons để gán tech stack cho sản phẩm.
-                  </FieldDescription>
-                )}
-                <FieldDescription>
-                  Hiển thị thành badge trên card Hero ngoài trang chủ. Thứ tự
-                  chọn là thứ tự hiển thị.
-                </FieldDescription>
               </Field>
 
               <Field>

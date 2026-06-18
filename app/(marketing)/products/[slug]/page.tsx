@@ -41,6 +41,7 @@ import {
   getProductUpdatePolicy,
 } from "@/lib/products/metadata";
 import { getProductChangelog } from "@/lib/github/changelog";
+import { getProductTechSlugs, techLabel } from "@/lib/products/specs";
 import { ProductInfoTabs } from "@/components/products/product-info-tabs";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildBreadcrumbJsonLd, buildProductJsonLd } from "@/lib/seo";
@@ -97,13 +98,13 @@ function getStringFromMetadata(metadata: ProductDetail["metadata"], key: string)
 }
 
 function getTechStack(product: ProductDetail) {
-  return (
-    getStringArrayFromMetadata(product.metadata, "tech_stack") ?? [
-      "Next.js",
-      "Supabase",
-      "Tailwind CSS",
-    ]
-  );
+  const slugs = getProductTechSlugs(product.metadata);
+
+  if (slugs.length > 0) {
+    return slugs.map((slug) => techLabel(slug, "en"));
+  }
+
+  return ["Next.js", "Supabase", "Tailwind CSS"];
 }
 
 function getLicense(product: ProductDetail) {

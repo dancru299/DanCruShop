@@ -17,14 +17,22 @@ export type SpecFieldType = "single" | "multi" | "boolean";
 
 export type SpecOption = {
   value: string;
+  /** Vietnamese label for the admin form. */
   label: string;
+  /** English label for customer-facing UI; falls back to `label`. */
+  labelEn?: string;
   /** Optional brand-ish badge classes; falls back to the outline variant. */
   className?: string;
+  /** Logo path relative to /public, e.g. "/logo_tech/nextjs-white.svg". */
+  logo?: string | null;
 };
 
 export type SpecField = {
   key: string;
+  /** Vietnamese label for the admin form. */
   label: string;
+  /** English label for customer-facing UI (compare matrix). */
+  labelEn: string;
   type: SpecFieldType;
   options?: SpecOption[];
   /** Placeholder shown in the admin form for boolean/empty hints. */
@@ -33,7 +41,12 @@ export type SpecField = {
 
 export type SpecGroup = {
   id: string;
+  /** Vietnamese label for the admin form. */
   label: string;
+  /** English label for customer-facing UI (compare matrix). */
+  labelEn: string;
+  /** "tech" groups drive the stack builder, filters, Hero logos & compare. "meta" groups are compare/admin only. */
+  kind: "tech" | "meta";
   fields: SpecField[];
 };
 
@@ -48,41 +61,41 @@ const BRAND: Record<string, string> = {
 };
 
 const FRAMEWORK_OPTIONS: SpecOption[] = [
-  { value: "nextjs", label: "Next.js", className: BRAND.neutral },
-  { value: "react", label: "React", className: BRAND.sky },
-  { value: "vue", label: "Vue", className: BRAND.emerald },
+  { value: "nextjs", label: "Next.js", className: BRAND.neutral, logo: "/logo_tech/nextjs-white.svg" },
+  { value: "react", label: "React", className: BRAND.sky, logo: "/logo_tech/react_61DAFB.png" },
+  { value: "vue", label: "Vue", className: BRAND.emerald, logo: "/logo_tech/vue.svg" },
   { value: "nuxt", label: "Nuxt", className: BRAND.emerald },
   { value: "svelte", label: "Svelte", className: BRAND.rose },
   { value: "remix", label: "Remix", className: BRAND.neutral },
   { value: "astro", label: "Astro", className: BRAND.violet },
-  { value: "laravel", label: "Laravel", className: BRAND.rose },
+  { value: "laravel", label: "Laravel", className: BRAND.rose, logo: "/logo_tech/laravel.svg" },
   { value: "nestjs", label: "NestJS", className: BRAND.rose },
   { value: "express", label: "Express", className: BRAND.neutral },
-  { value: "go", label: "Go", className: BRAND.sky },
+  { value: "go", label: "Go", className: BRAND.sky, logo: "/logo_tech/go_00ADD8.png" },
 ];
 
 const CSS_OPTIONS: SpecOption[] = [
-  { value: "tailwind", label: "Tailwind CSS", className: BRAND.sky },
+  { value: "tailwind", label: "Tailwind CSS", className: BRAND.sky, logo: "/logo_tech/tailwind-css.svg" },
   { value: "shadcn", label: "shadcn/ui", className: BRAND.neutral },
   { value: "css-modules", label: "CSS Modules" },
   { value: "styled-components", label: "styled-components", className: BRAND.violet },
   { value: "mui", label: "MUI", className: BRAND.sky },
-  { value: "bootstrap", label: "Bootstrap", className: BRAND.violet },
+  { value: "bootstrap", label: "Bootstrap", className: BRAND.violet, logo: "/logo_tech/bootstrap.svg" },
 ];
 
 const DATABASE_OPTIONS: SpecOption[] = [
-  { value: "supabase", label: "Supabase", className: BRAND.emerald },
-  { value: "postgres", label: "PostgreSQL", className: BRAND.sky },
+  { value: "supabase", label: "Supabase", className: BRAND.emerald, logo: "/logo_tech/supabase.svg" },
+  { value: "postgres", label: "PostgreSQL", className: BRAND.sky, logo: "/logo_tech/postgresql.svg" },
   { value: "mysql", label: "MySQL", className: BRAND.sky },
-  { value: "mongodb", label: "MongoDB", className: BRAND.emerald },
+  { value: "mongodb", label: "MongoDB", className: BRAND.emerald, logo: "/logo_tech/mongodb.svg" },
   { value: "sqlite", label: "SQLite", className: BRAND.neutral },
   { value: "planetscale", label: "PlanetScale", className: BRAND.neutral },
-  { value: "firebase", label: "Firebase", className: BRAND.amber },
+  { value: "firebase", label: "Firebase", className: BRAND.amber, logo: "/logo_tech/firebase.svg" },
   { value: "prisma", label: "Prisma", className: BRAND.neutral },
 ];
 
 const PAYMENT_OPTIONS: SpecOption[] = [
-  { value: "stripe", label: "Stripe", className: BRAND.indigo },
+  { value: "stripe", label: "Stripe", className: BRAND.indigo, logo: "/logo_tech/stripe.svg" },
   { value: "vietqr", label: "VietQR", className: BRAND.rose },
   { value: "lemonsqueezy", label: "Lemon Squeezy", className: BRAND.amber },
   { value: "paypal", label: "PayPal", className: BRAND.sky },
@@ -109,10 +122,24 @@ const EMAIL_OPTIONS: SpecOption[] = [
   { value: "nodemailer", label: "Nodemailer", className: BRAND.emerald },
 ];
 
+const HOSTING_OPTIONS: SpecOption[] = [
+  { value: "vercel", label: "Vercel", className: BRAND.neutral, labelEn: "Vercel", logo: "/logo_tech/vercel.svg" },
+  { value: "railway", label: "Railway", className: BRAND.violet, labelEn: "Railway" },
+  { value: "flyio", label: "Fly.io", className: BRAND.violet, labelEn: "Fly.io" },
+  { value: "cloudflare", label: "Cloudflare", className: BRAND.amber, labelEn: "Cloudflare" },
+];
+
+const AI_OPTIONS: SpecOption[] = [
+  { value: "openai", label: "OpenAI", className: BRAND.emerald, labelEn: "OpenAI", logo: "/logo_tech/openai.svg" },
+  { value: "anthropic", label: "Anthropic", className: BRAND.amber, labelEn: "Anthropic", logo: "/logo_tech/claude_D97757.png" },
+  { value: "langchain", label: "LangChain", className: BRAND.emerald, labelEn: "LangChain" },
+  { value: "pinecone", label: "Pinecone", className: BRAND.emerald, labelEn: "Pinecone" },
+];
+
 const PROJECT_LIMIT_OPTIONS: SpecOption[] = [
-  { value: "one", label: "1 dự án" },
-  { value: "three", label: "3 dự án" },
-  { value: "unlimited", label: "Không giới hạn", className: BRAND.emerald },
+  { value: "one", label: "1 dự án", labelEn: "1 project" },
+  { value: "three", label: "3 dự án", labelEn: "3 projects" },
+  { value: "unlimited", label: "Không giới hạn", labelEn: "Unlimited", className: BRAND.emerald },
 ];
 
 const SUPPORT_OPTIONS: SpecOption[] = [
@@ -127,33 +154,58 @@ export const SPEC_GROUPS: SpecGroup[] = [
   {
     id: "tech-stack",
     label: "Stack công nghệ",
+    labelEn: "Tech stack",
+    kind: "tech",
     fields: [
-      { key: "framework", label: "Framework chính", type: "single", options: FRAMEWORK_OPTIONS },
-      { key: "css", label: "CSS / UI", type: "multi", options: CSS_OPTIONS },
-      { key: "database", label: "Database", type: "single", options: DATABASE_OPTIONS },
+      { key: "framework", label: "Framework chính", labelEn: "Main framework", type: "single", options: FRAMEWORK_OPTIONS },
+      { key: "css", label: "CSS / UI", labelEn: "CSS / UI", type: "multi", options: CSS_OPTIONS },
+      { key: "database", label: "Database", labelEn: "Database", type: "single", options: DATABASE_OPTIONS },
     ],
   },
   {
     id: "integrations",
     label: "Tính năng tích hợp",
+    labelEn: "Integrations",
+    kind: "tech",
     fields: [
-      { key: "payment", label: "Cổng thanh toán", type: "multi", options: PAYMENT_OPTIONS },
-      { key: "auth", label: "Xác thực (Auth)", type: "single", options: AUTH_OPTIONS },
-      { key: "email", label: "Email", type: "multi", options: EMAIL_OPTIONS },
+      { key: "payment", label: "Cổng thanh toán", labelEn: "Payments", type: "multi", options: PAYMENT_OPTIONS },
+      { key: "auth", label: "Xác thực (Auth)", labelEn: "Authentication", type: "single", options: AUTH_OPTIONS },
+      { key: "email", label: "Email", labelEn: "Email", type: "multi", options: EMAIL_OPTIONS },
+    ],
+  },
+  {
+    id: "hosting",
+    label: "Hosting",
+    labelEn: "Hosting",
+    kind: "tech",
+    fields: [
+      { key: "hosting", label: "Nền tảng hosting", labelEn: "Hosting", type: "multi", options: HOSTING_OPTIONS },
+    ],
+  },
+  {
+    id: "ai",
+    label: "Trí tuệ nhân tạo",
+    labelEn: "AI",
+    kind: "tech",
+    fields: [
+      { key: "ai", label: "AI / ML", labelEn: "AI / ML", type: "multi", options: AI_OPTIONS },
     ],
   },
   {
     id: "license-support",
     label: "Bản quyền & Hỗ trợ",
+    labelEn: "License & support",
+    kind: "meta",
     fields: [
-      { key: "project_limit", label: "Giới hạn dự án", type: "single", options: PROJECT_LIMIT_OPTIONS },
+      { key: "project_limit", label: "Giới hạn dự án", labelEn: "Project limit", type: "single", options: PROJECT_LIMIT_OPTIONS },
       {
         key: "lifetime_updates",
         label: "Cập nhật trọn đời",
+        labelEn: "Lifetime updates",
         type: "boolean",
         hint: "Người mua nhận update mãi mãi.",
       },
-      { key: "support", label: "Kênh hỗ trợ", type: "multi", options: SUPPORT_OPTIONS },
+      { key: "support", label: "Kênh hỗ trợ", labelEn: "Support channels", type: "multi", options: SUPPORT_OPTIONS },
     ],
   },
 ];
@@ -163,6 +215,16 @@ export const SPEC_FIELDS: SpecField[] = SPEC_GROUPS.flatMap(
 );
 
 const SPEC_FIELD_BY_KEY = new Map(SPEC_FIELDS.map((field) => [field.key, field]));
+
+// ---- Flat lookup by slug (across ALL groups) ----
+
+const ALL_OPTIONS = SPEC_FIELDS.flatMap((field) => field.options ?? []);
+
+const OPTION_BY_SLUG = new Map<string, SpecOption>(
+  ALL_OPTIONS.map((option) => [option.value, option])
+);
+
+const TECH_GROUPS = SPEC_GROUPS.filter((group) => group.kind === "tech");
 
 /** Normalized, validated specs value for a single field. */
 export type SpecValue =
@@ -242,4 +304,70 @@ export function buildSpecsForSave(
   }
 
   return specs;
+}
+
+// ---- NEW helpers (replacing stack-config.ts role) ----
+
+/** Return tech groups (kind === "tech") for the Stack Builder UI. */
+export function getTechSpecGroups(): SpecGroup[] {
+  return TECH_GROUPS;
+}
+
+/**
+ * Collect all tech slugs from a product's `metadata.specs` (tech groups only).
+ * Used by the Stack Builder filter, Hero spotlight logos, and product detail.
+ */
+export function getProductTechSlugs(metadata: ProductMetadata): string[] {
+  const obj = readSpecsObject(metadata);
+  const slugs: string[] = [];
+
+  for (const group of TECH_GROUPS) {
+    for (const field of group.fields) {
+      const raw = obj[field.key];
+      if (field.type === "boolean" || raw == null) continue;
+
+      if (field.type === "single" && typeof raw === "string") {
+        slugs.push(raw);
+      } else if (Array.isArray(raw)) {
+        for (const item of raw) {
+          if (typeof item === "string") slugs.push(item);
+        }
+      }
+    }
+  }
+
+  return slugs;
+}
+
+/** Lookup a SpecOption globally by slug. */
+export function getTechOption(slug: string): SpecOption | undefined {
+  return OPTION_BY_SLUG.get(slug);
+}
+
+/** Human-readable label for a slug (English); falls back to slug. */
+export function techLabel(slug: string, lang: "en" | "vi" = "en"): string {
+  const option = OPTION_BY_SLUG.get(slug);
+  if (!option) return slug;
+  if (lang === "vi") return option.label;
+  return option.labelEn ?? option.label;
+}
+
+/** Logo path for a slug, or `null`. */
+export function techLogo(slug: string): string | null {
+  const option = OPTION_BY_SLUG.get(slug);
+  return option?.logo ?? null;
+}
+
+/**
+ * Filter + deduplicate user-submitted tech slugs against the controlled
+ * vocabulary (replaces `normalizeStackKeys` from stack-config).
+ */
+export function validateTechSlugs(raw: string[]): string[] {
+  return Array.from(
+    new Set(
+      raw
+        .map((k) => k.trim().toLowerCase())
+        .filter((k) => OPTION_BY_SLUG.has(k))
+    )
+  ).sort();
 }

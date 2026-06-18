@@ -8,10 +8,6 @@ import {
   getCategoryOptions,
   getProductCategoryIds,
 } from "@/lib/supabase/queries/categories";
-import {
-  getProductTechIconIds,
-  getTechIconOptions,
-} from "@/lib/supabase/queries/tech-icons";
 import { getAdminProductById } from "@/lib/supabase/queries/products";
 import { cn } from "@/lib/utils";
 
@@ -31,12 +27,10 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     notFound();
   }
 
-  const [categories, selectedCategoryIds, techIcons, selectedTechIconIds] =
+  const [categories, selectedCategoryIds] =
     await Promise.all([
       getCategoryOptions(),
       getProductCategoryIds(product.id),
-      getTechIconOptions(),
-      getProductTechIconIds(product.id),
     ]);
 
   return (
@@ -57,8 +51,6 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
         product={product}
         categories={categories}
         selectedCategoryIds={selectedCategoryIds}
-        techIcons={techIcons}
-        selectedTechIconIds={selectedTechIconIds}
       />
     </div>
   );

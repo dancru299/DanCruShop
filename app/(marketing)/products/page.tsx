@@ -3,12 +3,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PackageOpenIcon } from "lucide-react";
 
+import { StackBuilder } from "@/components/products/stack-builder";
 import { ProductFilters } from "@/components/products/product-filters";
 import { ProductPagination } from "@/components/products/product-pagination";
 import { ProductSearchBar } from "@/components/products/product-search-bar";
 import { ProductCard } from "@/components/products/product-card";
 import { Button } from "@/components/ui/button";
 import type { ProductType } from "@/lib/supabase/queries/products";
+import { validateTechSlugs } from "@/lib/products/specs";
+import { searchByStack, type StackMatchProduct } from "@/lib/products/stack-query";
 import {
   getAllCategories,
   searchPublishedProducts,
@@ -38,6 +41,7 @@ type ProductsPageProps = {
     category?: string;
     type?: string;
     page?: string;
+    stack?: string;
   }>;
 };
 
@@ -78,20 +82,33 @@ function isValidProductType(value: string): value is ProductType {
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const { q, category, type, page } = await searchParams;
+  const { q, category, type, page, stack } = await searchParams;
 
   const safeType = type && isValidProductType(type) ? type : undefined;
   const safePage = Math.max(1, Number(page) || 1);
-  const hasActiveFilters = Boolean(q || category || safeType);
+
+  const rawStack = stack ?? "";
+  const selectedStack = validateTechSlugs(
+    rawStack ? rawStack.split(",") : []
+  );
+  const isStackMode = selectedStack.length > 0;
+
+  const hasActiveFilters = Boolean(q || category || safeType || isStackMode);
 
   const [{ products, total, totalPages }, categories] = await Promise.all([
-    searchPublishedProducts({
-      category,
-      page: safePage,
-      perPage: 12,
-      query: q,
-      type: safeType,
-    }),
+    isStackMode
+      ? searchByStack({
+          selectedTechs: selectedStack,
+          page: safePage,
+          perPage: 12,
+        })
+      : searchPublishedProducts({
+          category,
+          page: safePage,
+          perPage: 12,
+          query: q,
+          type: safeType,
+        }),
     getAllCategories(),
   ]);
 
@@ -124,19 +141,38 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             </Suspense>
             <Suspense
               fallback={
-                <div className="h-7 w-full animate-pulse rounded-lg bg-muted" />
+                <div className="h-32 w-full animate-pulse rounded-xl bg-muted" />
               }
             >
-              <ProductFilters categories={categories} />
+              <StackBuilder />
             </Suspense>
+            {categories.length > 0 ? (
+              <Suspense
+                fallback={
+                  <div className="h-7 w-full animate-pulse rounded-lg bg-muted" />
+                }
+              >
+                <ProductFilters categories={categories} />
+              </Suspense>
+            ) : null}
           </div>
 
           {products.length > 0 ? (
             <div className="flex flex-col gap-8">
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-                {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
+                {products.map((product) => {
+                  const matchPercent = isStackMode
+                    ? (product as StackMatchProduct).matchPercent
+                    : undefined;
+
+                  return (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      matchPercent={matchPercent}
+                    />
+                  );
+                })}
               </div>
               <Suspense>
                 <ProductPagination

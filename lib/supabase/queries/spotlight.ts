@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import type { ProductType } from "@/lib/supabase/queries/products";
+import { getProductTechSlugs, techLabel, techLogo } from "@/lib/products/specs";
+import type { ProductMetadata } from "@/lib/products/metadata";
 
-// A published product enriched with its cached stats and tech-stack icons.
-// Backs the home Hero spotlight slider and the iMac showcase — both rank
-// products automatically (top sellers / best rated) rather than via editorial
-// curation, so the shape stays generic.
+// A published product enriched with its cached stats and tech-stack icons
+// derived from metadata.specs. Backs the home Hero spotlight slider and the
+// iMac showcase — both rank products automatically (top sellers / best rated)
+// rather than via editorial curation, so the shape stays generic.
 export type SpotlightProduct = {
   id: string;
   title: string;
@@ -41,31 +43,20 @@ const spotlightSelect = `
   rating_count,
   sales_count,
   created_at,
-  product_tech_icons (
-    position,
-    tech_icon:tech_icons ( label, icon_url )
-  )
+  metadata
 `;
 
-type TechIconJoinRow = {
-  position: number | null;
-  tech_icon: SpotlightTechIcon | SpotlightTechIcon[] | null;
-};
-
 type SpotlightRow = Omit<SpotlightProduct, "tech_icons"> & {
-  product_tech_icons: TechIconJoinRow[] | null;
+  metadata: ProductMetadata | null;
 };
 
 function mapSpotlightRow(row: SpotlightRow): SpotlightProduct {
-  const tech_icons = (row.product_tech_icons ?? [])
-    .slice()
-    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
-    .flatMap((join) => {
-      const icon = Array.isArray(join.tech_icon)
-        ? join.tech_icon[0]
-        : join.tech_icon;
-      return icon ? [{ label: icon.label, icon_url: icon.icon_url }] : [];
-    });
+  const metadata = row.metadata ?? {};
+  const slugs = getProductTechSlugs(metadata);
+  const tech_icons: SpotlightTechIcon[] = slugs.map((slug) => ({
+    label: techLabel(slug, "en"),
+    icon_url: techLogo(slug),
+  }));
 
   return {
     id: row.id,
@@ -77,7 +68,6 @@ function mapSpotlightRow(row: SpotlightRow): SpotlightProduct {
     is_free: row.is_free,
     product_type: row.product_type,
     thumbnail_url: row.thumbnail_url,
-    // Supabase returns numeric columns as strings; coerce defensively.
     rating_average: Number(row.rating_average) || 0,
     rating_count: Number(row.rating_count) || 0,
     sales_count: Number(row.sales_count) || 0,

@@ -18,6 +18,7 @@ import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { CompareButton } from "@/components/compare/compare-button";
 import type { CompareProduct } from "@/components/compare/compare-provider";
 import { FavoriteButton } from "@/components/products/favorite-button";
+import { StackBadge } from "@/components/products/stack-badge";
 import type { CartProduct } from "@/components/cart/cart-provider";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -32,6 +33,7 @@ import { TiltSpotlight } from "@/components/ui/tilt-spotlight";
 
 type ProductCardProps = {
   product: PublishedProduct;
+  matchPercent?: number;
 };
 
 const productTypeVisuals: Record<
@@ -147,13 +149,21 @@ export function ProductArtwork({
   );
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, matchPercent }: ProductCardProps) {
   const visual = productTypeVisuals[product.product_type];
   const TypeIcon = visual.Icon;
   const discount = getProductDiscount(product);
 
+  const isPerfectMatch = matchPercent === 100;
+
   return (
-    <TiltSpotlight className="group/product-card flex h-full flex-col backdrop-blur-xl">
+    <TiltSpotlight
+      className={cn(
+        "group/product-card flex h-full flex-col backdrop-blur-xl",
+        isPerfectMatch &&
+          "ring-2 ring-emerald-500/70 shadow-[0_0_22px_rgba(16,185,129,0.45)]"
+      )}
+    >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {product.thumbnail_url ? (
@@ -169,12 +179,19 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* bottom vignette for depth */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/45 to-transparent" />
 
+        {/* match badge (top-left): stack match indicator */}
+        {matchPercent != null ? (
+          <div className="absolute left-2.5 top-2.5 z-20">
+            <StackBadge matchPercent={matchPercent} />
+          </div>
+        ) : null}
+
         {/* status badge (top-left): free takes precedence over discount */}
-        {product.is_free ? (
+        {matchPercent == null && product.is_free ? (
           <span className="absolute left-2.5 top-2.5 z-20 inline-flex items-center rounded-full bg-emerald-500/90 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm backdrop-blur">
             Free
           </span>
-        ) : discount ? (
+        ) : matchPercent == null && discount ? (
           <span className="absolute left-2.5 top-2.5 z-20 inline-flex items-center rounded-full bg-rose-500 px-2 py-0.5 text-[11px] font-bold text-white shadow-sm">
             -{discount.percent}%
           </span>
