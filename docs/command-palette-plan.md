@@ -37,8 +37,9 @@
 | Coupon backend | `actions/coupon.actions.ts`, `lib/payments/coupons.ts` | `applyCouponToCart()`, `createCoupon()` |
 | Rate limit | `lib/rate-limit.ts`, `supabase/rate-limits.sql` | Dùng cho easter egg |
 | Mono font | `app/globals.css` `--font-mono` (Geist Mono) | Cho prompt terminal |
-| Dialog primitive | `components/ui/dialog.tsx` (Radix) | cmdk sẽ đặt lên trên |
-| Analytics | `trackAnalyticsEvent()` | Đo mức dùng |
+| Dialog primitive | `components/ui/dialog.tsx` (**Base UI** — `@base-ui/react`) | **Không** dùng `Command.Dialog` của cmdk (kéo theo Radix); bọc bare `<Command>` bằng Base UI Dialog |
+| Ô search header hiện tại | `components/shared/header-search.tsx:44` | Đang bắt `⌘K` **và** `/`; sẽ chuyển thành **nút mở palette** (Option B) |
+| Analytics | `lib/analytics/client.ts` → `trackAnalyticsEvent()` | Đo mức dùng |
 
 **Cần thêm**: package `cmdk` (chưa cài).
 
@@ -50,7 +51,9 @@
 ```bash
 npm install cmdk
 ```
-`cmdk` lo sẵn: lọc/sắp xếp, điều hướng ⬆️⬇️, `aria` roles, Enter để chọn. Đặt trên Radix Dialog đã có.
+`cmdk` lo sẵn: lọc/sắp xếp, điều hướng ⬆️⬇️, `aria` roles, Enter để chọn.
+
+> **Tích hợp với Base UI (quan trọng):** dự án dùng `@base-ui/react`, **không** dùng `Command.Dialog` của cmdk (nó tự bọc Radix → kéo về lib dialog thứ 2). Cách đúng: `Dialog.Root/Portal/Popup` của Base UI + đặt bare `<Command>` của cmdk bên trong. Base UI Dialog tự trap focus → cần trỏ initial focus vào `Command.Input` khi mở.
 
 ### 2.2 Data layer
 
@@ -94,18 +97,20 @@ Lệnh điều hướng (bám đúng routes thật trong `app/`):
 ### 2.3 Component breakdown (files mới)
 ```
 components/command-palette/
-├─ command-palette.tsx          # Client. State open/query, render CommandDialog
+├─ command-palette.tsx          # Client. State open/query, Base UI Dialog + cmdk Command
 ├─ command-palette-provider.tsx # Mount + global hotkey listener + context mở/đóng
 ├─ palette-product-item.tsx     # 1 dòng kết quả sản phẩm (thumb, title, giá)
 ├─ palette-prompt.tsx           # Header "$ dancru-shop >" + caret nhấp nháy
 └─ use-palette-search.ts        # hook: debounce 200ms + gọi searchProductsForPalette
 ```
 
-- **`command-palette-provider.tsx`**:
-  - `useEffect` đăng ký `keydown`: bắt `(e.metaKey || e.ctrlKey) && e.key === "k"` → `e.preventDefault()` (chặn Ctrl+K focus address bar Firefox) → `setOpen(true)`.
-  - Context `openPalette()` để nút khác (ô search header, FAB mobile) gọi mở.
+- **`command-palette-provider.tsx`** — là nơi DUY NHẤT giữ global hotkey (gỡ khỏi `header-search.tsx`):
+  - `useEffect` đăng ký `keydown` với 2 trigger tách biệt:
+    - **`⌘/Ctrl+K`**: mở **luôn**, kể cả đang focus trong input/textarea (⌘K không có hành vi native trong text field). Khi palette đang mở → toggle đóng. `e.preventDefault()` để chặn Ctrl+K focus address bar Firefox.
+    - **`/`**: chỉ mở khi **không** đang gõ (`target.tagName !== INPUT/TEXTAREA && !isContentEditable`) — bê nguyên guard `typing` đã có trong `header-search.tsx`.
+  - Context `openPalette()` để nút header + FAB mobile gọi mở.
 - **`command-palette.tsx`**:
-  - `<CommandDialog>` (Radix Dialog + cmdk).
+  - `Dialog.Root/Portal/Popup` (Base UI) bọc bare `<Command>` (cmdk); initial focus → `Command.Input`.
   - Trên cùng: `<PalettePrompt/>` hiển thị `$ dancru-shop >` + input.
   - Groups: **Products** (động) → **Navigation** → **Theme**.
   - Empty state: "Type to search products, or try /cart, /theme…".
@@ -124,9 +129,11 @@ Sửa `app/layout.tsx`:
 </CompareProvider>
 ```
 
-### 2.5 Entry points (ngoài hotkey)
-- **Header**: nút search giả lập ô `⌘K` (kiểu Vercel) gọi `openPalette()`. Phát hiện OS để hiện `⌘K` (Mac) hay `Ctrl K` (Win) qua `navigator.platform`.
-- **Mobile**: nút mở palette nhưng UX fallback full-screen search; nav chính bằng tap.
+### 2.5 Entry points (ngoài hotkey) — **Option B đã chốt**
+`components/shared/header-search.tsx` được **viết lại**: bỏ `<form>` + `<Input>` inline + cả `useEffect` bắt phím (đã chuyển sang provider). Thay bằng **một `<button>` mở palette** giữ nguyên vẻ ngoài ô search hiện tại (icon kính lúp, placeholder gợi ý xoay vòng, `kbd ⌘K`) nhưng `onClick={openPalette}`. Palette trở thành **search duy nhất** — không còn 2 chỗ search song song.
+- Phát hiện OS để hiện `⌘K` (Mac) hay `Ctrl K` (Win) qua `navigator.platform`.
+- Logic submit cũ (`/products?q=...`) chuyển vào palette: nếu gõ query mà Enter trên item search → mở trang sản phẩm; nếu muốn "xem tất cả kết quả" → có dòng lệnh `Search "<query>" in all products` đẩy về `/products?q=`.
+- **Mobile**: nút mở palette; UX fallback full-screen; nav chính bằng tap.
 
 ### 2.6 Styling (terminal + glassmorphism)
 - `font-mono` (Geist Mono) cho prompt + lệnh.
@@ -135,12 +142,12 @@ Sửa `app/layout.tsx`:
 - Prompt: `text-emerald-400` cho `$`, `text-muted-foreground` cho path.
 
 ### 2.7 Accessibility
-- Radix Dialog lo focus-trap, ESC, scroll-lock, `aria-modal`.
+- Base UI Dialog lo focus-trap, ESC, scroll-lock, `aria-modal`.
 - Input `aria-label="Command palette"`; cmdk tự gắn `role="listbox"/"option"` + `aria-selected`.
 - Kiểm tra contrast trên nền glass ở cả 2 theme.
 
 ### 2.8 Analytics
-Tái dùng `trackAnalyticsEvent`: bắn `command_palette_open`, `command_palette_navigate`, `command_palette_product_select`.
+Tái dùng `trackAnalyticsEvent` (`lib/analytics/client.ts`): bắn `command_palette_open`, `command_palette_navigate`, `command_palette_product_select`.
 
 ### 2.9 Tests
 - `tests/unit/command-palette.test.ts`: test filter `commands.ts` theo keywords + mapping `searchProductsForPalette` (mock). Theo pattern `tests/unit/access-control.test.ts`.
@@ -188,7 +195,8 @@ Chống lạm dụng nhiều lớp:
 | 3 | `lib/command-palette/commands.ts` | mới |
 | 4 | `components/command-palette/*` (5 file) | mới |
 | 5 | `app/layout.tsx` (mount) | sửa |
-| 6 | header entry button + `app/globals.css` (caret blink) | sửa |
+| 6 | `components/shared/header-search.tsx` → nút mở palette (bỏ input + gỡ hotkey) | sửa |
+| 6b | `app/globals.css` (caret blink) | sửa |
 | 7 | `tests/unit/command-palette.test.ts` | mới |
 | — | **— mốc demo MVP —** | — |
 | 8 | `help` + console art | mới |
@@ -199,7 +207,7 @@ Chống lạm dụng nhiều lớp:
 
 ## 5. Rủi ro & edge cases
 - **Ctrl+K nuốt phím trình duyệt** → `preventDefault`.
-- **Gõ phím khi đang ở input khác** (vd ô search admin) → chỉ chặn khi không trong field, hoặc luôn mở (chốt lúc làm).
+- **Trigger khi đang gõ trong field khác**: `⌘K` mở luôn (toggle); `/` chỉ mở khi không gõ (guard `typing`). Tránh double-bind: hotkey chỉ tồn tại ở provider, đã gỡ khỏi `header-search.tsx`.
 - **SSR/hydration theme** → next-themes đã `suppressHydrationWarning`; nút theme render sau mount để tránh lệch.
 - **Search spam** → debounce 200ms + min 2 ký tự + giới hạn 6 kết quả.
 - **Coupon abuse** → xử lý ở §3.2.
