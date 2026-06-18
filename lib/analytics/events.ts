@@ -10,6 +10,9 @@ export const analyticsEventNames = [
   "download_start",
   "download_success",
   "download_error",
+  "command_palette_open",
+  "command_palette_product_select",
+  "command_palette_navigate",
 ] as const;
 
 export type AnalyticsEventName = (typeof analyticsEventNames)[number];

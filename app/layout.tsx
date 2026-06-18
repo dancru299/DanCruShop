@@ -6,6 +6,8 @@ import { CartProvider } from "@/components/cart/cart-provider";
 import { CompareBar } from "@/components/compare/compare-bar";
 import { CompareProvider } from "@/components/compare/compare-provider";
 import { FavoritesProvider } from "@/components/favorites/favorites-provider";
+import { CommandPaletteProvider } from "@/components/command-palette/command-palette-provider";
+import { CommandPalette } from "@/components/command-palette/command-palette";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { getSiteUrl, siteName } from "@/lib/site-config";
@@ -80,9 +82,12 @@ export default function RootLayout({
             <CartProvider>
               <FavoritesProvider>
                 <CompareProvider>
-                  {children}
-                  <CompareBar />
-                  <Toaster position="top-center" richColors />
+                  <CommandPaletteProvider>
+                    {children}
+                    <CompareBar />
+                    <CommandPalette />
+                    <Toaster position="top-center" richColors />
+                  </CommandPaletteProvider>
                 </CompareProvider>
               </FavoritesProvider>
             </CartProvider>
