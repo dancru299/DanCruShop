@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { PackageOpenIcon } from "lucide-react";
 
 import { PurchasedProductCard } from "@/components/dashboard/purchased-product-card";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { getUserPurchases } from "@/lib/supabase/queries/purchases";
 import { createClient } from "@/lib/supabase/server";
@@ -40,23 +41,16 @@ export default async function DashboardPage() {
           ))}
         </div>
       ) : (
-        <div className="flex min-h-80 flex-col items-center justify-center gap-5 rounded-lg border bg-card p-8 text-center text-card-foreground shadow-sm">
-          <div className="flex size-12 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
-            <PackageOpenIcon aria-hidden="true" />
-          </div>
-          <div className="flex max-w-md flex-col gap-2">
-            <h2 className="text-xl font-semibold tracking-normal">
-              Ban chua mua san pham nao
-            </h2>
-            <p className="text-sm leading-6 text-muted-foreground">
-              Khi ban mua hoac nhan tai nguyen mien phi, san pham se xuat hien
-              tai day.
-            </p>
-          </div>
-          <Button render={<Link href="/" />} nativeButton={false}>
-            Kham pha cua hang
-          </Button>
-        </div>
+        <EmptyState
+          icon={PackageOpenIcon}
+          title="You haven't purchased any products yet"
+          description="When you buy products or claim free resources, they will appear here."
+          action={
+            <Button render={<Link href="/" />} nativeButton={false}>
+              Explore shop
+            </Button>
+          }
+        />
       )}
     </main>
   );

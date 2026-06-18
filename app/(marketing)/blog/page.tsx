@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { BookOpenIcon } from "lucide-react";
+
 import { BlogCard } from "@/components/blog/blog-card";
+import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
 import { getPublishedPosts } from "@/lib/supabase/queries/blog";
 import { cn } from "@/lib/utils";
@@ -56,19 +59,16 @@ export default async function BlogPage() {
             ))}
           </div>
         ) : (
-          <div className="flex min-h-80 flex-col items-center justify-center gap-5 rounded-lg border bg-card/60 backdrop-blur-xl p-8 text-center text-card-foreground shadow-sm">
-            <div className="flex max-w-md flex-col gap-2">
-              <h2 className="text-xl font-semibold tracking-normal">
-                No articles yet
-              </h2>
-              <p className="text-sm leading-6 text-muted-foreground">
-                When new posts are published from the CMS, they'll show up here.
-              </p>
-            </div>
-            <Link href="/" className={cn(buttonVariants({ variant: "outline" }))}>
-              Back to storefront
-            </Link>
-          </div>
+          <EmptyState
+            icon={BookOpenIcon}
+            title="No articles yet"
+            description="When new posts are published from the CMS, they'll show up here."
+            action={
+              <Link href="/" className={cn(buttonVariants({ variant: "outline" }))}>
+                Back to storefront
+              </Link>
+            }
+          />
         )}
       </section>
     </div>

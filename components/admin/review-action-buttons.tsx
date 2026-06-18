@@ -5,13 +5,18 @@ import { CheckCircleIcon, Loader2Icon, XCircleIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { approveReview, rejectReview } from "@/actions/admin-review.actions";
+import { AdminActionMenuButton } from "@/components/admin/admin-action-menu";
 import { Button } from "@/components/ui/button";
 
 type ReviewActionButtonsProps = {
+  menuItem?: boolean;
   reviewId: string;
 };
 
-export function ReviewActionButtons({ reviewId }: ReviewActionButtonsProps) {
+export function ReviewActionButtons({
+  menuItem = false,
+  reviewId,
+}: ReviewActionButtonsProps) {
   const [isApprovePending, startApproveTransition] = useTransition();
   const [isRejectPending, startRejectTransition] = useTransition();
 
@@ -42,6 +47,28 @@ export function ReviewActionButtons({ reviewId }: ReviewActionButtonsProps) {
   }
 
   const isAnyPending = isApprovePending || isRejectPending;
+
+  if (menuItem) {
+    return (
+      <>
+        <AdminActionMenuButton
+          icon={isApprovePending ? "loader" : "check"}
+          disabled={isAnyPending}
+          onClick={handleApprove}
+        >
+          {isApprovePending ? "Đang duyệt..." : "Duyệt"}
+        </AdminActionMenuButton>
+        <AdminActionMenuButton
+          icon={isRejectPending ? "loader" : "x"}
+          disabled={isAnyPending}
+          onClick={handleReject}
+          tone="destructive"
+        >
+          {isRejectPending ? "Đang từ chối..." : "Từ chối"}
+        </AdminActionMenuButton>
+      </>
+    );
+  }
 
   return (
     <div className="flex items-center justify-end gap-2">

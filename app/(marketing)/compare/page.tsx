@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeftIcon, GitCompareIcon } from "lucide-react";
 
 import { CompareMatrix } from "@/components/compare/compare-matrix";
+import { EmptyState } from "@/components/shared/empty-state";
 import { buttonVariants } from "@/components/ui/button";
 import { getCompareProducts } from "@/lib/supabase/queries/compare";
 
@@ -57,27 +58,19 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
       {products.length >= 2 ? (
         <CompareMatrix products={products} />
       ) : (
-        <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed bg-card/40 px-6 py-16 text-center">
-          <GitCompareIcon
-            aria-hidden="true"
-            className="size-8 text-muted-foreground"
-          />
-          <div className="grid gap-1">
-            <p className="text-base font-medium">
-              You need at least 2 products to compare
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Tap the compare button on a product card to add it to your list,
-              then come back here.
-            </p>
-          </div>
-          <Link
-            href="/products"
-            className={buttonVariants({ variant: "default", size: "sm" })}
-          >
-            Explore products
-          </Link>
-        </div>
+        <EmptyState
+          icon={GitCompareIcon}
+          title="You need at least 2 products to compare"
+          description="Tap the compare button on a product card to add it to your list, then come back here."
+          action={
+            <Link
+              href="/products"
+              className={buttonVariants({ variant: "default", size: "sm" })}
+            >
+              Explore products
+            </Link>
+          }
+        />
       )}
     </div>
   );

@@ -13,6 +13,7 @@ import {
 import { createPortal } from "react-dom";
 import {
   BanIcon,
+  CheckCircle2Icon,
   ExternalLinkIcon,
   KeyRoundIcon,
   Loader2Icon,
@@ -22,6 +23,7 @@ import {
   PencilIcon,
   RotateCcwIcon,
   Trash2Icon,
+  XCircleIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -32,6 +34,7 @@ const MENU_WIDTH = 176;
 const actionMenuIcons = {
   ban: BanIcon,
   bundle: PackagePlusIcon,
+  check: CheckCircle2Icon,
   "external-link": ExternalLinkIcon,
   key: KeyRoundIcon,
   loader: Loader2Icon,
@@ -39,6 +42,7 @@ const actionMenuIcons = {
   pencil: PencilIcon,
   restore: RotateCcwIcon,
   trash: Trash2Icon,
+  x: XCircleIcon,
 };
 
 type ActionMenuIconName = keyof typeof actionMenuIcons;

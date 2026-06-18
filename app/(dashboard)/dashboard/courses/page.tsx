@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { BookOpenIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { getUserPurchases } from "@/lib/supabase/queries/purchases";
 import { getCourseByProductId, getCourseProgress } from "@/lib/supabase/queries/courses";
@@ -115,22 +116,16 @@ export default async function CoursesPage() {
           })}
         </div>
       ) : (
-        <div className="flex min-h-80 flex-col items-center justify-center gap-5 rounded-lg border bg-card p-8 text-center text-card-foreground shadow-sm">
-          <div className="flex size-12 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
-            <BookOpenIcon aria-hidden="true" />
-          </div>
-          <div className="flex max-w-md flex-col gap-2">
-            <h2 className="text-xl font-semibold tracking-normal">
-              No courses yet
-            </h2>
-            <p className="text-sm leading-6 text-muted-foreground">
-              When you buy a course, it will appear here.
-            </p>
-          </div>
-          <Button render={<Link href="/products" />} nativeButton={false}>
-            Browse products
-          </Button>
-        </div>
+        <EmptyState
+          icon={BookOpenIcon}
+          title="No courses yet"
+          description="When you buy a course, it will appear here."
+          action={
+            <Button render={<Link href="/products" />} nativeButton={false}>
+              Browse products
+            </Button>
+          }
+        />
       )}
     </main>
   );

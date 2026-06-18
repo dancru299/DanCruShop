@@ -42,11 +42,11 @@ export default function MarketingError({
             <RotateCcwIcon aria-hidden="true" className="mr-1.5 size-4" />
             Try again
           </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/products">Browse products</Link>
+          <Button render={<Link href="/products" />} nativeButton={false} variant="outline" size="sm">
+            Browse products
           </Button>
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/">Homepage</Link>
+          <Button render={<Link href="/" />} nativeButton={false} variant="ghost" size="sm">
+            Homepage
           </Button>
         </div>
       </div>

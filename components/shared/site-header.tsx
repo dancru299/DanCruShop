@@ -113,7 +113,7 @@ export async function SiteHeader() {
           <Link href="/products" className="transition-colors hover:text-foreground">
             Products
           </Link>
-          <Link href="/#danh-muc" className="transition-colors hover:text-foreground">
+          <Link href="/#categories" className="transition-colors hover:text-foreground">
             Categories
           </Link>
           <Link href="/blog" className="transition-colors hover:text-foreground">

@@ -33,7 +33,7 @@ function makeAdmin(
         single: vi.fn(async () => dequeue()),
         maybeSingle: vi.fn(async () => dequeue()),
         // The Supabase query builder is thenable (await chain).
-        then: (onFulfilled: unknown, onRejected: unknown) =>
+        then: (onFulfilled?: any, onRejected?: any) =>
           Promise.resolve()
             .then(() => dequeue())
             .then(onFulfilled, onRejected),

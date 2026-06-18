@@ -1,18 +1,20 @@
-import ReactMarkdown from "react-markdown"
-import { cn } from "@/lib/utils"
+import ReactMarkdown from "react-markdown";
+import type { ComponentProps } from "react";
+import { cn } from "@/lib/utils";
 
 type MdxContentProps = {
   content: string;
   className?: string;
+  components?: ComponentProps<typeof ReactMarkdown>["components"];
 };
 
-export function MdxContent({ content, className }: MdxContentProps) {
+export function MdxContent({ content, className, components }: MdxContentProps) {
   return (
     <article
       data-slot="mdx-content"
       className={cn(
         "prose prose-neutral max-w-none dark:prose-invert",
-        "prose-headings:font-bold prose-headings:tracking-tight",
+        "prose-headings:font-semibold prose-headings:tracking-tight",
         "prose-a:text-primary prose-a:no-underline hover:prose-a:underline",
         "prose-img:rounded-lg prose-img:border prose-img:bg-muted/30",
         "prose-pre:rounded-lg prose-pre:border prose-pre:bg-muted/50 dark:prose-pre:bg-muted/20 prose-pre:p-4",
@@ -20,7 +22,7 @@ export function MdxContent({ content, className }: MdxContentProps) {
         className
       )}
     >
-      <ReactMarkdown>{content}</ReactMarkdown>
+      <ReactMarkdown components={components}>{content}</ReactMarkdown>
     </article>
   );
 }

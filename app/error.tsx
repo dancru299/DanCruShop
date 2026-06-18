@@ -56,11 +56,9 @@ export default function GlobalError({
                 <RotateCcwIcon aria-hidden="true" className="mr-1.5 size-4" />
                 Try again
               </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/">
-                  <ArrowLeftIcon aria-hidden="true" className="mr-1.5 size-4" />
-                  Back to homepage
-                </Link>
+              <Button render={<Link href="/" />} nativeButton={false} variant="outline" size="sm">
+                <ArrowLeftIcon aria-hidden="true" className="mr-1.5 size-4" />
+                Back to homepage
               </Button>
             </div>
           </div>

@@ -20,6 +20,8 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AdminMetric } from "@/components/admin/admin-metric";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { requireAdmin } from "@/lib/auth/roles";
 import {
   getSupabaseErrorDetails,
@@ -500,7 +502,7 @@ async function getAdminOverviewData() {
 
   const activities: ActivityItem[] = [
     ...orders.slice(0, 5).map((order) => ({
-      label: order.status === "paid" ? "Paid order" : "Order activity",
+      label: order.status === "paid" ? "Đơn đã thanh toán" : "Hoạt động đơn hàng",
       meta: `${order.email} - ${formatMoney(order.total_cents, order.currency)}`,
       timestamp: order.created_at,
       tone:
@@ -512,13 +514,13 @@ async function getAdminOverviewData() {
     })),
     ...products.slice(0, 4).map((product) => ({
       label:
-        product.status === "published" ? "Product published" : "Product draft",
+        product.status === "published" ? "Sản phẩm đã đăng" : "Sản phẩm bản nháp",
       meta: product.title,
       timestamp: product.created_at,
       tone: product.status === "published" ? ("sky" as const) : ("violet" as const),
     })),
     ...posts.slice(0, 4).map((post) => ({
-      label: post.status === "published" ? "Post published" : "Post draft",
+      label: post.status === "published" ? "Bài viết đã đăng" : "Bài viết bản nháp",
       meta: post.title,
       timestamp: post.published_at ?? post.created_at,
       tone: post.status === "published" ? ("emerald" as const) : ("violet" as const),
@@ -605,39 +607,7 @@ function getLineChartPaths(points: TrendPoint[]) {
   return { areaPath, baseline, coords, height, linePath, width };
 }
 
-function MetricCard({
-  description,
-  Icon,
-  label,
-  tone,
-  value,
-}: {
-  description: string;
-  Icon: LucideIcon;
-  label: string;
-  tone: Tone;
-  value: string;
-}) {
-  return (
-    <div className="flex min-h-32 flex-col justify-between gap-4 rounded-lg border bg-card p-4 text-card-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-lg">
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-medium text-muted-foreground">{label}</p>
-        <span
-          className={cn(
-            "flex size-8 items-center justify-center rounded-lg",
-            toneClasses[tone]
-          )}
-        >
-          <Icon aria-hidden="true" className="size-4" />
-        </span>
-      </div>
-      <div className="flex flex-col gap-1">
-        <p className="text-2xl font-semibold tracking-normal">{value}</p>
-        <p className="text-xs leading-5 text-muted-foreground">{description}</p>
-      </div>
-    </div>
-  );
-}
+
 
 function LineChart({
   emptyLabel,
@@ -939,68 +909,64 @@ export default async function AdminOverviewPage() {
     ...data.topBuyers.map((buyer) => buyer.revenueCents)
   );
 
+  const headerActions = (
+    <div className="flex flex-wrap gap-2">
+      <Button render={<Link href="/admin/products/new" />} nativeButton={false}>
+        <PlusIcon aria-hidden="true" data-icon="inline-start" />
+        Sản phẩm mới
+      </Button>
+      <Button
+        variant="outline"
+        render={<Link href="/admin/orders" />}
+        nativeButton={false}
+      >
+        <ReceiptTextIcon aria-hidden="true" data-icon="inline-start" />
+        Đơn hàng
+      </Button>
+    </div>
+  );
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="flex max-w-3xl flex-col gap-2">
-          <p className="text-sm text-muted-foreground">Admin command center</p>
-          <h1 className="text-3xl font-semibold tracking-normal">
-            DanCruShop Overview
-          </h1>
-          <p className="text-sm leading-6 text-muted-foreground">
-            Track sales, cashflow, catalog health, buyer activity, content, and
-            the analytics modules that still need instrumentation.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <Button render={<Link href="/admin/products/new" />} nativeButton={false}>
-            <PlusIcon aria-hidden="true" data-icon="inline-start" />
-            New Product
-          </Button>
-          <Button
-            variant="outline"
-            render={<Link href="/admin/orders" />}
-            nativeButton={false}
-          >
-            <ReceiptTextIcon aria-hidden="true" data-icon="inline-start" />
-            Orders
-          </Button>
-        </div>
-      </div>
+      <AdminPageHeader
+        eyebrow="Trung tâm chỉ huy Admin"
+        title="Tổng quan DanCruShop"
+        description="Theo dõi doanh số, dòng tiền, trạng thái sản phẩm, hoạt động của khách hàng, bài viết blog và các số liệu phân tích."
+        action={headerActions}
+      />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
+        <AdminMetric
           description={`${getTrendLabel(currentRevenue, previousRevenue, (value) =>
             formatCompactMoney(value, data.primaryCurrency)
           )}`}
           Icon={CircleDollarSignIcon}
-          label="Revenue"
+          label="Doanh thu"
           tone="emerald"
           value={formatCompactMoney(data.totalRevenueCents, data.primaryCurrency)}
         />
-        <MetricCard
-          description={`${formatNumber(data.pendingOrders)} pending, ${formatNumber(
+        <AdminMetric
+          description={`${formatNumber(data.pendingOrders)} chờ duyệt, ${formatNumber(
             data.refundedOrders
-          )} refunded`}
+          )} đã hoàn tiền`}
           Icon={ReceiptTextIcon}
-          label="Orders"
+          label="Đơn hàng"
           tone="sky"
           value={formatNumber(data.orders.length)}
         />
-        <MetricCard
-          description={`${formatNumber(data.publishedProducts)} published, ${formatNumber(
+        <AdminMetric
+          description={`${formatNumber(data.publishedProducts)} đã đăng, ${formatNumber(
             data.draftProducts
-          )} drafts`}
+          )} bản nháp`}
           Icon={PackageIcon}
-          label="Products"
+          label="Sản phẩm"
           tone="violet"
           value={formatNumber(data.totalProducts)}
         />
-        <MetricCard
-          description={`${formatNumber(data.newCustomers7d)} new profiles in 7d`}
+        <AdminMetric
+          description={`${formatNumber(data.newCustomers7d)} khách mới trong 7 ngày`}
           Icon={UsersIcon}
-          label="Customers"
+          label="Khách hàng"
           tone="amber"
           value={formatNumber(data.customers)}
         />
@@ -1008,32 +974,32 @@ export default async function AdminOverviewPage() {
 
       <div className="grid gap-4 xl:grid-cols-[1.35fr_0.65fr]">
         <Panel
-          description="Primary currency only. Mixed-currency orders are kept out of this line until multi-currency reporting is added."
-          title="Cashflow trend"
-          action={<Badge variant="secondary">Last 14 days</Badge>}
+          description="Chỉ hiển thị tiền tệ chính. Đơn hàng khác tiền tệ sẽ không xuất hiện tại đây."
+          title="Xu hướng dòng tiền"
+          action={<Badge variant="secondary">14 ngày qua</Badge>}
         >
           <div className="mb-5 grid gap-4 sm:grid-cols-3">
             <div>
-              <p className="text-xs text-muted-foreground">Paid revenue</p>
+              <p className="text-xs text-muted-foreground">Doanh thu thực nhận</p>
               <p className="text-2xl font-semibold">
                 {formatMoney(data.totalRevenueCents, data.primaryCurrency)}
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Paid orders</p>
+              <p className="text-xs text-muted-foreground">Đơn đã thanh toán</p>
               <p className="text-2xl font-semibold">
                 {formatNumber(data.paidOrders.length)}
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Active access</p>
+              <p className="text-xs text-muted-foreground">Giao dịch hoạt động</p>
               <p className="text-2xl font-semibold">
                 {formatNumber(data.activePurchases)}
               </p>
             </div>
           </div>
           <LineChart
-            emptyLabel="No paid orders in this period"
+            emptyLabel="Không có đơn hàng nào được thanh toán trong khoảng thời gian này"
             formatter={(value) => formatCompactMoney(value, data.primaryCurrency)}
             gradientId="cashflowGradient"
             points={data.revenueTrend}
@@ -1042,14 +1008,14 @@ export default async function AdminOverviewPage() {
         </Panel>
 
         <Panel
-          description="Anonymous Supabase events from the last 7 days."
-          title="Interest signals"
+          description="Sự kiện ẩn danh từ hệ thống trong 7 ngày gần nhất."
+          title="Tín hiệu quan tâm"
           action={<GaugeIcon aria-hidden="true" className="size-4 text-muted-foreground" />}
         >
           <div className="flex flex-col gap-5">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-xs text-muted-foreground">Orders in 7d</p>
+                <p className="text-xs text-muted-foreground">Đơn trong 7 ngày</p>
                 <p className="text-2xl font-semibold">
                   {formatNumber(data.orders7d)}
                 </p>
@@ -1058,26 +1024,26 @@ export default async function AdminOverviewPage() {
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Visitors</p>
+                <p className="text-xs text-muted-foreground">Khách ghé thăm</p>
                 <p className="text-2xl font-semibold">
                   {formatNumber(data.betaFunnel.uniqueVisitors)}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {formatNumber(data.betaFunnel.pageViews)} page views
+                  {formatNumber(data.betaFunnel.pageViews)} lượt xem trang
                 </p>
               </div>
             </div>
             <MiniBars points={data.analyticsTrend} tone="sky" />
             <div className="rounded-lg border p-3">
-              <FunnelRow label="Product views" value={data.betaFunnel.productViews} />
-              <FunnelRow label="Add to cart" value={data.betaFunnel.addToCart} />
+              <FunnelRow label="Lượt xem sản phẩm" value={data.betaFunnel.productViews} />
+              <FunnelRow label="Thêm vào giỏ" value={data.betaFunnel.addToCart} />
               <FunnelRow
-                label="Checkout starts"
+                label="Bắt đầu thanh toán"
                 value={data.betaFunnel.checkoutStarts}
               />
-              <FunnelRow label="Paid orders" value={data.paidOrders.length} />
+              <FunnelRow label="Đơn đã thanh toán" value={data.paidOrders.length} />
               <FunnelRow
-                label="Download starts"
+                label="Lượt tải tài nguyên"
                 value={data.betaFunnel.downloadStarts}
               />
             </div>
@@ -1087,13 +1053,13 @@ export default async function AdminOverviewPage() {
 
       <div className="grid gap-4 xl:grid-cols-2">
         <Panel
-          description="Ranked by paid units sold from order items."
-          title="Top 5 products"
+          description="Xếp hạng dựa trên số lượng sản phẩm thực tế đã được bán."
+          title="Top 5 sản phẩm bán chạy"
           action={<ShoppingBagIcon aria-hidden="true" className="size-4 text-muted-foreground" />}
         >
           <RankedList
             currency={data.primaryCurrency}
-            emptyLabel="No paid product sales yet."
+            emptyLabel="Chưa có sản phẩm nào được bán."
             items={data.topProducts}
             maxValue={maxProductUnits}
             type="products"
@@ -1101,13 +1067,13 @@ export default async function AdminOverviewPage() {
         </Panel>
 
         <Panel
-          description="Best buyers by paid order revenue."
-          title="Top buyers"
+          description="Những khách hàng có tổng giá trị mua hàng cao nhất."
+          title="Khách hàng tiêu biểu"
           action={<UserRoundIcon aria-hidden="true" className="size-4 text-muted-foreground" />}
         >
           <RankedList
             currency={data.primaryCurrency}
-            emptyLabel="No paid buyers yet."
+            emptyLabel="Chưa có khách mua hàng."
             items={data.topBuyers}
             maxValue={maxBuyerRevenue}
             type="buyers"
@@ -1117,21 +1083,21 @@ export default async function AdminOverviewPage() {
 
       <div className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
         <Panel
-          description="Content attention is ready for view tracking, but currently sorted by newest published posts."
-          title="Content radar"
+          description="Sắp xếp theo các bài viết được xuất bản mới nhất."
+          title="Radar bài viết"
           action={<FileTextIcon aria-hidden="true" className="size-4 text-muted-foreground" />}
         >
           <div className="mb-4 grid grid-cols-3 gap-3 text-sm">
             <div>
-              <p className="text-xs text-muted-foreground">Published</p>
+              <p className="text-xs text-muted-foreground">Đã đăng</p>
               <p className="text-xl font-semibold">{formatNumber(data.publishedPosts)}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Drafts</p>
+              <p className="text-xs text-muted-foreground">Nháp</p>
               <p className="text-xl font-semibold">{formatNumber(data.draftPosts)}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Views</p>
+              <p className="text-xs text-muted-foreground">Lượt xem</p>
               <p className="text-xl font-semibold">--</p>
             </div>
           </div>
@@ -1148,50 +1114,50 @@ export default async function AdminOverviewPage() {
                       {formatShortDate(post.published_at ?? post.created_at)}
                     </p>
                   </div>
-                  <Badge variant="outline">Views pending</Badge>
+                  <Badge variant="outline">Đang chờ đo</Badge>
                 </div>
               ))
             ) : (
               <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-                No published posts yet.
+                Chưa có bài viết nào được xuất bản.
               </div>
             )}
           </div>
         </Panel>
 
         <Panel
-          description="A single place to see what is live and what still needs instrumentation."
-          title="Tracking coverage"
+          description="Tổng hợp các kênh dữ liệu đang chạy và các phần đang phát triển."
+          title="Phạm vi theo dõi"
           action={<ActivityIcon aria-hidden="true" className="size-4 text-muted-foreground" />}
         >
           <CoverageRow
-            description="Orders, revenue, order status, and purchase access are available now."
-            label="Sales and cashflow"
-            status="Live"
+            description="Đơn hàng, doanh thu, trạng thái và quyền truy cập tải xuống đã hoạt động."
+            label="Doanh số và dòng tiền"
+            status="Hoạt động"
             tone="emerald"
           />
           <CoverageRow
-            description="Top products are calculated from paid order items."
-            label="Product performance"
-            status="Live"
+            description="Thống kê sản phẩm bán chạy nhất được tính từ đơn hàng đã thanh toán."
+            label="Hiệu suất sản phẩm"
+            status="Hoạt động"
             tone="sky"
           />
           <CoverageRow
-            description="Page views are live; content-level ranking can come after beta traffic stabilizes."
-            label="Blog attention"
-            status="Partial"
+            description="Lượt xem bài viết đã hoạt động; bảng xếp hạng chi tiết sẽ có sau khi lưu lượng ổn định."
+            label="Tương tác Blog"
+            status="Một phần"
             tone="violet"
           />
           <CoverageRow
-            description="Needs product_feedback or comments table with moderation status."
-            label="Feedback inbox"
-            status="Next"
+            description="Cần thêm bảng đánh giá phản hồi hoặc bình luận của người dùng."
+            label="Hòm thư góp ý"
+            status="Tiếp theo"
             tone="amber"
           />
           <CoverageRow
-            description="Anonymous events now track page views, product views, cart adds, checkout starts, and downloads."
-            label="Traffic analytics"
-            status="Live"
+            description="Sự kiện ẩn danh theo dõi lượt xem trang, xem sản phẩm, thêm giỏ, checkout và tải file."
+            label="Phân tích lưu lượng"
+            status="Hoạt động"
             tone="emerald"
           />
         </Panel>
@@ -1199,8 +1165,8 @@ export default async function AdminOverviewPage() {
 
       <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <Panel
-          description="A quick feed from orders, catalog changes, and publishing activity."
-          title="Recent activity"
+          description="Luồng cập nhật nhanh từ các đơn hàng mới, thay đổi sản phẩm hoặc hoạt động đăng bài."
+          title="Hoạt động gần đây"
           action={<Clock3Icon aria-hidden="true" className="size-4 text-muted-foreground" />}
         >
           {data.activity.length > 0 ? (
@@ -1227,40 +1193,38 @@ export default async function AdminOverviewPage() {
             </div>
           ) : (
             <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-              Activity will appear after products, posts, or orders are created.
+              Hoạt động sẽ xuất hiện sau khi sản phẩm, bài viết hoặc đơn hàng được tạo.
             </div>
           )}
         </Panel>
 
         <Panel
-          description="Future comments and ratings can land here as a moderation queue."
-          title="Feedback preview"
+          description="Nơi quản lý và kiểm duyệt các bình luận và phản hồi từ khách hàng."
+          title="Xem trước phản hồi"
           action={<MessageSquareIcon aria-hidden="true" className="size-4 text-muted-foreground" />}
         >
           <div className="flex flex-col gap-4">
             <div className="rounded-lg border border-dashed p-4">
               <div className="mb-3 flex items-center justify-between gap-3">
-                <p className="text-sm font-medium">Product feedback</p>
-                <Badge variant="outline">Not connected</Badge>
+                <p className="text-sm font-medium">Đánh giá sản phẩm</p>
+                <Badge variant="outline">Chưa kết nối</Badge>
               </div>
               <p className="text-sm leading-6 text-muted-foreground">
-                When product comments, ratings, or testimonials are added, this
-                panel can show pending reviews, sentiment, product mentions, and
-                moderation actions.
+                Khi các đánh giá, nhận xét từ người mua được tích hợp, bảng điều khiển này sẽ hiển thị các phản hồi chờ duyệt, điểm đánh giá trung bình và hành động kiểm duyệt.
               </p>
             </div>
             <div className="grid grid-cols-3 gap-3 text-center text-sm">
               <div className="rounded-lg bg-muted/40 p-3">
                 <p className="text-lg font-semibold">--</p>
-                <p className="text-xs text-muted-foreground">Pending</p>
+                <p className="text-xs text-muted-foreground">Chờ duyệt</p>
               </div>
               <div className="rounded-lg bg-muted/40 p-3">
                 <p className="text-lg font-semibold">--</p>
-                <p className="text-xs text-muted-foreground">Rating</p>
+                <p className="text-xs text-muted-foreground">Điểm số</p>
               </div>
               <div className="rounded-lg bg-muted/40 p-3">
                 <p className="text-lg font-semibold">--</p>
-                <p className="text-xs text-muted-foreground">Mentions</p>
+                <p className="text-xs text-muted-foreground">Đề cập</p>
               </div>
             </div>
           </div>
@@ -1274,11 +1238,10 @@ export default async function AdminOverviewPage() {
           </span>
           <div className="flex flex-col gap-1">
             <h2 className="text-base font-semibold tracking-normal">
-              Beta analytics milestone
+              Cột mốc phân tích Beta
             </h2>
             <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-              Supabase events now capture the launch funnel. Next useful step is
-              alerting on checkout, webhook, email, and download failures.
+              Hệ thống sự kiện Supabase hiện đã ghi nhận phễu ra mắt sản phẩm. Bước hữu ích tiếp theo là cảnh báo khi checkout, webhook, email hoặc tải tài nguyên bị lỗi.
             </p>
           </div>
         </div>
@@ -1287,7 +1250,7 @@ export default async function AdminOverviewPage() {
           render={<Link href="/admin/products" />}
           nativeButton={false}
         >
-          Manage catalog
+          Quản lý sản phẩm
           <ArrowUpRightIcon aria-hidden="true" data-icon="inline-end" />
         </Button>
       </div>

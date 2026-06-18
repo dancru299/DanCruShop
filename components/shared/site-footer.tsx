@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 const productLinks = [
   { label: "All products", href: "/products" },
-  { label: "Categories", href: "/#danh-muc" },
+  { label: "Categories", href: "/#categories" },
   { label: "Blog", href: "/blog" },
 ];
 

@@ -20,6 +20,7 @@ import {
 } from "@/actions/checkout.actions";
 import { applyCouponToCart } from "@/actions/coupon.actions";
 import { useCart, type CartItem } from "@/components/cart/cart-provider";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -128,23 +129,17 @@ export function CartPageClient() {
   if (items.length === 0) {
     return (
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-12 md:py-16">
-        <div className="flex min-h-96 flex-col items-center justify-center gap-5 rounded-lg border bg-card p-8 text-center text-card-foreground shadow-sm">
-          <div className="flex size-14 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
-            <ShoppingCartIcon aria-hidden="true" className="size-6" />
-          </div>
-          <div className="flex max-w-md flex-col gap-2">
-            <h1 className="text-2xl font-semibold tracking-normal">
-              Your cart is empty
-            </h1>
-            <p className="text-sm leading-6 text-muted-foreground">
-              Pick products from the storefront and check out in one place.
-            </p>
-          </div>
-          <Button render={<Link href="/products" />} nativeButton={false}>
-            Browse products
-            <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
-          </Button>
-        </div>
+        <EmptyState
+          icon={ShoppingCartIcon}
+          title="Your cart is empty"
+          description="Pick products from the storefront and check out in one place."
+          action={
+            <Button render={<Link href="/products" />} nativeButton={false}>
+              Browse products
+              <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
+            </Button>
+          }
+        />
       </div>
     );
   }

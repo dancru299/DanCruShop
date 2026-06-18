@@ -41,7 +41,7 @@ const navItems = [
   },
   {
     description: "Quickly browse the resource categories in the shop.",
-    href: "/#danh-muc",
+    href: "/#categories",
     icon: Grid2x2Icon,
     label: "Categories",
   },

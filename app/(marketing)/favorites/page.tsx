@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { HeartIcon } from "lucide-react";
 
 import { ProductCard } from "@/components/products/product-card";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import {
   getSupabaseErrorDetails,
@@ -102,26 +103,20 @@ export default async function FavoritesPage() {
             ))}
           </div>
         ) : (
-          <div className="flex min-h-72 flex-col items-center justify-center gap-4 rounded-lg border bg-card p-8 text-center">
-            <div className="flex size-12 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
-              <HeartIcon aria-hidden="true" />
-            </div>
-            <div className="flex max-w-md flex-col gap-2">
-              <h2 className="text-xl font-semibold tracking-normal">
-                No favorite products yet
-              </h2>
-              <p className="text-sm leading-6 text-muted-foreground">
-                Tap the heart icon on a product to save it here.
-              </p>
-            </div>
-            <Button
-              render={<Link href="/products" />}
-              nativeButton={false}
-              variant="outline"
-            >
-              Browse products
-            </Button>
-          </div>
+          <EmptyState
+            icon={HeartIcon}
+            title="No favorite products yet"
+            description="Tap the heart icon on a product to save it here."
+            action={
+              <Button
+                render={<Link href="/products" />}
+                nativeButton={false}
+                variant="outline"
+              >
+                Browse products
+              </Button>
+            }
+          />
         )}
       </section>
     </div>

@@ -58,11 +58,9 @@ export default function ShopError({
             <RotateCcwIcon aria-hidden="true" className="mr-1.5 size-4" />
             Try again
           </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/cart">
-              <ArrowLeftIcon aria-hidden="true" className="mr-1.5 size-4" />
-              Back to cart
-            </Link>
+          <Button render={<Link href="/cart" />} nativeButton={false} variant="outline" size="sm">
+            <ArrowLeftIcon aria-hidden="true" className="mr-1.5 size-4" />
+            Back to cart
           </Button>
         </div>
       </div>

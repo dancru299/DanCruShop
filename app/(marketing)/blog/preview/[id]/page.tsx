@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isValidElement, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
+import { MdxContent } from "@/components/blog/mdx-content";
 import {
   ArrowLeftIcon,
   EyeIcon,
@@ -42,7 +43,7 @@ function slugifyHeading(value: string) {
 }
 
 function formatDate(value: string | null, fallback: string) {
-  return new Intl.DateTimeFormat("vi-VN", { dateStyle: "long" }).format(
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(
     new Date(value ?? fallback)
   );
 }
@@ -157,75 +158,73 @@ export default async function BlogPreviewPage({
       </div>
 
       <main className="mx-auto grid w-full max-w-6xl items-start gap-10 px-4 pb-16 pt-2 md:pb-20 lg:grid-cols-[minmax(0,7fr)_minmax(18rem,3fr)]">
-        <article className="min-w-0 rounded-lg border bg-card/60 p-5 shadow-sm md:p-8">
-          <ReactMarkdown
-            components={{
-              h2: ({ children }) => {
-                const title = getNodeText(children);
-                const headingId = headingIdMap.get(title) ?? slugifyHeading(title);
-                return (
-                  <h2
-                    id={headingId}
-                    className="scroll-mt-24 border-t pt-8 text-2xl font-semibold leading-tight tracking-normal first:border-t-0 first:pt-0 md:text-3xl"
-                  >
-                    {children}
-                  </h2>
-                );
-              },
-              h3: ({ children }) => {
-                const title = getNodeText(children);
-                const headingId = headingIdMap.get(title) ?? slugifyHeading(title);
-                return (
-                  <h3
-                    id={headingId}
-                    className="scroll-mt-24 text-xl font-semibold leading-8 tracking-normal"
-                  >
-                    {children}
-                  </h3>
-                );
-              },
-              p: ({ children }) => (
-                <p className="text-base leading-8 text-muted-foreground">{children}</p>
-              ),
-              a: ({ href, children }) => (
-                <a
-                  href={href}
-                  target={href?.startsWith("http") ? "_blank" : undefined}
-                  rel={href?.startsWith("http") ? "noreferrer noopener" : undefined}
-                  className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
+        <MdxContent
+          className="min-w-0 rounded-lg border bg-card/60 p-5 shadow-sm md:p-8"
+          content={post.content ?? ""}
+          components={{
+            h2: ({ children }) => {
+              const title = getNodeText(children);
+              const headingId = headingIdMap.get(title) ?? slugifyHeading(title);
+              return (
+                <h2
+                  id={headingId}
+                  className="scroll-mt-24 border-t pt-8 text-2xl font-semibold leading-tight tracking-normal first:border-t-0 first:pt-0 md:text-3xl"
                 >
                   {children}
-                </a>
-              ),
-              ul: ({ children }) => (
-                <ul className="grid gap-3 pl-0 text-muted-foreground">{children}</ul>
-              ),
-              ol: ({ children }) => (
-                <ol className="grid list-decimal gap-3 pl-5 text-muted-foreground">{children}</ol>
-              ),
-              li: ({ children }) => (
-                <li className="leading-7 marker:text-foreground">{children}</li>
-              ),
-              blockquote: ({ children }) => (
-                <blockquote className="rounded-lg border-l-4 bg-muted/50 px-5 py-4 text-muted-foreground">
+                </h2>
+              );
+            },
+            h3: ({ children }) => {
+              const title = getNodeText(children);
+              const headingId = headingIdMap.get(title) ?? slugifyHeading(title);
+              return (
+                <h3
+                  id={headingId}
+                  className="scroll-mt-24 text-xl font-semibold leading-8 tracking-normal"
+                >
                   {children}
-                </blockquote>
-              ),
-              pre: ({ children }) => (
-                <pre className="overflow-x-auto rounded-lg border bg-muted p-4 text-sm">
-                  {children}
-                </pre>
-              ),
-              code: ({ children }) => (
-                <code className="rounded-md bg-muted px-1.5 py-0.5 text-sm text-foreground">
-                  {children}
-                </code>
-              ),
-            }}
-          >
-            {post.content ?? ""}
-          </ReactMarkdown>
-        </article>
+                </h3>
+              );
+            },
+            p: ({ children }) => (
+              <p className="text-base leading-8 text-muted-foreground">{children}</p>
+            ),
+            a: ({ href, children }) => (
+              <a
+                href={href}
+                target={href?.startsWith("http") ? "_blank" : undefined}
+                rel={href?.startsWith("http") ? "noreferrer noopener" : undefined}
+                className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
+              >
+                {children}
+              </a>
+            ),
+            ul: ({ children }) => (
+              <ul className="grid gap-3 pl-0 text-muted-foreground">{children}</ul>
+            ),
+            ol: ({ children }) => (
+              <ol className="grid list-decimal gap-3 pl-5 text-muted-foreground">{children}</ol>
+            ),
+            li: ({ children }) => (
+              <li className="leading-7 marker:text-foreground">{children}</li>
+            ),
+            blockquote: ({ children }) => (
+              <blockquote className="rounded-lg border-l-4 bg-muted/50 px-5 py-4 text-muted-foreground">
+                {children}
+              </blockquote>
+            ),
+            pre: ({ children }) => (
+              <pre className="overflow-x-auto rounded-lg border bg-muted p-4 text-sm">
+                {children}
+              </pre>
+            ),
+            code: ({ children }) => (
+              <code className="rounded-md bg-muted px-1.5 py-0.5 text-sm text-foreground">
+                {children}
+              </code>
+            ),
+          }}
+        />
 
         {headings.length > 0 ? (
           <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">

@@ -176,7 +176,7 @@ function getProductTags(product: ProductDetail, categoryLabels: string[]) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("vi-VN", {
+  return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
   }).format(new Date(value));
 }
@@ -349,7 +349,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                   rel="noreferrer"
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Xem demo
+                  View demo
                   <ExternalLinkIcon aria-hidden="true" className="size-4" />
                 </Link>
               ) : null}
@@ -360,7 +360,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                   rel="noreferrer"
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Xem preview
+                  View preview
                   <ExternalLinkIcon aria-hidden="true" className="size-4" />
                 </Link>
               ) : null}

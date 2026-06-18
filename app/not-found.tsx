@@ -21,17 +21,15 @@ export default function NotFound() {
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <Button asChild size="sm">
-            <Link href="/">
-              <ArrowLeftIcon aria-hidden="true" className="mr-1.5 size-4" />
-              Back to homepage
-            </Link>
+          <Button render={<Link href="/" />} nativeButton={false} size="sm">
+            <ArrowLeftIcon aria-hidden="true" className="mr-1.5 size-4" />
+            Back to homepage
           </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/products">Browse products</Link>
+          <Button render={<Link href="/products" />} nativeButton={false} variant="outline" size="sm">
+            Browse products
           </Button>
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/blog">Read blog</Link>
+          <Button render={<Link href="/blog" />} nativeButton={false} variant="ghost" size="sm">
+            Read blog
           </Button>
         </div>
       </div>
