@@ -6,7 +6,19 @@ description: Use when building or editing any UI page/component in DanCruShop (a
 # DanCruShop UI Design System
 
 Next.js (App Router) + Tailwind v4 + shadcn-style primitives in `components/ui/`.
-Copy is **Vietnamese**. Reference template for admin: `app/(dashboard)/admin/products/`.
+Reference template for admin: `app/(dashboard)/admin/products/`.
+
+## Copy language (split by audience)
+
+- **Admin** (`app/(dashboard)/admin/**`, admin forms/tables, admin-only messages such as the
+  GitHub repo "check connection" result) → **Vietnamese**.
+- **Everything else** — customer-facing storefront (`app/(marketing)/**`, `app/(shop)/**`,
+  `app/(auth)/**`, product/compare/cart pages, emails, toasts shown to shoppers) → **English**.
+
+Never ship mixed-language customer UI. For config shared between admin and storefront
+(e.g. `lib/products/specs.ts`), keep the Vietnamese `label` for the admin form and add an
+English `labelEn` that customer-facing components consume. Match `Intl` locales too
+(`en-US` for customer-facing dates).
 
 ## Golden rules
 
@@ -98,5 +110,5 @@ URL params (`ProductSearchBar`, `searchPublishedProducts`), unlike admin's local
 - [ ] Reused shared primitives (no duplicated header/metric/search/menu).
 - [ ] List page has search at top + metrics + action-menu popup; create/edit on own routes.
 - [ ] Empty state + loading (`isPending`) handled; toasts on mutation result.
-- [ ] Vietnamese copy; tokens not hex; matches products page spacing.
+- [ ] Copy language matches audience (admin = Vietnamese, storefront = English); tokens not hex; matches products page spacing.
 - [ ] `npx tsc --noEmit` (ignore `RepoTemplate/`) and `npx eslint` clean. Do **not** run `next dev`.
