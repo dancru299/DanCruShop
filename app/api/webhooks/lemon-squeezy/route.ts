@@ -5,6 +5,7 @@ import {
   processOrderCreatedEvent,
   processOrderRefundedEvent,
 } from "@/lib/payments/lemon-squeezy-webhook";
+import { notifyWebhookFailure } from "@/lib/payments/webhook-failure-alert";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -221,7 +222,15 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     console.error("Unexpected Lemon Squeezy webhook handler error", error);
+
+    // Fire-and-forget — don't block the 500 response on alert delivery.
+    notifyWebhookFailure({
+      message,
+      provider: "lemon_squeezy",
+      providerEventId,
+    });
 
     return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
   }
