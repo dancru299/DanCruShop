@@ -43,7 +43,7 @@ const CATEGORY_META: Record<
   },
 }
 
-const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
 })
 
@@ -59,10 +59,10 @@ export function ProductInfoTabs({ overview, commits }: ProductInfoTabsProps) {
   return (
     <Tabs defaultValue="overview">
       <TabsList>
-        <TabsTrigger value="overview">Chi tiết sản phẩm</TabsTrigger>
+        <TabsTrigger value="overview">Product details</TabsTrigger>
         <TabsTrigger value="changelog">
           <HistoryIcon aria-hidden="true" />
-          Lịch sử cập nhật
+          Changelog
         </TabsTrigger>
       </TabsList>
 
@@ -129,7 +129,7 @@ export function ProductInfoTabs({ overview, commits }: ProductInfoTabsProps) {
           </ol>
         ) : (
           <div className="rounded-lg border border-dashed bg-card/40 p-6 text-center text-sm text-muted-foreground">
-            Chưa có lịch sử cập nhật để hiển thị.
+            No changelog to display yet.
           </div>
         )}
       </TabsContent>

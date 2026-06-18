@@ -60,7 +60,7 @@ function toCartProduct(product: CompareProductData): CartProduct {
 function Dash() {
   return (
     <MinusIcon
-      aria-label="Không có"
+      aria-label="Not included"
       className="size-4 text-muted-foreground/40"
     />
   );
@@ -69,7 +69,7 @@ function Dash() {
 function BoolCell({ value }: { value: boolean }) {
   return value ? (
     <CheckIcon
-      aria-label="Có hỗ trợ"
+      aria-label="Supported"
       className="size-5 text-emerald-500 drop-shadow-[0_0_6px_rgba(16,185,129,0.45)]"
     />
   ) : (
@@ -80,11 +80,11 @@ function BoolCell({ value }: { value: boolean }) {
 function buildGroups(): GroupDef[] {
   const overview: GroupDef = {
     id: "overview",
-    label: "Tổng quan",
+    label: "Overview",
     rows: [
       {
         id: "price",
-        label: "Giá bán",
+        label: "Price",
         signature: (product) => String(product.price_cents),
         render: (product) => {
           const discount = getProductDiscount(product);
@@ -105,7 +105,7 @@ function buildGroups(): GroupDef[] {
       },
       {
         id: "type",
-        label: "Loại sản phẩm",
+        label: "Product type",
         signature: (product) => product.product_type,
         render: (product) => (
           <Badge variant="outline">
@@ -115,7 +115,7 @@ function buildGroups(): GroupDef[] {
       },
       {
         id: "rating",
-        label: "Đánh giá",
+        label: "Rating",
         signature: (product) =>
           `${product.rating.average.toFixed(1)}|${product.rating.count}`,
         render: (product) =>
@@ -133,7 +133,7 @@ function buildGroups(): GroupDef[] {
               </span>
             </span>
           ) : (
-            <span className="text-sm text-muted-foreground">Chưa có</span>
+            <span className="text-sm text-muted-foreground">Not rated</span>
           ),
       },
     ],
@@ -141,10 +141,10 @@ function buildGroups(): GroupDef[] {
 
   const specGroups: GroupDef[] = SPEC_GROUPS.map((group) => ({
     id: group.id,
-    label: group.label,
+    label: group.labelEn,
     rows: group.fields.map((field) => ({
       id: field.key,
-      label: field.label,
+      label: field.labelEn,
       signature: (product) => {
         const value = readSpecValue(product.metadata, field);
         if (value.type === "boolean") {
@@ -174,7 +174,7 @@ function buildGroups(): GroupDef[] {
                   variant="outline"
                   className={cn("h-5 px-2", option?.className)}
                 >
-                  {option?.label ?? item}
+                  {option?.labelEn ?? option?.label ?? item}
                 </Badge>
               );
             })}
@@ -266,7 +266,7 @@ export function CompareMatrix({
           onChange={(event) => setDiffOnly(event.target.checked)}
           className="size-4 accent-primary"
         />
-        Chỉ hiện điểm khác biệt
+        Show differences only
       </label>
 
       <div className="hidden overflow-x-auto md:block">
@@ -299,7 +299,7 @@ export function CompareMatrix({
                   </Link>
                   <button
                     type="button"
-                    aria-label={`Bỏ ${product.title} khỏi so sánh`}
+                    aria-label={`Remove ${product.title} from comparison`}
                     onClick={() => removeColumn(product)}
                     className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   >
@@ -330,7 +330,7 @@ export function CompareMatrix({
                   size="sm"
                   className="mt-auto w-full"
                 >
-                  Thêm vào giỏ
+                  Add to cart
                 </AddToCartButton>
               </div>
             );
@@ -407,7 +407,7 @@ export function CompareMatrix({
                 className="sticky top-16 z-30 flex flex-col gap-2 border-b border-l bg-background/95 p-2 backdrop-blur-xl"
               >
                 <select
-                  aria-label={`Chọn sản phẩm cột ${col === "a" ? 1 : 2}`}
+                  aria-label={`Select product for column ${col === "a" ? 1 : 2}`}
                   value={col === "a" ? mobilePair.a : mobilePair.b}
                   onChange={(event) => {
                     const index = Number(event.target.value);
@@ -440,7 +440,7 @@ export function CompareMatrix({
                   size="sm"
                   className="mt-auto w-full"
                 >
-                  Thêm
+                  Add
                 </AddToCartButton>
               </div>
             );

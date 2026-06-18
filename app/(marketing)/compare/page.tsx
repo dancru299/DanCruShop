@@ -7,7 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { getCompareProducts } from "@/lib/supabase/queries/compare";
 
 export const metadata: Metadata = {
-  title: "So sánh sản phẩm",
+  title: "Compare products",
   robots: { index: false, follow: false },
 };
 
@@ -40,17 +40,17 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
           className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeftIcon aria-hidden="true" className="size-4" />
-          Tiếp tục xem sản phẩm
+          Continue browsing products
         </Link>
         <div className="flex items-center gap-3">
           <GitCompareIcon aria-hidden="true" className="size-6" />
           <h1 className="text-3xl font-semibold tracking-normal">
-            So sánh kỹ thuật
+            Technical comparison
           </h1>
         </div>
         <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-          Đối chiếu stack công nghệ, tính năng tích hợp và chính sách bản quyền
-          giữa các sản phẩm để chọn đúng starter kit cho dự án của bạn.
+          Compare the tech stack, integrations, and licensing across products to
+          pick the right starter kit for your project.
         </p>
       </div>
 
@@ -64,18 +64,18 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
           />
           <div className="grid gap-1">
             <p className="text-base font-medium">
-              Cần ít nhất 2 sản phẩm để so sánh
+              You need at least 2 products to compare
             </p>
             <p className="text-sm text-muted-foreground">
-              Bấm nút so sánh trên thẻ sản phẩm để thêm vào danh sách, rồi quay
-              lại đây.
+              Tap the compare button on a product card to add it to your list,
+              then come back here.
             </p>
           </div>
           <Link
             href="/products"
             className={buttonVariants({ variant: "default", size: "sm" })}
           >
-            Khám phá sản phẩm
+            Explore products
           </Link>
         </div>
       )}

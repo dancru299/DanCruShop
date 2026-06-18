@@ -17,8 +17,8 @@ export function CompareButton({ className, product }: CompareButtonProps) {
   const { isComparing, toggle, isLoaded } = useCompare();
   const active = isComparing(product.id);
   const label = active
-    ? "Bỏ khỏi danh sách so sánh"
-    : "Thêm vào danh sách so sánh";
+    ? "Remove from comparison"
+    : "Add to comparison";
 
   return (
     <button

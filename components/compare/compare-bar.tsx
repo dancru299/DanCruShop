@@ -52,7 +52,7 @@ export function CompareBar() {
                 )}
                 <button
                   type="button"
-                  aria-label={`Bỏ ${item.title}`}
+                  aria-label={`Remove ${item.title}`}
                   onClick={() => remove(item.id)}
                   className="absolute inset-0 flex items-center justify-center bg-black/55 text-white opacity-0 transition-opacity hover:opacity-100"
                 >
@@ -64,12 +64,12 @@ export function CompareBar() {
 
           <div className="min-w-0">
             <p className="text-sm font-semibold">
-              Đã chọn {count}/{max} sản phẩm
+              {count}/{max} products selected
             </p>
             <p className="truncate text-xs text-muted-foreground">
               {canCompare
-                ? "Sẵn sàng so sánh kỹ thuật"
-                : "Chọn thêm ít nhất 2 sản phẩm để so sánh"}
+                ? "Ready for technical comparison"
+                : "Select at least 2 products to compare"}
             </p>
           </div>
         </div>
@@ -79,7 +79,7 @@ export function CompareBar() {
           onClick={clear}
           className="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
-          Xoá tất cả
+          Clear all
         </button>
 
         <Link
@@ -92,7 +92,7 @@ export function CompareBar() {
             !canCompare && "pointer-events-none opacity-50"
           )}
         >
-          So sánh ngay
+          Compare now
           <ArrowRightIcon aria-hidden="true" data-icon="inline-end" />
         </Link>
       </div>
