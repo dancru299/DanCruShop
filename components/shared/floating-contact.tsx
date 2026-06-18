@@ -46,7 +46,7 @@ export function FloatingContact({ channels }: { channels: ContactChannels }) {
   if (channels.zalo.url) {
     items.push({
       key: "zalo",
-      label: "Chat Zalo",
+      label: "Chat on Zalo",
       href: channels.zalo.url,
       iconUrl: channels.zalo.icon,
       className: "bg-[#0068ff] text-white hover:bg-[#0058db]",
@@ -76,7 +76,7 @@ export function FloatingContact({ channels }: { channels: ContactChannels }) {
   if (channels.phone.url) {
     items.push({
       key: "phone",
-      label: "Gọi ngay",
+      label: "Call now",
       href: normalizePhoneHref(channels.phone.url),
       iconUrl: channels.phone.icon,
       className: "bg-emerald-500 text-white hover:bg-emerald-600",
@@ -136,7 +136,7 @@ export function FloatingContact({ channels }: { channels: ContactChannels }) {
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        aria-label={open ? "Đóng liên hệ" : "Liên hệ hỗ trợ"}
+        aria-label={open ? "Close contact" : "Contact support"}
         className="relative flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl ring-4 ring-primary/15 transition-transform duration-200 hover:scale-105"
       >
         {!open ? (

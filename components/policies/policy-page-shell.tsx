@@ -60,10 +60,10 @@ export function PolicyPageShell({
         <div className="grid gap-4 rounded-lg border bg-card p-5 text-card-foreground shadow-sm md:grid-cols-[1fr_auto] md:items-center">
           <div>
             <h2 className="text-base font-semibold tracking-normal">
-              Cần kiểm tra một trường hợp cụ thể?
+              Need us to check a specific case?
             </h2>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Email support phản hồi trong 24h trong giai đoạn beta.
+              Email support replies within 24 hours during beta.
             </p>
           </div>
           <Button

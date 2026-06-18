@@ -20,6 +20,8 @@ export type ShowcaseProduct = {
   priceLabel: string;
   /** Average review score as a string, e.g. "4.7". */
   rating: string;
+  /** Number of published reviews. 0 -> show a "New" chip, not "0.0". */
+  ratingCount: number;
   /** Dashboard screenshot shown on the warped iMac screen (public path). */
   dashboardImg: string;
   /** Link to the product detail page. */
@@ -41,6 +43,7 @@ export const productShowcaseProducts: ShowcaseProduct[] = [
     brand: "LaraSaaS",
     priceLabel: "$15.00",
     rating: "4.9",
+    ratingCount: 128,
     dashboardImg: "/showcase/dashboard_larasaas.png",
     href: "/products",
     accent: "#6366f1",
@@ -54,6 +57,7 @@ export const productShowcaseProducts: ShowcaseProduct[] = [
     brand: "Filament",
     priceLabel: "$15.00",
     rating: "4.8",
+    ratingCount: 86,
     dashboardImg: "/showcase/dashboard_filament.png",
     href: "/products",
     accent: "#f59e0b",
@@ -67,6 +71,7 @@ export const productShowcaseProducts: ShowcaseProduct[] = [
     brand: "TALLMart",
     priceLabel: "$35.50",
     rating: "4.7",
+    ratingCount: 64,
     dashboardImg: "/showcase/dashboard_tallmart.png",
     href: "/products",
     accent: "#10b981",
@@ -110,6 +115,7 @@ export function buildShowcaseProducts(
       brand: product.title,
       priceLabel: formatProductPrice(product),
       rating: (Number(product.rating_average) || 0).toFixed(1),
+      ratingCount: product.rating_count,
       dashboardImg:
         product.thumbnail_url ??
         SHOWCASE_FALLBACK_IMAGES[index % SHOWCASE_FALLBACK_IMAGES.length],

@@ -7,16 +7,16 @@ import { getPublishedPosts } from "@/lib/supabase/queries/blog";
 import { cn } from "@/lib/utils";
 
 const blogDescription =
-  "Ghi chú triển khai, launch notes và bài viết thực tế về storefront sản phẩm số trên DanCruShop.";
+  "Implementation notes, launch notes, and practical articles about running a digital-product storefront on DanCruShop.";
 
 export const metadata: Metadata = {
-  title: "Bài viết",
+  title: "Blog",
   description: blogDescription,
   alternates: {
     canonical: "/blog",
   },
   openGraph: {
-    title: "Bài viết | DanCruShop",
+    title: "Blog | DanCruShop",
     description: blogDescription,
     url: "/blog",
     type: "website",
@@ -37,11 +37,12 @@ export default async function BlogPage() {
           </p>
           <div className="flex max-w-3xl flex-col gap-4">
             <h1 className="text-4xl font-semibold leading-tight tracking-normal text-balance md:text-6xl">
-              Bài viết giúp builder bán sản phẩm tốt hơn.
+              Articles to help builders sell better.
             </h1>
             <p className="text-base leading-8 text-muted-foreground md:text-lg">
-              Ghi chú triển khai, launch notes và hướng dẫn kỹ thuật dành cho
-              người đang xây storefront, tool và sản phẩm số có doanh thu thật.
+              Implementation notes, launch notes, and technical guides for
+              people building storefronts, tools, and digital products with real
+              revenue.
             </p>
           </div>
         </div>
@@ -58,14 +59,14 @@ export default async function BlogPage() {
           <div className="flex min-h-80 flex-col items-center justify-center gap-5 rounded-lg border bg-card/60 backdrop-blur-xl p-8 text-center text-card-foreground shadow-sm">
             <div className="flex max-w-md flex-col gap-2">
               <h2 className="text-xl font-semibold tracking-normal">
-                Chưa có bài viết nào
+                No articles yet
               </h2>
               <p className="text-sm leading-6 text-muted-foreground">
-                Khi bài mới được publish từ CMS, danh sách sẽ hiện tại đây.
+                When new posts are published from the CMS, they'll show up here.
               </p>
             </div>
             <Link href="/" className={cn(buttonVariants({ variant: "outline" }))}>
-              Quay về storefront
+              Back to storefront
             </Link>
           </div>
         )}

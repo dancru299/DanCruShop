@@ -29,20 +29,20 @@ export function getSupportMailto(subject = "DanCruShop support") {
 
 export const betaPolicies = {
   delivery:
-    "Lemon Squeezy mở khóa tự động sau thanh toán. VietQR được duyệt thủ công trong vòng 24h.",
+    "Lemon Squeezy unlocks automatically after payment. VietQR is approved manually within 24 hours.",
   refund:
-    "Hoàn tiền trong 7 ngày nếu sản phẩm không truy cập được, lỗi nghiêm trọng, hoặc mô tả sai. Không áp dụng khi tài nguyên đã được tải/sử dụng đầy đủ hoặc đổi ý sau khi đã nhận file.",
-  support: "Email support phản hồi trong 24h trong giai đoạn beta.",
+    "Refunds within 7 days if a product can't be accessed, has a serious defect, or doesn't match the description. Not available once the resource has been fully downloaded/used or if you change your mind after receiving the files.",
+  support: "Email support replies within 24 hours during beta.",
 };
 
 export const policyLinks = [
   {
     href: "/delivery-policy",
-    label: "Giao hàng",
+    label: "Delivery",
   },
   {
     href: "/refund-policy",
-    label: "Hoàn tiền",
+    label: "Refunds",
   },
   {
     href: "/support",

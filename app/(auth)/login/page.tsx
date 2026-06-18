@@ -39,8 +39,8 @@ export default function LoginPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("error") === "auth_callback_failed") {
-      toast.error("Đăng nhập thất bại", {
-        description: "Liên kết không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.",
+      toast.error("Login failed", {
+        description: "The link is invalid or has expired. Please try again.",
       });
     }
   }, []);
@@ -57,9 +57,9 @@ export default function LoginPage() {
       });
 
       if (error) {
-        const message = "Email hoặc mật khẩu không đúng.";
+        const message = "Incorrect email or password.";
         setFormError(message);
-        toast.error("Không đăng nhập được", { description: message });
+        toast.error("Couldn't log in", { description: message });
         return;
       }
 
@@ -73,10 +73,10 @@ export default function LoginPage() {
     <>
       <div className="flex flex-col gap-1.5">
         <h1 className="text-2xl font-semibold tracking-normal">
-          Đăng nhập DanCruShop
+          Log in to DanCruShop
         </h1>
         <p className="text-sm leading-6 text-muted-foreground">
-          Nhập email và mật khẩu để truy cập tài khoản của bạn.
+          Enter your email and password to access your account.
         </p>
       </div>
 
@@ -84,7 +84,7 @@ export default function LoginPage() {
         <GoogleButton next={getNextPath()} />
       </div>
 
-      <FieldSeparator className="my-5">hoặc</FieldSeparator>
+      <FieldSeparator className="my-5">or</FieldSeparator>
 
       <form onSubmit={handleSubmit}>
         <FieldGroup>
@@ -107,12 +107,12 @@ export default function LoginPage() {
 
           <Field data-invalid={formError ? true : undefined}>
             <div className="flex items-center justify-between">
-              <FieldLabel htmlFor="password">Mật khẩu</FieldLabel>
+              <FieldLabel htmlFor="password">Password</FieldLabel>
               <Link
                 href="/forgot-password"
                 className="text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
               >
-                Quên mật khẩu?
+                Forgot password?
               </Link>
             </div>
             <Input
@@ -140,18 +140,18 @@ export default function LoginPage() {
             ) : (
               <ArrowRightIcon data-icon="inline-start" aria-hidden="true" />
             )}
-            {isPending ? "Đang đăng nhập..." : "Đăng nhập"}
+            {isPending ? "Logging in..." : "Log in"}
           </Button>
         </FieldGroup>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        Chưa có tài khoản?{" "}
+        Don't have an account?{" "}
         <Link
           href="/signup"
           className="text-foreground underline-offset-4 hover:text-primary hover:underline"
         >
-          Đăng ký
+          Sign up
         </Link>
       </p>
     </>

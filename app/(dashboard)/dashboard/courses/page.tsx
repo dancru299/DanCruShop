@@ -47,7 +47,7 @@ export default async function CoursesPage() {
         <p className="text-sm text-muted-foreground">DanCruShop dashboard</p>
         <h1 className="text-3xl font-semibold tracking-normal">My Courses</h1>
         <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-          Các khoá học bạn đã mua. Tiếp tục học từ nơi bạn dừng lại.
+          The courses you've purchased. Pick up right where you left off.
         </p>
       </div>
 
@@ -78,7 +78,7 @@ export default async function CoursesPage() {
                     {totalLessons > 0 && (
                       <div className="flex flex-col gap-1.5">
                         <p className="text-sm text-muted-foreground">
-                          {completedCount} / {totalLessons} bài học hoàn thành
+                          {completedCount} / {totalLessons} lessons completed
                         </p>
                         <div className="h-1.5 w-48 overflow-hidden rounded-full bg-muted">
                           <div
@@ -102,11 +102,11 @@ export default async function CoursesPage() {
                       nativeButton={false}
                     >
                       <BookOpenIcon data-icon="inline-start" aria-hidden="true" />
-                      {completedCount > 0 ? "Tiếp tục học" : "Bắt đầu học"}
+                      {completedCount > 0 ? "Continue learning" : "Start learning"}
                     </Button>
                   ) : (
                     <Button variant="outline" disabled>
-                      Chưa có nội dung
+                      No content yet
                     </Button>
                   )}
                 </div>
@@ -121,14 +121,14 @@ export default async function CoursesPage() {
           </div>
           <div className="flex max-w-md flex-col gap-2">
             <h2 className="text-xl font-semibold tracking-normal">
-              Chưa có khoá học nào
+              No courses yet
             </h2>
             <p className="text-sm leading-6 text-muted-foreground">
-              Khi bạn mua một khoá học, nó sẽ xuất hiện tại đây.
+              When you buy a course, it will appear here.
             </p>
           </div>
           <Button render={<Link href="/products" />} nativeButton={false}>
-            Khám phá sản phẩm
+            Browse products
           </Button>
         </div>
       )}

@@ -8,31 +8,31 @@ const supportEmail = getSupportEmail();
 
 export const metadata: Metadata = {
   title: "Support",
-  description: `Liên hệ DanCruShop qua ${supportEmail}.`,
+  description: `Contact DanCruShop at ${supportEmail}.`,
 };
 
 export default function SupportPage() {
   return (
     <PolicyPageShell
-      title="Support DanCruShop"
-      description={`Email ${supportEmail} phản hồi trong 24h trong giai đoạn beta. Gửi kèm email mua hàng, tên sản phẩm và ảnh lỗi nếu có.`}
+      title="DanCruShop support"
+      description={`Email ${supportEmail} replies within 24 hours during beta. Include your purchase email, the product name, and a screenshot of the issue if you have one.`}
       points={[
         {
           Icon: MailIcon,
-          title: "Kênh chính",
-          description: `Gửi email tới ${supportEmail}; shop sẽ phản hồi theo thứ tự ưu tiên đơn hàng đang lỗi truy cập.`,
+          title: "Main channel",
+          description: `Email ${supportEmail}; the shop responds by priority, starting with orders that can't be accessed.`,
         },
         {
           Icon: ReceiptTextIcon,
-          title: "Thông tin cần gửi",
+          title: "What to include",
           description:
-            "Email mua hàng, mã đơn hoặc provider order id, tên sản phẩm và mô tả vấn đề đang gặp.",
+            "Your purchase email, order code or provider order id, the product name, and a description of the issue.",
         },
         {
           Icon: LifeBuoyIcon,
-          title: "Ưu tiên beta",
+          title: "Beta priority",
           description:
-            "Các lỗi không nhận được magic link, không thấy sản phẩm trong dashboard hoặc link tải lỗi sẽ được ưu tiên xử lý.",
+            "Issues like not receiving the magic link, not seeing a product in the dashboard, or broken download links are handled first.",
         },
       ]}
     />

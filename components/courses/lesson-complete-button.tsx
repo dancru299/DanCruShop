@@ -58,10 +58,10 @@ export function LessonCompleteButton({
         <CheckCircle2Icon data-icon="inline-start" aria-hidden="true" />
       )}
       {isPending
-        ? "Đang lưu..."
+        ? "Saving..."
         : isCompleted
-          ? "Đánh dấu chưa học"
-          : "Đánh dấu hoàn thành"}
+          ? "Mark as not done"
+          : "Mark as complete"}
     </Button>
   );
 }

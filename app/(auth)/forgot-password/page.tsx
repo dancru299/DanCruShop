@@ -48,8 +48,8 @@ export default function ForgotPasswordPage() {
       }
 
       setStep("reset");
-      toast.success("Nếu email hợp lệ, mã đã được gửi", {
-        description: "Vui lòng kiểm tra hộp thư của bạn.",
+      toast.success("If the email is valid, a code has been sent", {
+        description: "Please check your inbox.",
       });
     });
   }
@@ -59,7 +59,7 @@ export default function ForgotPasswordPage() {
     setResetError(null);
 
     if (password !== confirm) {
-      setResetError("Mật khẩu nhập lại không khớp.");
+      setResetError("Passwords do not match.");
       return;
     }
 
@@ -78,12 +78,12 @@ export default function ForgotPasswordPage() {
       });
 
       if (error) {
-        toast.success("Đã đặt lại mật khẩu", { description: "Vui lòng đăng nhập." });
+        toast.success("Password reset", { description: "Please log in." });
         router.push("/login");
         return;
       }
 
-      toast.success("Đã đặt lại mật khẩu");
+      toast.success("Password reset");
       router.push("/dashboard");
       router.refresh();
     });
@@ -94,11 +94,11 @@ export default function ForgotPasswordPage() {
       const result = await requestPasswordReset(email);
 
       if (!result.ok) {
-        toast.error("Không gửi lại được mã", { description: result.error });
+        toast.error("Couldn't resend code", { description: result.error });
         return;
       }
 
-      toast.success("Đã gửi lại mã");
+      toast.success("Code resent");
     });
   }
 
@@ -107,19 +107,19 @@ export default function ForgotPasswordPage() {
       <>
         <div className="flex flex-col gap-1.5">
           <h1 className="text-2xl font-semibold tracking-normal">
-            Đặt lại mật khẩu
+            Reset password
           </h1>
           <p className="text-sm leading-6 text-muted-foreground">
-            Nhập mã đã gửi tới{" "}
-            <span className="font-medium text-foreground">{email}</span> và mật
-            khẩu mới.
+            Enter the code sent to{" "}
+            <span className="font-medium text-foreground">{email}</span> and a
+            new password.
           </p>
         </div>
 
         <form className="mt-6" onSubmit={handleResetSubmit}>
           <FieldGroup>
             <Field>
-              <FieldLabel>Mã xác thực</FieldLabel>
+              <FieldLabel>Verification code</FieldLabel>
               <CodeInput
                 value={code}
                 onChange={setCode}
@@ -130,13 +130,13 @@ export default function ForgotPasswordPage() {
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="password">Mật khẩu mới</FieldLabel>
+              <FieldLabel htmlFor="password">New password</FieldLabel>
               <Input
                 id="password"
                 name="password"
                 type="password"
                 value={password}
-                placeholder="Ít nhất 8 ký tự"
+                placeholder="At least 8 characters"
                 autoComplete="new-password"
                 disabled={isPending}
                 onChange={(event) => setPassword(event.target.value)}
@@ -145,7 +145,7 @@ export default function ForgotPasswordPage() {
             </Field>
 
             <Field data-invalid={resetError ? true : undefined}>
-              <FieldLabel htmlFor="confirm">Nhập lại mật khẩu</FieldLabel>
+              <FieldLabel htmlFor="confirm">Confirm password</FieldLabel>
               <Input
                 id="confirm"
                 name="confirm"
@@ -173,7 +173,7 @@ export default function ForgotPasswordPage() {
                   className="animate-spin"
                 />
               ) : null}
-              {isPending ? "Đang đặt lại..." : "Đặt lại mật khẩu"}
+              {isPending ? "Resetting..." : "Reset password"}
             </Button>
           </FieldGroup>
         </form>
@@ -186,7 +186,7 @@ export default function ForgotPasswordPage() {
             className="inline-flex items-center gap-1 text-muted-foreground underline-offset-4 hover:text-primary hover:underline disabled:opacity-50"
           >
             <ArrowLeftIcon aria-hidden="true" className="size-3.5" />
-            Đổi email
+            Change email
           </button>
           <button
             type="button"
@@ -194,7 +194,7 @@ export default function ForgotPasswordPage() {
             disabled={isPending}
             className="text-muted-foreground underline-offset-4 hover:text-primary hover:underline disabled:opacity-50"
           >
-            Gửi lại mã
+            Resend code
           </button>
         </div>
       </>
@@ -205,10 +205,10 @@ export default function ForgotPasswordPage() {
     <>
       <div className="flex flex-col gap-1.5">
         <h1 className="text-2xl font-semibold tracking-normal">
-          Quên mật khẩu
+          Forgot password
         </h1>
         <p className="text-sm leading-6 text-muted-foreground">
-          Nhập email của bạn, chúng tôi sẽ gửi mã để đặt lại mật khẩu.
+          Enter your email and we'll send a code to reset your password.
         </p>
       </div>
 
@@ -234,7 +234,7 @@ export default function ForgotPasswordPage() {
               <FieldError>{emailError}</FieldError>
             ) : (
               <FieldDescription>
-                Mã xác thực sẽ được gửi nếu email này có tài khoản.
+                A verification code will be sent if this email has an account.
               </FieldDescription>
             )}
           </Field>
@@ -249,18 +249,18 @@ export default function ForgotPasswordPage() {
             ) : (
               <ArrowRightIcon data-icon="inline-start" aria-hidden="true" />
             )}
-            {isPending ? "Đang gửi..." : "Gửi mã"}
+            {isPending ? "Sending..." : "Send code"}
           </Button>
         </FieldGroup>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        Nhớ mật khẩu rồi?{" "}
+        Remember your password?{" "}
         <Link
           href="/login"
           className="text-foreground underline-offset-4 hover:text-primary hover:underline"
         >
-          Đăng nhập
+          Log in
         </Link>
       </p>
     </>

@@ -93,7 +93,7 @@ export default async function VietQrOrderPage({ params }: VietQrOrderPageProps) 
           nativeButton={false}
         >
           <ArrowLeftIcon data-icon="inline-start" aria-hidden="true" />
-          Quay lại cửa hàng
+          Back to store
         </Button>
 
         <section className="grid gap-6 lg:grid-cols-[22rem_1fr]">
@@ -101,15 +101,15 @@ export default async function VietQrOrderPage({ params }: VietQrOrderPageProps) 
             {qrUrl ? (
               <img
                 src={qrUrl}
-                alt={`VietQR cho đơn ${orderCode}`}
+                alt={`VietQR for order ${orderCode}`}
                 className="aspect-square w-full rounded-lg border bg-background object-contain"
               />
             ) : (
               <div className="flex aspect-square w-full flex-col items-center justify-center gap-3 rounded-lg border bg-muted p-6 text-muted-foreground">
                 <ClockIcon aria-hidden="true" />
                 <p className="text-sm leading-6">
-                  QR chưa được cấu hình. Vui lòng dùng thông tin chuyển khoản
-                  thủ công bên cạnh.
+                  QR is not configured yet. Please use the manual bank transfer
+                  details on the right.
                 </p>
               </div>
             )}
@@ -126,27 +126,27 @@ export default async function VietQrOrderPage({ params }: VietQrOrderPageProps) 
                   {order.status}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
-                  Mã đơn hàng: {orderCode}
+                  Order code: {orderCode}
                 </span>
               </div>
               <h1 className="text-3xl font-semibold tracking-normal">
-                Chuyển khoản VietQR
+                VietQR bank transfer
               </h1>
               <p className="text-sm leading-7 text-muted-foreground md:text-base">
-                Vui lòng chuyển khoản với nội dung là Mã Đơn Hàng. Quản trị
-                viên sẽ duyệt và gửi email cho bạn trong vòng 24h.
+                Please make the transfer using the order code as the note. An
+                admin will approve it and email you within 24 hours.
               </p>
             </div>
 
             <div className="grid gap-3 text-sm">
               <div className="flex items-center justify-between gap-4 border-b pb-3">
-                <span className="text-muted-foreground">Số tiền</span>
+                <span className="text-muted-foreground">Amount</span>
                 <span className="font-semibold">
                   {formatAmount(order.total_cents, order.currency)}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-4 border-b pb-3">
-                <span className="text-muted-foreground">Nội dung</span>
+                <span className="text-muted-foreground">Transfer note</span>
                 <span className="font-semibold">{orderCode}</span>
               </div>
               <div className="flex items-center justify-between gap-4 border-b pb-3">
@@ -155,19 +155,19 @@ export default async function VietQrOrderPage({ params }: VietQrOrderPageProps) 
               </div>
               {vietqr.bankBin ? (
                 <div className="flex items-center justify-between gap-4 border-b pb-3">
-                  <span className="text-muted-foreground">Ngân hàng</span>
+                  <span className="text-muted-foreground">Bank</span>
                   <span className="font-semibold">{vietqr.bankBin}</span>
                 </div>
               ) : null}
               {vietqr.accountNo ? (
                 <div className="flex items-center justify-between gap-4 border-b pb-3">
-                  <span className="text-muted-foreground">Số tài khoản</span>
+                  <span className="text-muted-foreground">Account number</span>
                   <span className="font-semibold">{vietqr.accountNo}</span>
                 </div>
               ) : null}
               {vietqr.accountName ? (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Chủ tài khoản</span>
+                  <span className="text-muted-foreground">Account holder</span>
                   <span className="font-semibold">{vietqr.accountName}</span>
                 </div>
               ) : null}

@@ -74,7 +74,7 @@ function SheetContent({
             }
           >
             <XIcon />
-            <span className="sr-only">Đóng</span>
+            <span className="sr-only">Close</span>
           </SheetPrimitive.Close>
         ) : null}
       </SheetPrimitive.Popup>

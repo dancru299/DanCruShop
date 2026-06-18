@@ -197,7 +197,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const toastId = `cart-product-${product.id}`;
 
       if (currentItems.some((item) => item.id === product.id)) {
-        toast.message("Đã có trong giỏ", {
+        toast.message("Already in cart", {
           description: product.title,
           id: toastId,
         });
@@ -226,7 +226,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         },
         productId: product.id,
       });
-      toast.success("Đã thêm vào giỏ", {
+      toast.success("Added to cart", {
         description: product.title,
         id: toastId,
       });

@@ -36,7 +36,7 @@ export function FavoriteButton({
     <button
       type="button"
       aria-pressed={active}
-      aria-label={active ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích"}
+      aria-label={active ? "Remove from favorites" : "Add to favorites"}
       disabled={disabled}
       onClick={(event) => {
         event.preventDefault();

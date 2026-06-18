@@ -11,7 +11,7 @@ export function FavoritesHeaderButton() {
 
   return (
     <Button
-      aria-label={`Yêu thích, ${favoriteCount} sản phẩm`}
+      aria-label={`Favorites, ${favoriteCount} items`}
       className="relative"
       render={<Link href="/favorites" />}
       nativeButton={false}

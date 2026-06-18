@@ -11,20 +11,20 @@ type PricedProduct = Pick<
 
 export const productTypeLabels: Record<ProductType, string> = {
   bundle: "Bundle",
-  course: "Khóa học",
-  digital_download: "Tải xuống số",
-  free_resource: "Tài nguyên miễn phí",
+  course: "Course",
+  digital_download: "Digital download",
+  free_resource: "Free resource",
   template: "Template",
   tool: "Tool",
 };
 
 export const productTypeDescriptions: Record<ProductType, string> = {
-  bundle: "Bộ tài nguyên đóng gói sẵn gồm file, hướng dẫn và các thành phần liên quan.",
-  course: "Tài nguyên học có cấu trúc với bài học, file và ghi chú triển khai.",
-  digital_download: "Tệp số giao ngay để thêm thẳng vào workflow làm việc của bạn.",
-  free_resource: "Tài nguyên miễn phí có thể nhận và lưu lại trong thư viện đã mua.",
-  template: "Starter, template hoặc layout tái sử dụng cho dự án thật.",
-  tool: "Công cụ tập trung giải quyết một công việc thực tế trong workflow.",
+  bundle: "A ready-packaged set of files, guides, and related components.",
+  course: "Structured learning with lessons, files, and implementation notes.",
+  digital_download: "Instant-delivery digital files to drop straight into your workflow.",
+  free_resource: "A free resource you can claim and keep in your purchased library.",
+  template: "A reusable starter, template, or layout for real projects.",
+  tool: "A focused tool that solves one real job in your workflow.",
 };
 
 export function formatPrice(priceCents: number, currency: string) {
@@ -44,14 +44,14 @@ export function formatPrice(priceCents: number, currency: string) {
 
 export function formatProductPrice(product: PricedProduct) {
   if (product.is_free) {
-    return "Miễn phí";
+    return "Free";
   }
 
   return formatPrice(product.price_cents, product.currency);
 }
 
 export function getProductDeliveryLabel(product: Pick<PublishedProduct, "is_free">) {
-  return product.is_free ? "Nhận miễn phí" : "Giao ngay";
+  return product.is_free ? "Get it free" : "Instant delivery";
 }
 
 type DiscountProduct = Pick<

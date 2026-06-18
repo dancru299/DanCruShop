@@ -3,6 +3,8 @@
 Digital product shop for DanCru: storefront, cart, buyer dashboard, admin CMS,
 course delivery, protected downloads, Lemon Squeezy checkout, VietQR manual
 orders, Supabase Auth/DB/Storage, and Resend purchase emails.
+this is a Next.js e-commerce application with Supabase, using TypeScript and Tailwind CSS. The project has a well-organized structure with actions, components, and various features like courses, bundles, coupons, and more.
+
 
 ## Tech Stack
 

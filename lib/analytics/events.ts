@@ -3,6 +3,7 @@ export const analyticsEventNames = [
   "product_view",
   "add_to_cart",
   "favorite_toggle",
+  "compare_add",
   "checkout_start",
   "checkout_error",
   "vietqr_order_created",

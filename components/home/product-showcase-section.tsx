@@ -26,8 +26,8 @@ const STAGE_H = 576;
 const AUTOPLAY_MS = 3800;
 const PAUSE_AFTER_CLICK_MS = 9000;
 
-const EYEBROW = "BỘ STARTER CAO CẤP";
-const TITLE = "Xây sản phẩm lớn tiếp theo, chuẩn chỉnh.";
+const EYEBROW = "PREMIUM STARTER KITS";
+const TITLE = "Build your next big product, the right way.";
 const SUBTITLE = "";
 
 // Calibrated perspective warp mapping the flat 1024x576 screen image onto the
@@ -121,7 +121,7 @@ export function ProductShowcaseSection({
     <section
       id="product-showcase"
       className="relative w-full overflow-hidden bg-[#090a0f] text-white"
-      aria-roledescription="Trình chiếu sản phẩm nổi bật"
+      aria-roledescription="Featured product carousel"
       onMouseEnter={() => {
         hoveringRef.current = true;
       }}
@@ -267,7 +267,7 @@ export function ProductShowcaseSection({
                   letterSpacing: "-0.02em",
                 }}
               >
-                Bộ chọn sản phẩm
+                Product picker
               </span>
               <span
                 style={{
@@ -381,7 +381,7 @@ export function ProductShowcaseSection({
                           transition: "color .35s",
                         }}
                       >
-                        Giá: {product.priceLabel}
+                        Price: {product.priceLabel}
                       </div>
                     </div>
                   </button>
@@ -430,7 +430,7 @@ export function ProductShowcaseSection({
                 {selected.brand}
               </div>
               <div style={{ fontSize: 11.5, color: "#555964", fontWeight: 600 }}>
-                Giá:{" "}
+                Price:{" "}
                 <span style={{ color: selected.accent, transition: "color .5s" }}>
                   {selected.priceLabel}
                 </span>
@@ -441,16 +441,28 @@ export function ProductShowcaseSection({
                 display: "flex",
                 alignItems: "center",
                 gap: 4,
-                background: selected.soft,
+                background: selected.ratingCount > 0 ? selected.soft : "#e7f6ee",
                 padding: "5px 9px",
                 borderRadius: 8,
                 transition: "background .5s",
               }}
             >
-              <span style={{ color: "#f5b50a", fontSize: 12 }}>★</span>
-              <span style={{ fontSize: 12, fontWeight: 800, color: "#1c1e24" }}>
-                {selected.rating}
-              </span>
+              {selected.ratingCount > 0 ? (
+                <>
+                  <span style={{ color: "#f5b50a", fontSize: 12 }}>★</span>
+                  <span
+                    style={{ fontSize: 12, fontWeight: 800, color: "#1c1e24" }}
+                  >
+                    {selected.rating}
+                  </span>
+                </>
+              ) : (
+                <span
+                  style={{ fontSize: 11, fontWeight: 800, color: "#0f9d58" }}
+                >
+                  New
+                </span>
+              )}
             </div>
           </div>
 

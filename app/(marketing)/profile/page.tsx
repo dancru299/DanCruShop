@@ -31,10 +31,10 @@ export default async function ProfilePage() {
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10 md:py-14">
       <div className="flex flex-col gap-2">
-        <p className="text-sm text-muted-foreground">Tài khoản</p>
-        <h1 className="text-3xl font-semibold tracking-normal">Hồ sơ</h1>
+        <p className="text-sm text-muted-foreground">Account</p>
+        <h1 className="text-3xl font-semibold tracking-normal">Profile</h1>
         <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-          Cập nhật tên hiển thị và ảnh đại diện dùng trong mua hàng, đánh giá và phản hồi.
+          Update the display name and avatar used in purchases, reviews, and replies.
         </p>
       </div>
 

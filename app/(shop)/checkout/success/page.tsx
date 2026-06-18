@@ -27,33 +27,33 @@ export default function CheckoutSuccessPage() {
 
           <div className="flex flex-col gap-3">
             <h1 className="text-3xl font-semibold leading-tight tracking-normal">
-              Thanh toán thành công!
+              Payment successful!
             </h1>
             <p className="text-sm leading-7 text-muted-foreground md:text-base">
-              Vui lòng kiểm tra email của bạn để lấy Magic Link truy cập sản
-              phẩm. Sau khi mở link, sản phẩm đã mua sẽ xuất hiện trong
-              dashboard.
+              Please check your email for the Magic Link to access your
+              products. Once you open the link, your purchases will appear in
+              the dashboard.
             </p>
           </div>
 
           <div className="grid w-full gap-3 text-left sm:grid-cols-3">
             <div className="rounded-lg border bg-background/50 p-3">
               <MailCheckIcon aria-hidden="true" className="mb-2 size-4" />
-              <p className="text-sm font-medium">1. Kiểm tra email</p>
+              <p className="text-sm font-medium">1. Check your email</p>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                Magic link có thể mất vài phút trong giai đoạn beta.
+                The magic link may take a few minutes during beta.
               </p>
             </div>
             <div className="rounded-lg border bg-background/50 p-3">
               <GaugeIcon aria-hidden="true" className="mb-2 size-4" />
-              <p className="text-sm font-medium">2. Mở dashboard</p>
+              <p className="text-sm font-medium">2. Open the dashboard</p>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                Tài nguyên đã mua sẽ nằm trong khu vực dashboard.
+                Your purchased resources live in the dashboard area.
               </p>
             </div>
             <div className="rounded-lg border bg-background/50 p-3">
               <LifeBuoyIcon aria-hidden="true" className="mb-2 size-4" />
-              <p className="text-sm font-medium">3. Cần hỗ trợ?</p>
+              <p className="text-sm font-medium">3. Need help?</p>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
                 {betaPolicies.support}
               </p>
@@ -67,10 +67,10 @@ export default function CheckoutSuccessPage() {
               nativeButton={false}
             >
               <ArrowLeftIcon data-icon="inline-start" aria-hidden="true" />
-              Xem sản phẩm khác
+              Browse more products
             </Button>
             <Button render={<Link href="/login" />} nativeButton={false}>
-              Mở trang đăng nhập
+              Open login page
             </Button>
             <Button
               variant="secondary"

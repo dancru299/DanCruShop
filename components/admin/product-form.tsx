@@ -8,16 +8,21 @@ import { useMemo, useState, useTransition } from "react";
 import {
   ArrowLeftIcon,
   ArrowUpRightIcon,
+  CheckCircle2Icon,
   ExternalLinkIcon,
+  GitBranchIcon,
   KeyRoundIcon,
   Loader2Icon,
   PackagePlusIcon,
   SaveIcon,
+  SlidersHorizontalIcon,
   TagIcon,
+  TriangleAlertIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
+  checkProductGithubRepo,
   createProduct,
   updateProduct,
   type ProductInsert,
@@ -48,6 +53,13 @@ import {
   ProductArtwork,
   formatProductPrice,
 } from "@/components/products/product-card";
+import {
+  SPEC_FIELDS,
+  SPEC_GROUPS,
+  buildSpecsForSave,
+  readSpecValue,
+  type SpecFieldType,
+} from "@/lib/products/specs";
 import type { CategoryOption } from "@/lib/supabase/queries/categories";
 import type { TechIconOption } from "@/lib/supabase/queries/tech-icons";
 import type {
@@ -79,6 +91,7 @@ type ProductFormProduct = Pick<
   | "lemon_squeezy_product_id"
   | "lemon_squeezy_variant_id"
   | "requires_license"
+  | "metadata"
 >;
 
 type ProductFormProps = {
@@ -358,7 +371,72 @@ export function ProductForm({
   const [requiresLicense, setRequiresLicense] = useState(
     product?.requires_license ?? false
   );
+  const [githubRepo, setGithubRepo] = useState(
+    typeof product?.metadata?.github_repo === "string"
+      ? product.metadata.github_repo
+      : ""
+  );
+  const [isCheckingRepo, startCheckRepo] = useTransition();
+  const [repoCheck, setRepoCheck] = useState<{
+    ok: boolean;
+    message: string;
+  } | null>(null);
+  const [specState, setSpecState] = useState<
+    Record<string, string[] | boolean>
+  >(() => {
+    const metadata = product?.metadata ?? {};
+    const initial: Record<string, string[] | boolean> = {};
+
+    for (const field of SPEC_FIELDS) {
+      const value = readSpecValue(metadata, field);
+      initial[field.key] =
+        value.type === "boolean" ? value.value : value.values;
+    }
+
+    return initial;
+  });
   const [errors, setErrors] = useState<ProductFormErrors>({});
+
+  function toggleSpecOption(key: string, value: string, type: SpecFieldType) {
+    setSpecState((current) => {
+      const selected = Array.isArray(current[key]) ? (current[key] as string[]) : [];
+
+      if (type === "single") {
+        return { ...current, [key]: selected[0] === value ? [] : [value] };
+      }
+
+      return {
+        ...current,
+        [key]: selected.includes(value)
+          ? selected.filter((item) => item !== value)
+          : [...selected, value],
+      };
+    });
+  }
+
+  function toggleSpecBoolean(key: string) {
+    setSpecState((current) => ({ ...current, [key]: current[key] !== true }));
+  }
+
+  function handleCheckRepo() {
+    setRepoCheck(null);
+    startCheckRepo(async () => {
+      const result = await checkProductGithubRepo(githubRepo);
+
+      if (result.ok) {
+        setRepoCheck({
+          ok: true,
+          message: `Kết nối thành công (${
+            result.authenticated ? "đã xác thực PAT" : "ẩn danh"
+          }) — tìm thấy ${result.conventionalCount}/${
+            result.totalFetched
+          } commit hợp lệ gần nhất.`,
+        });
+      } else {
+        setRepoCheck({ ok: false, message: result.message });
+      }
+    });
+  }
 
   function toggleCategory(id: string) {
     setCategoryIds((current) =>
@@ -446,10 +524,26 @@ export function ProductForm({
       return;
     }
 
+    const nextMetadata: Record<string, unknown> = { ...(product?.metadata ?? {}) };
+    const trimmedRepo = githubRepo.trim();
+    if (trimmedRepo) {
+      nextMetadata.github_repo = trimmedRepo;
+    } else {
+      delete nextMetadata.github_repo;
+    }
+
+    const specs = buildSpecsForSave(specState);
+    if (Object.keys(specs).length > 0) {
+      nextMetadata.specs = specs;
+    } else {
+      delete nextMetadata.specs;
+    }
+
     const payload: ProductInsert = {
       categoryIds,
       techIconIds,
       currency,
+      metadata: nextMetadata,
       demo_url: demoUrl.trim() || null,
       description: description.trim() || null,
       is_free:
@@ -877,6 +971,122 @@ export function ProductForm({
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-base font-semibold tracking-normal">
+                  Thông số kỹ thuật (bảng so sánh)
+                </h2>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  Chọn đúng công nghệ để sản phẩm hiển thị chuẩn trong bảng so
+                  sánh kỹ thuật. Bỏ trống field nào thì field đó hiện dấu “—”.
+                </p>
+              </div>
+              <SlidersHorizontalIcon
+                aria-hidden="true"
+                className="size-4 text-muted-foreground"
+              />
+            </div>
+
+            <div className="flex flex-col gap-6">
+              {SPEC_GROUPS.map((group) => (
+                <div key={group.id} className="flex flex-col gap-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {group.label}
+                  </p>
+                  {group.fields.map((field) => {
+                    if (field.type === "boolean") {
+                      const active = specState[field.key] === true;
+
+                      return (
+                        <Field key={field.key}>
+                          <button
+                            type="button"
+                            onClick={() => toggleSpecBoolean(field.key)}
+                            disabled={isPending}
+                            aria-pressed={active}
+                            className={cn(
+                              "flex items-center justify-between gap-4 rounded-lg border p-3 text-left transition-colors",
+                              active
+                                ? "border-primary bg-primary/5"
+                                : "bg-background hover:bg-muted"
+                            )}
+                          >
+                            <span className="grid gap-0.5">
+                              <span className="text-sm font-medium">
+                                {field.label}
+                              </span>
+                              {field.hint ? (
+                                <span className="text-xs text-muted-foreground">
+                                  {field.hint}
+                                </span>
+                              ) : null}
+                            </span>
+                            <span
+                              className={cn(
+                                "inline-flex h-6 w-11 shrink-0 items-center rounded-full border p-0.5 transition-colors",
+                                active ? "bg-primary" : "bg-muted"
+                              )}
+                            >
+                              <span
+                                className={cn(
+                                  "size-4 rounded-full bg-background transition-transform",
+                                  active ? "translate-x-5" : "translate-x-0"
+                                )}
+                              />
+                            </span>
+                          </button>
+                        </Field>
+                      );
+                    }
+
+                    const selected = Array.isArray(specState[field.key])
+                      ? (specState[field.key] as string[])
+                      : [];
+
+                    return (
+                      <Field key={field.key}>
+                        <FieldLabel>
+                          {field.label}
+                          {field.type === "single" ? (
+                            <span className="ml-1 text-xs font-normal text-muted-foreground">
+                              (chọn 1)
+                            </span>
+                          ) : null}
+                        </FieldLabel>
+                        <div className="flex flex-wrap gap-2">
+                          {(field.options ?? []).map((option) => {
+                            const active = selected.includes(option.value);
+
+                            return (
+                              <button
+                                key={option.value}
+                                type="button"
+                                onClick={() =>
+                                  toggleSpecOption(field.key, option.value, field.type)
+                                }
+                                disabled={isPending}
+                                aria-pressed={active}
+                                className={cn(
+                                  "inline-flex h-8 items-center rounded-lg border px-2.5 text-sm font-medium transition-colors",
+                                  active
+                                    ? "border-primary bg-primary text-primary-foreground"
+                                    : "bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+                                )}
+                              >
+                                {option.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </Field>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-base font-semibold tracking-normal">
                   Delivery and external links
                 </h2>
                 <p className="text-sm leading-6 text-muted-foreground">
@@ -939,6 +1149,63 @@ export function ProductForm({
                   />
                 </Field>
               </div>
+
+              <Field>
+                <FieldLabel htmlFor="github-repo">
+                  GitHub repo (changelog)
+                </FieldLabel>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Input
+                    id="github-repo"
+                    value={githubRepo}
+                    onChange={(event) => {
+                      setGithubRepo(event.target.value);
+                      setRepoCheck(null);
+                    }}
+                    placeholder="dancru299/DanCruShop hoặc https://github.com/dancru299/DanCruShop"
+                    disabled={isPending}
+                    className="sm:flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCheckRepo}
+                    disabled={isPending || isCheckingRepo || !githubRepo.trim()}
+                  >
+                    {isCheckingRepo ? (
+                      <Loader2Icon
+                        aria-hidden="true"
+                        className="animate-spin"
+                        data-icon="inline-start"
+                      />
+                    ) : (
+                      <GitBranchIcon aria-hidden="true" data-icon="inline-start" />
+                    )}
+                    {isCheckingRepo ? "Đang kiểm tra..." : "Kiểm tra kết nối"}
+                  </Button>
+                </div>
+                <FieldDescription>
+                  Tải tự động các commit theo chuẩn Conventional Commits
+                  (feat/fix/docs/refactor/perf) để hiện ở tab “Lịch sử cập nhật”.
+                  Repo private cần cấu hình GITHUB_PAT trên server. Để trống nếu
+                  không dùng.
+                </FieldDescription>
+                {repoCheck ? (
+                  <p
+                    className={cn(
+                      "flex items-center gap-1.5 text-sm",
+                      repoCheck.ok ? "text-emerald-500" : "text-destructive"
+                    )}
+                  >
+                    {repoCheck.ok ? (
+                      <CheckCircle2Icon aria-hidden="true" className="size-4" />
+                    ) : (
+                      <TriangleAlertIcon aria-hidden="true" className="size-4" />
+                    )}
+                    {repoCheck.message}
+                  </p>
+                ) : null}
+              </Field>
             </FieldGroup>
           </section>
         </div>

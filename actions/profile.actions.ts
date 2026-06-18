@@ -38,7 +38,7 @@ function getOptionalString(formData: FormData, key: string) {
 }
 
 function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Đã có lỗi xảy ra.";
+  return error instanceof Error ? error.message : "Something went wrong.";
 }
 
 function sanitizeFileName(fileName: string) {
@@ -109,7 +109,7 @@ export async function updateProfile(
 
   if (fullName.length > 80) {
     return {
-      error: "Tên phải có tối đa 80 ký tự.",
+      error: "The name can be at most 80 characters.",
       success: null,
     };
   }
@@ -123,7 +123,7 @@ export async function updateProfile(
 
     if (userError || !user) {
       return {
-        error: "Vui lòng đăng nhập trước khi cập nhật hồ sơ.",
+        error: "Please log in before updating your profile.",
         success: null,
       };
     }
@@ -137,7 +137,7 @@ export async function updateProfile(
       console.error("Failed to update profile", error);
 
       return {
-        error: "Hiện không thể cập nhật hồ sơ.",
+        error: "Couldn't update your profile right now.",
         success: null,
       };
     }
@@ -147,13 +147,13 @@ export async function updateProfile(
 
     return {
       error: null,
-      success: "Đã cập nhật hồ sơ.",
+      success: "Profile updated.",
     };
   } catch (error) {
     console.error("Unexpected error while updating profile", error);
 
     return {
-      error: "Hiện không thể cập nhật hồ sơ.",
+      error: "Couldn't update your profile right now.",
       success: null,
     };
   }
@@ -171,7 +171,7 @@ export async function uploadProfileAvatar(
 
     if (userError || !user) {
       return {
-        error: "Vui lòng đăng nhập trước khi tải ảnh đại diện.",
+        error: "Please log in before uploading an avatar.",
         ok: false,
       };
     }
@@ -211,7 +211,7 @@ export async function uploadProfileAvatar(
       console.error("Failed to update profile avatar", profileError);
 
       return {
-        error: "Đã tải ảnh lên nhưng chưa thể cập nhật hồ sơ.",
+        error: "The image uploaded, but the profile couldn't be updated.",
         ok: false,
       };
     }

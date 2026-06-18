@@ -10,8 +10,8 @@ import type { VerificationPurpose } from "@/lib/auth/verification-code";
 import { getSupportEmail } from "@/lib/site-config";
 
 const VERIFICATION_SUBJECT: Record<VerificationPurpose, string> = {
-  signup: "Mã kích hoạt tài khoản DanCruShop",
-  password_reset: "Mã đặt lại mật khẩu DanCruShop",
+  signup: "Your DanCruShop activation code",
+  password_reset: "Your DanCruShop password reset code",
 };
 
 function getResendClient() {

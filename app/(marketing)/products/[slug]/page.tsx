@@ -34,11 +34,14 @@ import {
 } from "@/lib/products/display";
 import {
   getProductCompatibility,
+  getProductGithubRepo,
   getProductIncludedItems,
   getProductRequirements,
   getProductSupportNote,
   getProductUpdatePolicy,
 } from "@/lib/products/metadata";
+import { getProductChangelog } from "@/lib/github/changelog";
+import { ProductInfoTabs } from "@/components/products/product-info-tabs";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildBreadcrumbJsonLd, buildProductJsonLd } from "@/lib/seo";
 import {
@@ -106,14 +109,14 @@ function getTechStack(product: ProductDetail) {
 function getLicense(product: ProductDetail) {
   return (
     getStringFromMetadata(product.metadata, "license") ??
-    "Dùng cho dự án cá nhân hoặc thương mại của riêng bạn."
+    "Use it for your own personal or commercial projects."
   );
 }
 
 function getAudience(product: ProductDetail) {
   return (
     getStringFromMetadata(product.metadata, "audience") ??
-    "Builder, maker và developer đang ship sản phẩm thực dụng."
+    "Builders, makers, and developers shipping practical products."
   );
 }
 
@@ -156,7 +159,7 @@ function getProductTags(product: ProductDetail, categoryLabels: string[]) {
   const tags = [
     productTypeLabels[product.product_type],
     ...categoryLabels,
-    product.is_free ? "Miễn phí" : null,
+    product.is_free ? "Free" : null,
   ];
 
   return tags.filter((tag): tag is string => {
@@ -213,14 +216,14 @@ export async function generateMetadata({
 
   if (!product) {
     return {
-      title: "Không tìm thấy sản phẩm",
+      title: "Product not found",
     };
   }
 
   const description =
     product.short_description ??
     product.description?.slice(0, 200) ??
-    `Khám phá ${product.title} trên ${siteName}.`;
+    `Explore ${product.title} on ${siteName}.`;
   const path = `/products/${product.slug}`;
 
   return {
@@ -254,13 +257,16 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   }
 
   const viewer = await getViewerState();
-  const [hasPurchased, reviewsData, bundleChildren] = await Promise.all([
-    viewer.userId ? checkUserAccess(viewer.userId, product.id) : false,
-    getProductReviews(product.id),
-    product.product_type === "bundle"
-      ? getBundleChildProducts(product.id)
-      : Promise.resolve([]),
-  ]);
+  const githubRepo = getProductGithubRepo(product.metadata);
+  const [hasPurchased, reviewsData, bundleChildren, changelog] =
+    await Promise.all([
+      viewer.userId ? checkUserAccess(viewer.userId, product.id) : false,
+      getProductReviews(product.id),
+      product.product_type === "bundle"
+        ? getBundleChildProducts(product.id)
+        : Promise.resolve([]),
+      githubRepo ? getProductChangelog(githubRepo) : Promise.resolve([]),
+    ]);
   const techStack = getTechStack(product);
   const license = getLicense(product);
   const includedItems = getIncludedItems(product);
@@ -273,6 +279,17 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const productTags = getProductTags(product, categoryLabels);
   const descriptionParagraphs = getDescriptionParagraphs(product);
   const canReply = hasPurchased || viewer.isAdmin;
+  const overviewContent = product.description ? (
+    <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary">
+      <ReactMarkdown>{product.description}</ReactMarkdown>
+    </div>
+  ) : (
+    <div className="grid gap-4 text-sm leading-7 text-muted-foreground md:text-base">
+      {descriptionParagraphs.map((paragraph, index) => (
+        <p key={`${paragraph}-${index}`}>{paragraph}</p>
+      ))}
+    </div>
+  );
 
   const productJsonLd = buildProductJsonLd({
     category: categoryLabels[0],
@@ -280,7 +297,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     description:
       product.short_description ??
       product.description?.slice(0, 200) ??
-      `Khám phá ${product.title} trên ${siteName}.`,
+      `Explore ${product.title} on ${siteName}.`,
     image: product.thumbnail_url,
     isFree: product.is_free,
     name: product.title,
@@ -295,8 +312,8 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     slug: product.slug,
   });
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
-    { name: "Trang chủ", path: "/" },
-    { name: "Sản phẩm", path: "/products" },
+    { name: "Home", path: "/" },
+    { name: "Products", path: "/products" },
     { name: product.title, path: `/products/${product.slug}` },
   ]);
 
@@ -380,36 +397,38 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                   <span className="text-sm font-semibold text-foreground">
                     {reviewsData.summary.totalReviews > 0
                       ? reviewsData.summary.averageRating.toFixed(1)
-                      : "Mới"}
+                      : "New"}
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {reviewsData.summary.totalReviews} đánh giá
+                  {reviewsData.summary.totalReviews > 0
+                    ? `${reviewsData.summary.totalReviews} reviews`
+                    : "No reviews yet"}
                 </p>
               </div>
               <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-2.5">
-                <p className="text-sm font-semibold">Truy cập lâu dài</p>
+                <p className="text-sm font-semibold">Long-term access</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Trong dashboard đã mua
+                  In your purchased dashboard
                 </p>
               </div>
               <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-2.5">
                 <p className="text-sm font-semibold">
                   {formatDate(product.updated_at)}
                 </p>
-                <p className="mt-1 text-sm text-muted-foreground">Cập nhật</p>
+                <p className="mt-1 text-sm text-muted-foreground">Updated</p>
               </div>
             </div>
 
             <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-4 text-card-foreground shadow-sm">
               <div className="mb-4 flex items-start justify-between gap-4 border-b pb-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Giá</p>
+                  <p className="text-sm text-muted-foreground">Price</p>
                   <p className="mt-1 text-2xl font-semibold tracking-normal">
                     {formatProductPrice(product)}
                   </p>
                 </div>
-                <Badge variant="outline">Thanh toán an toàn</Badge>
+                <Badge variant="outline">Secure payment</Badge>
               </div>
               <ProductCta
                 currency={product.currency}
@@ -432,20 +451,20 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               {[
                 {
                   Icon: Layers3Icon,
-                  label: "Loại",
+                  label: "Type",
                   value: productTypeLabels[product.product_type],
                 },
                 {
                   Icon: ShieldCheckIcon,
-                  label: "Bản quyền",
+                  label: "License",
                   value: license,
                 },
                 {
                   Icon: Clock3Icon,
-                  label: "Truy cập",
+                  label: "Access",
                   value: product.is_free
-                    ? "Miễn phí, mở ngay."
-                    : "Mở ngay sau thanh toán.",
+                    ? "Free, instant access."
+                    : "Instant access after payment.",
                 },
               ].map((item) => (
                 <div
@@ -472,13 +491,13 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         <section className="border-b">
           <div className="mx-auto w-full max-w-6xl px-4 py-12 md:py-16">
             <div className="mb-6 flex flex-col gap-2">
-              <p className="text-sm text-muted-foreground">Bundle gồm</p>
+              <p className="text-sm text-muted-foreground">This bundle includes</p>
               <h2 className="text-3xl font-semibold tracking-normal">
-                {bundleChildren.length} sản phẩm được mở khoá khi mua bundle
+                {bundleChildren.length} products unlocked when you buy the bundle
               </h2>
               <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                Thanh toán một lần, toàn bộ sản phẩm dưới đây sẽ xuất hiện trong
-                dashboard đã mua của bạn.
+                Pay once and every product below will appear in your purchased
+                dashboard.
               </p>
             </div>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -492,20 +511,14 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
       <section className="scroll-reveal mx-auto grid w-full max-w-6xl gap-8 px-4 py-12 md:py-16 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-muted-foreground">Chi tiết sản phẩm</p>
+          <p className="text-sm text-muted-foreground">Product details</p>
           <h2 className="text-3xl font-semibold tracking-normal">
-            Dùng được ngay cho dự án thật, không chỉ là một file tải về.
+            Ready to use in real projects, not just a file to download.
           </h2>
-          {product.description ? (
-            <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary">
-              <ReactMarkdown>{product.description}</ReactMarkdown>
-            </div>
+          {githubRepo ? (
+            <ProductInfoTabs overview={overviewContent} commits={changelog} />
           ) : (
-            <div className="grid gap-4 text-sm leading-7 text-muted-foreground md:text-base">
-              {descriptionParagraphs.map((paragraph, index) => (
-                <p key={`${paragraph}-${index}`}>{paragraph}</p>
-              ))}
-            </div>
+            overviewContent
           )}
           <div className="flex flex-wrap gap-2 pt-2">
             {techStack.map((item) => (
@@ -521,7 +534,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             <div className="mb-4 flex items-center gap-2">
               <SparklesIcon aria-hidden="true" className="size-5" />
               <h3 className="text-lg font-semibold tracking-normal">
-                Bạn nhận được gì
+                What you get
               </h3>
             </div>
             <div className="grid gap-3">
@@ -543,13 +556,13 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             <div className="mb-4 flex items-center gap-2">
               <ShieldCheckIcon aria-hidden="true" className="size-5" />
               <h3 className="text-lg font-semibold tracking-normal">
-                Trước khi mua
+                Before you buy
               </h3>
             </div>
             <div className="grid gap-3">
               <BeforeBuyingRow
                 Icon={MonitorCheckIcon}
-                title="Yêu cầu sử dụng"
+                title="Requirements"
                 description={requirements.join(" ")}
               />
               <BeforeBuyingRow
@@ -559,12 +572,12 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               />
               <BeforeBuyingRow
                 Icon={RotateCcwIcon}
-                title="Cập nhật và truy cập"
+                title="Updates and access"
                 description={updatePolicy}
               />
               <BeforeBuyingRow
                 Icon={LifeBuoyIcon}
-                title="Support và hoàn tiền"
+                title="Support and refunds"
                 description={`${supportNote} ${betaPolicies.refund}`}
                 href={getSupportMailto(`Support ${product.title}`)}
                 linkLabel={supportEmail}
@@ -574,7 +587,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-5 shadow-sm">
-              <p className="font-medium">Phù hợp với</p>
+              <p className="font-medium">Best for</p>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 {getAudience(product)}
               </p>
@@ -584,14 +597,14 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               className="group flex flex-col justify-between rounded-lg border bg-card/60 backdrop-blur-xl p-5 shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-lg"
             >
               <div>
-                <p className="font-medium">Mua kèm trong giỏ hàng?</p>
+                <p className="font-medium">Buy it together in your cart?</p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  Thêm sản phẩm này vào giỏ và checkout cùng các tài nguyên khác
-                  ở một nơi.
+                  Add this product to your cart and check out with your other
+                  resources in one place.
                 </p>
               </div>
               <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium">
-                Mở giỏ hàng
+                Open cart
                 <ArrowRightIcon
                   aria-hidden="true"
                   className="size-4 transition-transform group-hover:translate-x-0.5"

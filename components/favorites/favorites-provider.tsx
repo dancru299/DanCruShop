@@ -87,7 +87,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
           );
         } else {
           warnFavoriteStorage("Failed to load favorites.", error);
-          toast.error("Không thể tải danh sách yêu thích.");
+          toast.error("Couldn't load your favorites.");
         }
 
         setFavoriteIds(new Set());
@@ -130,14 +130,14 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   const toggleFavorite = useCallback(
     async (product: FavoriteProductInput) => {
       if (!isSchemaReady) {
-        toast.error("Tính năng yêu thích chưa được bật.", {
-          description: "Chạy supabase/product-favorites.sql trên Supabase.",
+        toast.error("Favorites are not enabled yet.", {
+          description: "Run supabase/product-favorites.sql on Supabase.",
         });
         return;
       }
 
       if (!userId) {
-        toast.message("Đăng nhập để lưu sản phẩm yêu thích.", {
+        toast.message("Log in to save favorite products.", {
           description: product.title,
         });
         return;
@@ -188,12 +188,12 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
             "Favorites are unavailable because product_favorites is not deployed.",
             error
           );
-          toast.error("Tính năng yêu thích chưa được bật.", {
-            description: "Chạy supabase/product-favorites.sql trên Supabase.",
+          toast.error("Favorites are not enabled yet.", {
+            description: "Run supabase/product-favorites.sql on Supabase.",
           });
         } else {
           warnFavoriteStorage("Failed to toggle favorite.", error);
-          toast.error("Không thể cập nhật yêu thích.", {
+          toast.error("Couldn't update favorites.", {
             description: product.title,
           });
         }
@@ -202,7 +202,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       }
 
       toast.success(
-        wasFavorite ? "Đã bỏ khỏi yêu thích." : "Đã lưu vào yêu thích.",
+        wasFavorite ? "Removed from favorites." : "Saved to favorites.",
         {
           description: product.title,
         }

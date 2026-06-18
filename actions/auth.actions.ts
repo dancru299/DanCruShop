@@ -29,23 +29,23 @@ function isValidEmail(email: string) {
 
 function validatePassword(password: string): string | null {
   if (password.length < MIN_PASSWORD_LENGTH) {
-    return `Mật khẩu phải có ít nhất ${MIN_PASSWORD_LENGTH} ký tự.`;
+    return `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
   }
 
   return null;
 }
 
 const RATE_LIMITED_MESSAGE =
-  "Bạn đã gửi quá nhiều yêu cầu. Vui lòng đợi ít nhất 1 phút rồi thử lại.";
+  "You've sent too many requests. Please wait at least 1 minute and try again.";
 
 const VERIFY_ERROR_MESSAGE: Record<
   Exclude<Awaited<ReturnType<typeof verifyCode>>, { ok: true }>["reason"],
   string
 > = {
-  invalid: "Mã không đúng. Vui lòng kiểm tra lại.",
-  expired: "Mã đã hết hạn. Vui lòng yêu cầu mã mới.",
+  invalid: "Incorrect code. Please check and try again.",
+  expired: "The code has expired. Please request a new one.",
   too_many_attempts:
-    "Bạn đã nhập sai quá nhiều lần. Vui lòng yêu cầu mã mới.",
+    "Too many incorrect attempts. Please request a new code.",
 };
 
 async function rateLimit(scope: string): Promise<boolean> {
@@ -99,7 +99,7 @@ export async function signUpWithPassword(
     const normalizedEmail = normalizeEmail(email);
 
     if (!isValidEmail(normalizedEmail)) {
-      return { ok: false, error: "Vui lòng nhập email hợp lệ." };
+      return { ok: false, error: "Please enter a valid email." };
     }
 
     const passwordError = validatePassword(password);
@@ -114,7 +114,7 @@ export async function signUpWithPassword(
     if (existing?.confirmed) {
       return {
         ok: false,
-        error: "Email đã được đăng ký. Vui lòng đăng nhập.",
+        error: "This email is already registered. Please log in.",
       };
     }
 
@@ -126,7 +126,7 @@ export async function signUpWithPassword(
 
       if (error) {
         console.error("Failed to update pending signup password", error);
-        return { ok: false, error: "Không thể đăng ký lúc này. Vui lòng thử lại." };
+        return { ok: false, error: "Couldn't sign up right now. Please try again." };
       }
     } else {
       const { error } = await admin.auth.admin.createUser({
@@ -137,7 +137,7 @@ export async function signUpWithPassword(
 
       if (error) {
         console.error("Failed to create user", error);
-        return { ok: false, error: "Không thể đăng ký lúc này. Vui lòng thử lại." };
+        return { ok: false, error: "Couldn't sign up right now. Please try again." };
       }
     }
 
@@ -147,7 +147,7 @@ export async function signUpWithPassword(
     return { ok: true };
   } catch (error) {
     console.error("Sign up failed", error);
-    return { ok: false, error: "Không thể đăng ký lúc này. Vui lòng thử lại." };
+    return { ok: false, error: "Couldn't sign up right now. Please try again." };
   }
 }
 
@@ -170,7 +170,7 @@ export async function verifySignupCode(
     const existing = await findExistingUser(normalizedEmail);
 
     if (!existing) {
-      return { ok: false, error: "Không tìm thấy tài khoản. Vui lòng đăng ký lại." };
+      return { ok: false, error: "Account not found. Please sign up again." };
     }
 
     const admin = createAdminClient();
@@ -180,13 +180,13 @@ export async function verifySignupCode(
 
     if (error) {
       console.error("Failed to confirm user", error);
-      return { ok: false, error: "Không thể kích hoạt tài khoản. Vui lòng thử lại." };
+      return { ok: false, error: "Couldn't activate the account. Please try again." };
     }
 
     return { ok: true };
   } catch (error) {
     console.error("Verify signup code failed", error);
-    return { ok: false, error: "Không thể kích hoạt tài khoản. Vui lòng thử lại." };
+    return { ok: false, error: "Couldn't activate the account. Please try again." };
   }
 }
 
@@ -202,7 +202,7 @@ export async function requestPasswordReset(
     const normalizedEmail = normalizeEmail(email);
 
     if (!isValidEmail(normalizedEmail)) {
-      return { ok: false, error: "Vui lòng nhập email hợp lệ." };
+      return { ok: false, error: "Please enter a valid email." };
     }
 
     const existing = await findExistingUser(normalizedEmail);
@@ -253,7 +253,7 @@ export async function resetPasswordWithCode(
     const existing = await findExistingUser(normalizedEmail);
 
     if (!existing) {
-      return { ok: false, error: "Không tìm thấy tài khoản." };
+      return { ok: false, error: "Account not found." };
     }
 
     const admin = createAdminClient();
@@ -263,13 +263,13 @@ export async function resetPasswordWithCode(
 
     if (error) {
       console.error("Failed to reset password", error);
-      return { ok: false, error: "Không thể đặt lại mật khẩu. Vui lòng thử lại." };
+      return { ok: false, error: "Couldn't reset the password. Please try again." };
     }
 
     return { ok: true };
   } catch (error) {
     console.error("Reset password failed", error);
-    return { ok: false, error: "Không thể đặt lại mật khẩu. Vui lòng thử lại." };
+    return { ok: false, error: "Couldn't reset the password. Please try again." };
   }
 }
 
@@ -290,11 +290,11 @@ export async function resendCode(
     const existing = await findExistingUser(normalizedEmail);
 
     if (!existing) {
-      return { ok: false, error: "Không tìm thấy tài khoản. Vui lòng đăng ký lại." };
+      return { ok: false, error: "Account not found. Please sign up again." };
     }
 
     if (existing.confirmed) {
-      return { ok: false, error: "Tài khoản đã được kích hoạt. Vui lòng đăng nhập." };
+      return { ok: false, error: "This account is already activated. Please log in." };
     }
 
     const code = await createVerificationCode(normalizedEmail, "signup");
@@ -303,7 +303,7 @@ export async function resendCode(
     return { ok: true };
   } catch (error) {
     console.error("Resend signup code failed", error);
-    return { ok: false, error: "Không thể gửi lại mã. Vui lòng thử lại." };
+    return { ok: false, error: "Couldn't resend the code. Please try again." };
   }
 }
 

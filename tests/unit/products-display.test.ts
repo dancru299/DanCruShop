@@ -22,11 +22,11 @@ describe("product display helpers", () => {
         is_free: true,
         price_cents: 9999,
       })
-    ).toBe("Miễn phí");
+    ).toBe("Free");
   });
 
   it("returns the expected delivery label", () => {
-    expect(getProductDeliveryLabel({ is_free: true })).toBe("Nhận miễn phí");
-    expect(getProductDeliveryLabel({ is_free: false })).toBe("Giao ngay");
+    expect(getProductDeliveryLabel({ is_free: true })).toBe("Get it free");
+    expect(getProductDeliveryLabel({ is_free: false })).toBe("Instant delivery");
   });
 });

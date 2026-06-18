@@ -65,7 +65,7 @@ function ProductSearchForm({
         <Input
           ref={inputRef}
           type="search"
-          placeholder="Tìm kiếm sản phẩm..."
+          placeholder="Search products..."
           value={value}
           onChange={(e) => setValue(e.target.value)}
           className="pl-8 pr-8"
@@ -83,7 +83,7 @@ function ProductSearchForm({
         )}
       </div>
       <Button type="submit" variant="outline">
-        Tìm
+        Search
       </Button>
     </form>
   );

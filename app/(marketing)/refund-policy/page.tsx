@@ -5,33 +5,33 @@ import { PolicyPageShell } from "@/components/policies/policy-page-shell";
 import { betaPolicies } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "Chính sách hoàn tiền",
+  title: "Refund policy",
   description: betaPolicies.refund,
 };
 
 export default function RefundPolicyPage() {
   return (
     <PolicyPageShell
-      title="Chính sách hoàn tiền"
+      title="Refund policy"
       description={betaPolicies.refund}
       points={[
         {
           Icon: CheckCircle2Icon,
-          title: "Áp dụng khi có lỗi thật",
+          title: "Applies to genuine issues",
           description:
-            "Shop ưu tiên hoàn tiền khi sản phẩm không truy cập được, lỗi nghiêm trọng, hoặc mô tả sai so với trang bán hàng.",
+            "The shop prioritizes refunds when a product can't be accessed, has a serious defect, or doesn't match the sales page.",
         },
         {
           Icon: AlertCircleIcon,
-          title: "Không áp dụng cho đổi ý",
+          title: "Not for change of mind",
           description:
-            "Với sản phẩm số, refund không áp dụng khi tài nguyên đã được tải/sử dụng đầy đủ hoặc khách đổi ý sau khi nhận file.",
+            "For digital products, refunds don't apply once the resource has been fully downloaded/used, or if you change your mind after receiving the files.",
         },
         {
           Icon: RotateCcwIcon,
-          title: "Thời hạn 7 ngày",
+          title: "7-day window",
           description:
-            "Gửi email trong vòng 7 ngày từ lúc mua, kèm email đơn hàng và mô tả lỗi để shop kiểm tra nhanh.",
+            "Email us within 7 days of purchase with your order email and a description of the issue so we can review it quickly.",
         },
       ]}
     />

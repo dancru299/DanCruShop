@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import { CartProvider } from "@/components/cart/cart-provider";
+import { CompareBar } from "@/components/compare/compare-bar";
+import { CompareProvider } from "@/components/compare/compare-provider";
 import { FavoritesProvider } from "@/components/favorites/favorites-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -11,7 +13,7 @@ import { getSiteUrl, siteName } from "@/lib/site-config";
 import "./globals.css";
 
 const siteDescription =
-  "Storefront tool, source code và tài nguyên số cho builder.";
+  "A storefront for tools, source code, and digital resources for builders.";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,7 +28,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
-    default: `${siteName} — Tool, source code & tài nguyên số`,
+    default: `${siteName} — Tools, source code & digital resources`,
     template: `%s | ${siteName}`,
   },
   description: siteDescription,
@@ -36,7 +38,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "vi_VN",
+    locale: "en_US",
     siteName,
     title: siteName,
     description: siteDescription,
@@ -60,7 +62,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="vi"
+      lang="en"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
@@ -77,8 +79,11 @@ export default function RootLayout({
           <AnalyticsProvider>
             <CartProvider>
               <FavoritesProvider>
-                {children}
-                <Toaster position="top-center" richColors />
+                <CompareProvider>
+                  {children}
+                  <CompareBar />
+                  <Toaster position="top-center" richColors />
+                </CompareProvider>
               </FavoritesProvider>
             </CartProvider>
           </AnalyticsProvider>

@@ -43,7 +43,7 @@ export default function SignUpPage() {
     setFormError(null);
 
     if (password !== confirm) {
-      setFormError("Mật khẩu nhập lại không khớp.");
+      setFormError("Passwords do not match.");
       return;
     }
 
@@ -52,13 +52,13 @@ export default function SignUpPage() {
 
       if (!result.ok) {
         setFormError(result.error);
-        toast.error("Không đăng ký được", { description: result.error });
+        toast.error("Sign-up failed", { description: result.error });
         return;
       }
 
       setStep("code");
-      toast.success("Đã gửi mã xác thực", {
-        description: "Vui lòng kiểm tra email của bạn.",
+      toast.success("Verification code sent", {
+        description: "Please check your email.",
       });
     });
   }
@@ -83,14 +83,14 @@ export default function SignUpPage() {
       });
 
       if (error) {
-        toast.success("Tài khoản đã được kích hoạt", {
-          description: "Vui lòng đăng nhập.",
+        toast.success("Account activated", {
+          description: "Please log in.",
         });
         router.push("/login");
         return;
       }
 
-      toast.success("Chào mừng đến với DanCruShop!");
+      toast.success("Welcome to DanCruShop!");
       router.push("/dashboard");
       router.refresh();
     });
@@ -101,11 +101,11 @@ export default function SignUpPage() {
       const result = await resendCode(email, "signup");
 
       if (!result.ok) {
-        toast.error("Không gửi lại được mã", { description: result.error });
+        toast.error("Couldn't resend code", { description: result.error });
         return;
       }
 
-      toast.success("Đã gửi lại mã xác thực");
+      toast.success("Verification code resent");
     });
   }
 
@@ -114,10 +114,10 @@ export default function SignUpPage() {
       <>
         <div className="flex flex-col gap-1.5">
           <h1 className="text-2xl font-semibold tracking-normal">
-            Nhập mã xác thực
+            Enter verification code
           </h1>
           <p className="text-sm leading-6 text-muted-foreground">
-            Chúng tôi đã gửi mã gồm 6 chữ số tới{" "}
+            We sent a 6-digit code to{" "}
             <span className="font-medium text-foreground">{email}</span>.
           </p>
         </div>
@@ -135,7 +135,7 @@ export default function SignUpPage() {
               {codeError ? (
                 <FieldError>{codeError}</FieldError>
               ) : (
-                <FieldDescription>Mã có hiệu lực trong 10 phút.</FieldDescription>
+                <FieldDescription>The code is valid for 10 minutes.</FieldDescription>
               )}
             </Field>
 
@@ -151,7 +151,7 @@ export default function SignUpPage() {
                   className="animate-spin"
                 />
               ) : null}
-              {isPending ? "Đang xác thực..." : "Xác thực & kích hoạt"}
+              {isPending ? "Verifying..." : "Verify & activate"}
             </Button>
           </FieldGroup>
         </form>
@@ -164,7 +164,7 @@ export default function SignUpPage() {
             className="inline-flex items-center gap-1 text-muted-foreground underline-offset-4 hover:text-primary hover:underline disabled:opacity-50"
           >
             <ArrowLeftIcon aria-hidden="true" className="size-3.5" />
-            Đổi email
+            Change email
           </button>
           <button
             type="button"
@@ -172,7 +172,7 @@ export default function SignUpPage() {
             disabled={isPending}
             className="text-muted-foreground underline-offset-4 hover:text-primary hover:underline disabled:opacity-50"
           >
-            Gửi lại mã
+            Resend code
           </button>
         </div>
       </>
@@ -183,10 +183,10 @@ export default function SignUpPage() {
     <>
       <div className="flex flex-col gap-1.5">
         <h1 className="text-2xl font-semibold tracking-normal">
-          Tạo tài khoản DanCruShop
+          Create your DanCruShop account
         </h1>
         <p className="text-sm leading-6 text-muted-foreground">
-          Đăng ký bằng email và mật khẩu của bạn.
+          Sign up with your email and password.
         </p>
       </div>
 
@@ -194,7 +194,7 @@ export default function SignUpPage() {
         <GoogleButton />
       </div>
 
-      <FieldSeparator className="my-5">hoặc</FieldSeparator>
+      <FieldSeparator className="my-5">or</FieldSeparator>
 
       <form onSubmit={handleFormSubmit}>
         <FieldGroup>
@@ -216,13 +216,13 @@ export default function SignUpPage() {
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="password">Mật khẩu</FieldLabel>
+            <FieldLabel htmlFor="password">Password</FieldLabel>
             <Input
               id="password"
               name="password"
               type="password"
               value={password}
-              placeholder="Ít nhất 8 ký tự"
+              placeholder="At least 8 characters"
               autoComplete="new-password"
               disabled={isPending}
               onChange={(event) => setPassword(event.target.value)}
@@ -231,7 +231,7 @@ export default function SignUpPage() {
           </Field>
 
           <Field data-invalid={formError ? true : undefined}>
-            <FieldLabel htmlFor="confirm">Nhập lại mật khẩu</FieldLabel>
+            <FieldLabel htmlFor="confirm">Confirm password</FieldLabel>
             <Input
               id="confirm"
               name="confirm"
@@ -257,18 +257,18 @@ export default function SignUpPage() {
             ) : (
               <ArrowRightIcon data-icon="inline-start" aria-hidden="true" />
             )}
-            {isPending ? "Đang gửi mã..." : "Đăng ký"}
+            {isPending ? "Sending code..." : "Sign up"}
           </Button>
         </FieldGroup>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        Đã có tài khoản?{" "}
+        Already have an account?{" "}
         <Link
           href="/login"
           className="text-foreground underline-offset-4 hover:text-primary hover:underline"
         >
-          Đăng nhập
+          Log in
         </Link>
       </p>
     </>

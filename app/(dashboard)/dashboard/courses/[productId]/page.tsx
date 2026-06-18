@@ -45,7 +45,7 @@ function ProgressBar({ completed, total }: { completed: number; total: number })
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">
-          {completed} / {total} bài học hoàn thành
+          {completed} / {total} lessons completed
         </span>
         <span className="font-medium">{pct}%</span>
       </div>
@@ -165,7 +165,7 @@ export default async function CourseOverviewPage({ params }: CourseOverviewPageP
             className={cn(buttonVariants({ variant: "default" }), "w-fit")}
           >
             <PlayCircleIcon aria-hidden="true" data-icon="inline-start" />
-            {completedCount > 0 ? "Tiếp tục học" : "Bắt đầu học"}
+            {completedCount > 0 ? "Continue learning" : "Start learning"}
           </Link>
         )}
       </div>
@@ -199,7 +199,7 @@ export default async function CourseOverviewPage({ params }: CourseOverviewPageP
                 ))}
                 {mod.lessons.length === 0 && (
                   <p className="px-3 py-2 text-sm text-muted-foreground">
-                    Chưa có bài học nào.
+                    No lessons yet.
                   </p>
                 )}
               </div>

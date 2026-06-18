@@ -76,20 +76,24 @@ function RailBanner({
       style={{ opacity }}
       aria-hidden={faded}
       className={cn(
-        // Rails sit in the gutter beside the max-w-6xl content. That gutter widens
-        // with the viewport, so scale the banner up on bigger screens instead of
-        // leaving it stranded at a tiny fixed width. Pinned near the top so they
-        // line up with the hero instead of floating dead-center.
-        "pointer-events-none fixed top-36 z-30 hidden w-40 2xl:block min-[1700px]:w-56 min-[1920px]:w-72",
-        side === "left" ? "left-4" : "right-4"
+        // Rails sit in the gutter beside the max-w-6xl (72rem) content. Only show
+        // them once the gutter is genuinely wide (>=1700px) — at narrower widths
+        // they crowd the content and read as ad spam. The rail is a fixed 13rem
+        // and centered in its gutter via calc, so it keeps an equal, breathing
+        // margin from both the content and the viewport edge at any size. Pinned
+        // near the top so they line up with the hero.
+        "pointer-events-none fixed top-36 z-30 hidden w-52 min-[1700px]:block",
+        side === "left"
+          ? "left-[calc((100vw-72rem)/4-6.5rem)]"
+          : "right-[calc((100vw-72rem)/4-6.5rem)]"
       )}
     >
       <Link
         href={rail.href || "#"}
-        aria-label={`Khuyến mãi ${side === "left" ? "bên trái" : "bên phải"}`}
+        aria-label={`Promotion (${side})`}
         tabIndex={faded ? -1 : undefined}
         style={{ pointerEvents: faded ? "none" : "auto" }}
-        className="block overflow-hidden rounded-xl border border-border/80 bg-card shadow-lg transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="block overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <img src={rail.imageUrl} alt="" className="block w-full" />
       </Link>

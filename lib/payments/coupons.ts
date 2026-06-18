@@ -71,11 +71,11 @@ export async function validateCoupon(
   const code = normalizeCouponCode(args.code);
 
   if (!code) {
-    return { error: "Nhập mã giảm giá.", ok: false };
+    return { error: "Enter a discount code.", ok: false };
   }
 
   if (!Number.isFinite(args.subtotalCents) || args.subtotalCents <= 0) {
-    return { error: "Giỏ hàng chưa có sản phẩm trả phí.", ok: false };
+    return { error: "Your cart has no paid products yet.", ok: false };
   }
 
   const supabaseAdmin = createAdminClient();
@@ -87,34 +87,34 @@ export async function validateCoupon(
 
   if (error) {
     console.error("Failed to load coupon", error);
-    return { error: "Không kiểm tra được mã giảm giá.", ok: false };
+    return { error: "Couldn't verify the discount code.", ok: false };
   }
 
   if (!data) {
-    return { error: "Mã giảm giá không tồn tại.", ok: false };
+    return { error: "That discount code doesn't exist.", ok: false };
   }
 
   const coupon = data as Coupon;
 
   if (!coupon.is_active) {
-    return { error: "Mã giảm giá đã bị tắt.", ok: false };
+    return { error: "This discount code is disabled.", ok: false };
   }
 
   const now = Date.now();
 
   if (coupon.starts_at && new Date(coupon.starts_at).getTime() > now) {
-    return { error: "Mã giảm giá chưa tới thời gian áp dụng.", ok: false };
+    return { error: "This discount code isn't active yet.", ok: false };
   }
 
   if (coupon.expires_at && new Date(coupon.expires_at).getTime() < now) {
-    return { error: "Mã giảm giá đã hết hạn.", ok: false };
+    return { error: "This discount code has expired.", ok: false };
   }
 
   if (
     coupon.max_redemptions !== null &&
     coupon.times_redeemed >= coupon.max_redemptions
   ) {
-    return { error: "Mã giảm giá đã hết lượt sử dụng.", ok: false };
+    return { error: "This discount code has no uses left.", ok: false };
   }
 
   const normalizedCurrency = args.currency.trim().toUpperCase();
@@ -125,14 +125,14 @@ export async function validateCoupon(
     coupon.currency.toUpperCase() !== normalizedCurrency
   ) {
     return {
-      error: `Mã chỉ áp dụng cho đơn ${coupon.currency.toUpperCase()}.`,
+      error: `This code only applies to ${coupon.currency.toUpperCase()} orders.`,
       ok: false,
     };
   }
 
   if (args.subtotalCents < coupon.min_order_cents) {
     return {
-      error: "Đơn hàng chưa đạt giá trị tối thiểu để dùng mã.",
+      error: "Your order hasn't reached the minimum value for this code.",
       ok: false,
     };
   }
@@ -146,18 +146,18 @@ export async function validateCoupon(
 
     if (countError) {
       console.error("Failed to count coupon redemptions", countError);
-      return { error: "Không kiểm tra được mã giảm giá.", ok: false };
+      return { error: "Couldn't verify the discount code.", ok: false };
     }
 
     if ((count ?? 0) >= coupon.per_user_limit) {
-      return { error: "Bạn đã dùng hết lượt cho mã này.", ok: false };
+      return { error: "You've used up your uses for this code.", ok: false };
     }
   }
 
   const discountCents = computeDiscountCents(coupon, args.subtotalCents);
 
   if (discountCents <= 0) {
-    return { error: "Mã không áp dụng được cho đơn này.", ok: false };
+    return { error: "This code can't be applied to your order.", ok: false };
   }
 
   return {

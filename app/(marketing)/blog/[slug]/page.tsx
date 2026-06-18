@@ -74,7 +74,7 @@ function getReadingTime(content: string | null) {
   const words = stripMarkdown(content ?? "").split(/\s+/).filter(Boolean).length;
   const minutes = Math.max(3, Math.ceil(words / 220));
 
-  return `${minutes} phút đọc`;
+  return `${minutes} min read`;
 }
 
 function slugifyHeading(value: string) {
@@ -123,7 +123,7 @@ function extractHeadings(content: string | null) {
 function getPostSummary(post: PublishedBlogPost) {
   return (
     post.excerpt ??
-    "Ghi chú thực chiến cho builder đang xây và bán sản phẩm số."
+    "Hands-on notes for builders making and selling digital products."
   );
 }
 
@@ -133,14 +133,14 @@ function getArticleTopics(post: BlogPostDetail) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
   const topicRules = [
-    { label: "Sản phẩm số", keywords: ["product", "san pham", "template"] },
-    { label: "Thương mại creator", keywords: ["creator", "shop", "storefront"] },
-    { label: "Thanh toán", keywords: ["checkout", "payment", "thanh toan"] },
-    { label: "Nội dung", keywords: ["blog", "content", "bai viet"] },
-    { label: "Vận hành", keywords: ["admin", "dashboard", "workflow"] },
-    { label: "Ra mắt", keywords: ["launch", "ship", "release"] },
-    { label: "Tự động hóa", keywords: ["automation", "tool", "system"] },
-    { label: "Học tập", keywords: ["course", "learning", "khoa hoc"] },
+    { label: "Digital products", keywords: ["product", "san pham", "template"] },
+    { label: "Creator commerce", keywords: ["creator", "shop", "storefront"] },
+    { label: "Payments", keywords: ["checkout", "payment", "thanh toan"] },
+    { label: "Content", keywords: ["blog", "content", "bai viet"] },
+    { label: "Operations", keywords: ["admin", "dashboard", "workflow"] },
+    { label: "Launches", keywords: ["launch", "ship", "release"] },
+    { label: "Automation", keywords: ["automation", "tool", "system"] },
+    { label: "Learning", keywords: ["course", "learning", "khoa hoc"] },
   ];
   const topics = topicRules
     .filter((topic) => topic.keywords.some((keyword) => source.includes(keyword)))
@@ -148,7 +148,7 @@ function getArticleTopics(post: BlogPostDetail) {
 
   return topics.length >= 3
     ? topics.slice(0, 5)
-    : ["Sản phẩm số", "Thương mại creator", "Ghi chú DanCruShop"];
+    : ["Digital products", "Creator commerce", "DanCruShop notes"];
 }
 
 function getHeadingIdMap(headings: ReturnType<typeof extractHeadings>) {
@@ -171,7 +171,7 @@ export async function generateMetadata({
 
   if (!post) {
     return {
-      title: "Không tìm thấy bài viết",
+      title: "Article not found",
     };
   }
 
@@ -179,7 +179,7 @@ export async function generateMetadata({
   const description =
     post.seo_description ??
     post.excerpt ??
-    "Đọc bài viết này trên DanCruShop.";
+    "Read this article on DanCruShop.";
 
   const path = `/blog/${post.slug}`;
 
@@ -235,8 +235,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     title: post.seo_title ?? post.title,
   });
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
-    { name: "Trang chủ", path: "/" },
-    { name: "Bài viết", path: "/blog" },
+    { name: "Home", path: "/" },
+    { name: "Blog", path: "/blog" },
     { name: post.title, path: `/blog/${post.slug}` },
   ]);
 
@@ -250,7 +250,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             className={cn(buttonVariants({ variant: "ghost" }), "w-fit")}
           >
             <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-            Quay lại Bài viết
+            Back to blog
           </Link>
 
           <div className="grid gap-7 lg:grid-cols-[minmax(0,7fr)_minmax(18rem,3fr)] lg:items-end">
@@ -258,7 +258,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline" className="h-6 gap-1.5 rounded-lg">
                   <BookOpenIcon aria-hidden="true" data-icon="inline-start" />
-                  Bài viết DanCruShop
+                  DanCruShop blog
                 </Badge>
                 <span className="inline-flex h-6 items-center gap-1.5 rounded-lg border bg-background px-2 text-xs font-medium text-muted-foreground">
                   <Clock3Icon aria-hidden="true" className="size-3.5" />
@@ -286,9 +286,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   <SparklesIcon aria-hidden="true" className="size-5" />
                 </div>
                 <div className="grid gap-1">
-                  <p className="text-sm font-semibold">Góc nhìn builder</p>
+                  <p className="text-sm font-semibold">A builder's perspective</p>
                   <p className="text-sm leading-6 text-muted-foreground">
-                    Ghi chú, chiến thuật và tư duy sản phẩm để xây một storefront sắc nét hơn.
+                    Notes, tactics, and product thinking for building a sharper storefront.
                   </p>
                 </div>
               </div>
@@ -407,7 +407,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <section className="rounded-lg border bg-card/60 backdrop-blur-xl p-4 shadow-sm">
               <div className="mb-4 flex items-center gap-2">
                 <HashIcon aria-hidden="true" className="size-4" />
-                <h2 className="text-sm font-semibold">Trong bài viết</h2>
+                <h2 className="text-sm font-semibold">In this article</h2>
               </div>
               <nav className="grid gap-2">
                 {headings.map((heading) => (
@@ -429,7 +429,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <section className="rounded-lg border bg-card/60 backdrop-blur-xl p-4 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
               <Layers3Icon aria-hidden="true" className="size-4" />
-              <h2 className="text-sm font-semibold">Đọc tiếp</h2>
+              <h2 className="text-sm font-semibold">Keep reading</h2>
             </div>
             {relatedPosts.length > 0 ? (
               <div className="grid gap-3">
@@ -463,7 +463,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </div>
             ) : (
               <p className="text-sm leading-6 text-muted-foreground">
-                Bài viết liên quan sẽ xuất hiện ở đây khi blog có thêm nội dung.
+                Related articles will appear here as the blog grows.
               </p>
             )}
           </section>
@@ -471,7 +471,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <section className="rounded-lg border bg-card/60 backdrop-blur-xl p-4 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
               <BookOpenIcon aria-hidden="true" className="size-4" />
-              <h2 className="text-sm font-semibold">Chủ đề</h2>
+              <h2 className="text-sm font-semibold">Topics</h2>
             </div>
             <div className="flex flex-wrap gap-2">
               {topics.map((topic) => (
@@ -487,9 +487,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </section>
 
           <section className="rounded-lg border bg-foreground p-4 text-background shadow-sm">
-            <p className="text-sm font-semibold">Xây cùng DanCruShop</p>
+            <p className="text-sm font-semibold">Build with DanCruShop</p>
             <p className="mt-2 text-sm leading-6 text-background/75">
-              Biến ý tưởng từ blog thành source code, template và tool có thể ship ngay.
+              Turn blog ideas into source code, templates, and tools you can ship right away.
             </p>
             <Link
               href="/products"
@@ -498,7 +498,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 "mt-4 w-full bg-background text-foreground hover:bg-background/90"
               )}
             >
-              Xem sản phẩm
+              View products
               <ArrowUpRightIcon aria-hidden="true" data-icon="inline-end" />
             </Link>
           </section>

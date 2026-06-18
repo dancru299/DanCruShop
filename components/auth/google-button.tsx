@@ -50,14 +50,14 @@ export function GoogleButton({ next = "/dashboard", disabled }: GoogleButtonProp
       });
 
       if (error) {
-        toast.error("Không thể đăng nhập với Google", {
+        toast.error("Couldn't sign in with Google", {
           description: error.message,
         });
         setIsLoading(false);
       }
       // On success the browser is redirected to Google; no further state needed.
     } catch {
-      toast.error("Không thể đăng nhập với Google");
+      toast.error("Couldn't sign in with Google");
       setIsLoading(false);
     }
   }
@@ -77,7 +77,7 @@ export function GoogleButton({ next = "/dashboard", disabled }: GoogleButtonProp
           <GoogleIcon />
         </span>
       )}
-      Tiếp tục với Google
+      Continue with Google
     </Button>
   );
 }

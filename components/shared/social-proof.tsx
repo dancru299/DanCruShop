@@ -15,21 +15,21 @@ export type SocialProofProduct = {
 // Buyer names are intentionally masked (real customers are never exposed); only
 // the product is real. Tweak this pool to taste.
 const BUYER_NAMES = [
-  "Nguyễn Văn A",
-  "Trần Thị B",
-  "Lê Hoàng C",
-  "Phạm Minh D",
-  "Hoàng Thị E",
-  "Vũ Đức F",
-  "Đặng Thu G",
-  "Bùi Quang H",
-  "Đỗ Thị K",
-  "Ngô Văn L",
-  "Dương Minh M",
-  "Phan Thị N",
+  "James W.",
+  "Olivia M.",
+  "Liam T.",
+  "Emma R.",
+  "Noah K.",
+  "Sophia L.",
+  "Ethan B.",
+  "Ava S.",
+  "Lucas H.",
+  "Mia C.",
+  "Daniel P.",
+  "Isabella N.",
 ];
 
-const ACTIONS = ["vừa mua", "vừa xem", "vừa thêm vào giỏ"];
+const ACTIONS = ["just bought", "just viewed", "just added to cart"];
 
 type Notice = {
   product: SocialProofProduct;
@@ -102,13 +102,13 @@ export function SocialProof({ products }: { products: SocialProofProduct[] }) {
               {notice.product.title}
             </p>
             <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
-              {notice.minutes} phút trước
+              {notice.minutes} min ago
               <span aria-hidden="true">·</span>
               <CheckCircle2Icon
                 aria-hidden="true"
                 className="size-3 text-emerald-500"
               />
-              Đã xác minh
+              Verified
             </p>
           </div>
         </Link>
@@ -116,7 +116,7 @@ export function SocialProof({ products }: { products: SocialProofProduct[] }) {
         <button
           type="button"
           onClick={() => setDismissed(true)}
-          aria-label="Đóng thông báo"
+          aria-label="Dismiss notification"
           className="absolute right-1.5 top-1.5 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <XIcon aria-hidden="true" className="size-3.5" />

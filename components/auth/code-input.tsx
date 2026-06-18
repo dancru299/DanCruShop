@@ -92,7 +92,7 @@ export function CodeInput({
   }
 
   return (
-    <div className="flex justify-between gap-2" role="group" aria-label="Mã xác thực">
+    <div className="flex justify-between gap-2" role="group" aria-label="Verification code">
       {Array.from({ length }).map((_, index) => (
         <input
           key={index}

@@ -181,7 +181,7 @@ export async function approveVietQrOrder(
     const emailProductName =
       products.length === 1
         ? products[0].title
-        : `${products.length} sản phẩm DanCruShop`;
+        : `${products.length} DanCruShop products`;
 
     await sendPurchaseAccessEmail(supabaseAdmin, normalizedEmail, emailProductName);
 

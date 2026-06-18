@@ -70,15 +70,15 @@ export function FlashSaleCountdown({ endsAt }: { endsAt: string }) {
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm font-medium text-muted-foreground">
-        Kết thúc trong
+        Ends in
       </span>
       <div className="flex items-end gap-1.5">
         {showDays && remaining ? (
-          <Cell value={pad(remaining.days)} label="Ngày" />
+          <Cell value={pad(remaining.days)} label="Days" />
         ) : null}
-        <Cell value={remaining ? pad(remaining.hours) : "--"} label="Giờ" />
-        <Cell value={remaining ? pad(remaining.minutes) : "--"} label="Phút" />
-        <Cell value={remaining ? pad(remaining.seconds) : "--"} label="Giây" />
+        <Cell value={remaining ? pad(remaining.hours) : "--"} label="Hrs" />
+        <Cell value={remaining ? pad(remaining.minutes) : "--"} label="Min" />
+        <Cell value={remaining ? pad(remaining.seconds) : "--"} label="Sec" />
       </div>
     </div>
   );

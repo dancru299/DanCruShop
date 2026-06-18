@@ -50,7 +50,7 @@ export async function FeaturedProductsSection({
 
         {products.length === 0 ? (
           <p className="text-sm leading-6 text-muted-foreground">
-            Chưa có sản phẩm nào để hiển thị. Hãy publish sản phẩm trong CMS.
+            No products to show yet. Publish products in the CMS.
           </p>
         ) : section.layout === "row" ? (
           <div className="-mx-4 flex snap-x gap-5 overflow-x-auto px-4 pb-2">

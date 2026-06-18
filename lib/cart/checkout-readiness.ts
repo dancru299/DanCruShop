@@ -28,11 +28,11 @@ export function getCartCheckoutWarning(items: CheckoutReadinessItem[]) {
   const readiness = getCartCheckoutReadiness(items);
 
   if (readiness.hasMixedCurrencies) {
-    return "Giỏ hàng đang có nhiều loại tiền tệ. Hãy tách đơn trước khi checkout.";
+    return "Your cart has multiple currencies. Split the order before checking out.";
   }
 
   if (readiness.isFreeOnly) {
-    return "Giỏ hàng chỉ có tài nguyên miễn phí; bạn sẽ đăng nhập để mở trong dashboard.";
+    return "Your cart only has free resources; log in to open them in your dashboard.";
   }
 
   return null;

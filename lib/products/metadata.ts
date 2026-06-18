@@ -58,18 +58,18 @@ export function getProductIncludedItems(product: ProductMetadataSource) {
   }
 
   return [
-    "Mở quyền truy cập ngay sau khi thanh toán thành công",
-    "Gói tài nguyên gọn, sẵn sàng cho dự án thật",
-    "Có context, ghi chú setup và hướng dẫn sử dụng thực tế",
-    "Bản cập nhật sau này được giao qua dashboard đã mua",
+    "Instant access right after a successful payment",
+    "A tidy resource package, ready for real projects",
+    "Context, setup notes, and practical usage guidance",
+    "Future updates delivered through your purchased dashboard",
   ];
 }
 
 export function getProductRequirements(product: ProductMetadataSource) {
   return (
     getStringArrayFromProductMetadata(product.metadata, "requirements") ?? [
-      "Có tài khoản DanCruShop để mở dashboard sau checkout.",
-      "Đọc phần mô tả, tech stack và license trước khi dùng cho dự án thật.",
+      "A DanCruShop account to open the dashboard after checkout.",
+      "Read the description, tech stack, and license before using it in real projects.",
     ]
   );
 }
@@ -85,13 +85,21 @@ export function getProductCompatibility(product: ProductMetadataSource) {
 export function getProductUpdatePolicy(product: ProductMetadataSource) {
   return (
     getStringFromProductMetadata(product.metadata, "update_policy") ??
-    "Người mua được mở lại bản cập nhật qua dashboard khi shop publish phiên bản mới."
+    "Buyers can re-download updates through the dashboard when the shop publishes a new version."
   );
 }
 
 export function getProductSupportNote(product: ProductMetadataSource) {
   return (
     getStringFromProductMetadata(product.metadata, "support_note") ??
-    "Nếu tài nguyên không truy cập được hoặc mô tả sai, liên hệ support trong 7 ngày."
+    "If a resource can't be accessed or doesn't match the description, contact support within 7 days."
   );
+}
+
+/**
+ * Repo to pull the changelog from, set as `github_repo` in product metadata.
+ * Accepts "owner/repo" or a full GitHub URL. Returns null when not configured.
+ */
+export function getProductGithubRepo(metadata: ProductMetadata) {
+  return getStringFromProductMetadata(metadata, "github_repo");
 }

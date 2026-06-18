@@ -11,7 +11,7 @@ export function CartHeaderButton() {
 
   return (
     <Button
-      aria-label={`Giỏ hàng, ${itemCount} sản phẩm`}
+      aria-label={`Cart, ${itemCount} items`}
       className="relative"
       data-cart-target
       render={<Link href="/cart" />}

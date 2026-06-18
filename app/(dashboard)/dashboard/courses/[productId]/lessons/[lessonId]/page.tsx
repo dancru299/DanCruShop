@@ -154,7 +154,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
             className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "w-fit")}
           >
             <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-            Tổng quan
+            Overview
           </Link>
 
           <div className="flex flex-col gap-3">
@@ -186,7 +186,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
           className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "w-fit lg:hidden")}
         >
           <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-          Tổng quan
+          Overview
         </Link>
 
         <div className="flex flex-col gap-2">
@@ -195,7 +195,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
             {isCompleted && (
               <Badge variant="default">
                 <CheckCircle2Icon aria-hidden="true" data-icon="inline-start" />
-                Hoàn thành
+                Completed
               </Badge>
             )}
           </div>
@@ -222,7 +222,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
                 className={cn(buttonVariants({ variant: "outline" }))}
               >
                 <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-                Bài trước
+                Previous lesson
               </Link>
             ) : (
               <span />
@@ -232,7 +232,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
                 href={`/dashboard/courses/${productId}/lessons/${next.id}`}
                 className={cn(buttonVariants({ variant: "outline" }))}
               >
-                Bài tiếp
+                Next lesson
                 <ArrowRightIcon aria-hidden="true" data-icon="inline-end" />
               </Link>
             )}

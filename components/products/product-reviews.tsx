@@ -78,7 +78,7 @@ function ReviewComposer({
   if (!isAuthenticated) {
     return (
       <div className="rounded-lg border border-dashed p-4 text-sm leading-6 text-muted-foreground">
-        Hãy đăng nhập sau khi mua sản phẩm để gửi đánh giá đã xác minh.
+        Log in after purchasing to submit a verified review.
       </div>
     );
   }
@@ -86,7 +86,7 @@ function ReviewComposer({
   if (!canReview) {
     return (
       <div className="rounded-lg border border-dashed p-4 text-sm leading-6 text-muted-foreground">
-        Chỉ người mua đã xác minh mới có thể chấm điểm và đánh giá sản phẩm này.
+        Only verified buyers can rate and review this product.
       </div>
     );
   }
@@ -97,7 +97,7 @@ function ReviewComposer({
       <input name="slug" type="hidden" value={slug} />
 
       <div className="grid gap-2">
-        <p className="text-sm font-medium">Đánh giá của bạn</p>
+        <p className="text-sm font-medium">Your rating</p>
         <div className="flex flex-wrap gap-2">
           {[5, 4, 3, 2, 1].map((rating) => (
             <label
@@ -118,10 +118,10 @@ function ReviewComposer({
         </div>
       </div>
 
-      <Input name="title" placeholder="Tiêu đề ngắn cho đánh giá" />
+      <Input name="title" placeholder="A short title for your review" />
       <Textarea
         name="comment"
-        placeholder="Chia sẻ điều hữu ích, điểm cần cải thiện và ai sẽ phù hợp với sản phẩm này."
+        placeholder="Share what's useful, what could be better, and who this product is for."
         rows={5}
         required
       />
@@ -134,7 +134,7 @@ function ReviewComposer({
       ) : null}
 
       <Button type="submit" className="w-fit" disabled={isPending}>
-        {isPending ? "Đang đăng..." : "Đăng đánh giá"}
+        {isPending ? "Submitting..." : "Submit review"}
       </Button>
     </form>
   );
@@ -167,14 +167,14 @@ function ReplyComposer({
       <input name="slug" type="hidden" value={slug} />
       <Textarea
         name="comment"
-        placeholder="Phản hồi đánh giá này"
+        placeholder="Reply to this review"
         rows={2}
         required
       />
       <div className="flex flex-wrap items-center gap-2">
         <Button type="submit" size="sm" variant="outline" disabled={isPending}>
           <MessageSquareReplyIcon aria-hidden="true" data-icon="inline-start" />
-          {isPending ? "Đang phản hồi..." : "Phản hồi"}
+          {isPending ? "Replying..." : "Reply"}
         </Button>
         {state.error ? (
           <span className="text-xs text-destructive">{state.error}</span>
@@ -206,7 +206,7 @@ function ReviewItem({
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-semibold">{review.authorName}</span>
               <Badge variant={review.authorRole === "admin" ? "default" : "secondary"}>
-                {review.authorRole === "admin" ? "DanCruShop" : "Người mua đã xác minh"}
+                {review.authorRole === "admin" ? "DanCruShop" : "Verified buyer"}
               </Badge>
             </div>
             <span className="text-xs text-muted-foreground">
@@ -236,7 +236,7 @@ function ReviewItem({
                     {reply.authorName}
                   </span>
                   <Badge variant={reply.authorRole === "admin" ? "default" : "outline"}>
-                    {reply.authorRole === "admin" ? "DanCruShop" : "Phản hồi từ người mua"}
+                    {reply.authorRole === "admin" ? "DanCruShop" : "Buyer reply"}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
                     {formatDate(reply.created_at)}
@@ -277,21 +277,23 @@ export function ProductReviews({
       <aside className="h-fit rounded-lg border bg-card p-5 text-card-foreground shadow-sm lg:sticky lg:top-24">
         <div className="grid gap-5">
           <div className="grid gap-2">
-            <p className="text-sm text-muted-foreground">Đánh giá từ người mua</p>
+            <p className="text-sm text-muted-foreground">Reviews from buyers</p>
             <h2 className="text-2xl font-semibold tracking-normal">
-              Đánh giá & phản hồi
+              Ratings & reviews
             </h2>
           </div>
 
           <div className="rounded-lg border bg-background p-4">
             <div className="flex items-end gap-3">
               <span className="text-4xl font-semibold tracking-normal">
-                {summary.totalReviews > 0 ? averageRating : "0.0"}
+                {summary.totalReviews > 0 ? averageRating : "New"}
               </span>
               <div className="grid gap-1 pb-1">
                 <Stars rating={summary.averageRating} />
                 <span className="text-sm text-muted-foreground">
-                  {summary.totalReviews} đánh giá đã xác minh
+                  {summary.totalReviews > 0
+                    ? `${summary.totalReviews} verified reviews`
+                    : "No reviews yet"}
                 </span>
               </div>
             </div>
@@ -311,7 +313,7 @@ export function ProductReviews({
                   key={rating}
                   className="grid grid-cols-[56px_1fr_32px] items-center gap-2 text-xs text-muted-foreground"
                 >
-                  <span>{rating} sao</span>
+                  <span>{rating} stars</span>
                   <div className="h-2 overflow-hidden rounded-full bg-muted">
                     <div
                       className="h-full rounded-full bg-amber-400"
@@ -349,11 +351,11 @@ export function ProductReviews({
             <StarIcon aria-hidden="true" className="size-8 text-muted-foreground" />
             <div className="grid max-w-md gap-2">
               <h3 className="text-xl font-semibold tracking-normal">
-                Chưa có đánh giá nào
+                No reviews yet
               </h3>
               <p className="text-sm leading-6 text-muted-foreground">
-                Khi có người mua đã xác minh gửi đánh giá, điểm số và phản hồi
-                sẽ xuất hiện tại đây.
+                Once verified buyers leave a review, their ratings and replies
+                will appear here.
               </p>
             </div>
           </div>

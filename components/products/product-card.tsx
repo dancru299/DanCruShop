@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+/* eslint-disable @next/next/no-img-element */
+
 import Link from "next/link";
 import {
   ArrowUpRightIcon,
@@ -14,6 +15,8 @@ import {
 } from "lucide-react";
 
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import { CompareButton } from "@/components/compare/compare-button";
+import type { CompareProduct } from "@/components/compare/compare-provider";
 import { FavoriteButton } from "@/components/products/favorite-button";
 import type { CartProduct } from "@/components/cart/cart-provider";
 import { buttonVariants } from "@/components/ui/button";
@@ -64,94 +67,6 @@ const productTypeVisuals: Record<
   },
 };
 
-const productTypeFiles: Record<
-  PublishedProduct["product_type"],
-  {
-    fileName: string;
-    Icon: LucideIcon;
-    codeLines: ReactNode[];
-  }
-> = {
-  bundle: {
-    fileName: "package.json",
-    Icon: Layers3Icon,
-    codeLines: [
-      <span key="1">{"{"}</span>,
-      <span key="2">  <span className="text-pink-400">"name"</span>: <span className="text-emerald-400">"@dancru/bundle"</span>,</span>,
-      <span key="3">  <span className="text-pink-400">"version"</span>: <span className="text-emerald-400">"1.0.0"</span>,</span>,
-      <span key="4">  <span className="text-pink-400">"items"</span>: [</span>,
-      <span key="5">    <span className="text-emerald-400">"nextjs-starter"</span>,</span>,
-      <span key="6">    <span className="text-emerald-400">"tailwind-ui"</span></span>,
-      <span key="7">  ]</span>,
-      <span key="8">{"}"}</span>,
-    ],
-  },
-  course: {
-    fileName: "course.md",
-    Icon: BookOpenIcon,
-    codeLines: [
-      <span key="1"><span className="text-blue-400"># Course: NextJS Pro</span></span>,
-      <span key="2" className="text-slate-500">## What you will learn:</span>,
-      <span key="3">- <span className="text-emerald-400">Turbopack & Routing</span></span>,
-      <span key="4">- <span className="text-emerald-400">Server Actions & DB</span></span>,
-      <span key="5">- <span className="text-emerald-400">Framer Motion FX</span></span>,
-      <span key="6"><span className="text-purple-400">const</span> <span className="text-yellow-400">Level</span> = <span className="text-emerald-400">"Expert"</span>;</span>,
-    ],
-  },
-  digital_download: {
-    fileName: "setup.sh",
-    Icon: DownloadIcon,
-    codeLines: [
-      <span key="1" className="text-slate-500">#!/bin/bash</span>,
-      <span key="2"><span className="text-purple-400">echo</span> <span className="text-emerald-400">"Extracting archive..."</span></span>,
-      <span key="3">tar -xzf download.tar.gz</span>,
-      <span key="4"><span className="text-purple-400">cd</span> digital-product</span>,
-      <span key="5"><span className="text-purple-400">echo</span> <span className="text-emerald-400">"Installing deps..."</span></span>,
-      <span key="6">npm install</span>,
-      <span key="7"><span className="text-purple-400">echo</span> <span className="text-cyan-400">"Success!"</span></span>,
-    ],
-  },
-  free_resource: {
-    fileName: "resource.go",
-    Icon: FileCode2Icon,
-    codeLines: [
-      <span key="1"><span className="text-purple-400">package</span> main</span>,
-      <span key="2"><span className="text-purple-400">import</span> <span className="text-emerald-400">"fmt"</span></span>,
-      <span key="3"><span className="text-purple-400">func</span> <span className="text-yellow-400">main</span>() {"{"}</span>,
-      <span key="4">  fmt.<span className="text-blue-400">Println</span>(<span className="text-emerald-400">"Free for developers"</span>)</span>,
-      <span key="5">  fmt.<span className="text-blue-400">Println</span>(<span className="text-emerald-400">"Download & Code"</span>)</span>,
-      <span key="6">{"}"}</span>,
-    ],
-  },
-  template: {
-    fileName: "page.tsx",
-    Icon: PackageIcon,
-    codeLines: [
-      <span key="1"><span className="text-purple-400">import</span> React <span className="text-purple-400">from</span> <span className="text-emerald-400">"react"</span>;</span>,
-      <span key="2"><span className="text-purple-400">export default function</span> <span className="text-yellow-400">Page</span>() {"{"}</span>,
-      <span key="3">  <span className="text-purple-400">return</span> (</span>,
-      <span key="4">    <span className="text-blue-400">&lt;</span><span className="text-teal-400">div</span> <span className="text-purple-400">className</span>=<span className="text-emerald-400">"gradient-bg"</span><span className="text-blue-400">&gt;</span></span>,
-      <span key="5">      <span className="text-blue-400">&lt;</span><span className="text-yellow-400">BentoGrid</span> <span className="text-blue-400">/&gt;</span></span>,
-      <span key="6">    <span className="text-blue-400">&lt;/</span><span className="text-teal-400">div</span><span className="text-blue-400">&gt;</span></span>,
-      <span key="7">  );</span>,
-      <span key="8">{"}"}</span>,
-    ],
-  },
-  tool: {
-    fileName: "tool.config",
-    Icon: WrenchIcon,
-    codeLines: [
-      <span key="1"><span className="text-purple-400">tool</span>:</span>,
-      <span key="2">  <span className="text-pink-400">name</span>: <span className="text-emerald-400">DanCruShop-CLI</span></span>,
-      <span key="3">  <span className="text-pink-400">version</span>: <span className="text-emerald-400">1.2.0</span></span>,
-      <span key="4">  <span className="text-pink-400">features</span>:</span>,
-      <span key="5">    - <span className="text-emerald-400">auto_deploy</span></span>,
-      <span key="6">    - <span className="text-emerald-400">minify_code</span></span>,
-      <span key="7">  <span className="text-pink-400">status</span>: <span className="text-cyan-400">ready</span></span>,
-    ],
-  },
-};
-
 export function formatProductPrice(product: PublishedProduct) {
   return formatDisplayProductPrice(product);
 }
@@ -169,6 +84,16 @@ function getCartProduct(product: PublishedProduct): CartProduct {
   };
 }
 
+function getCompareProduct(product: PublishedProduct): CompareProduct {
+  return {
+    id: product.id,
+    slug: product.slug,
+    title: product.title,
+    thumbnailUrl: product.thumbnail_url,
+    productType: product.product_type,
+  };
+}
+
 export function ProductArtwork({
   product,
   className,
@@ -176,8 +101,7 @@ export function ProductArtwork({
   className?: string;
 }) {
   const visual = productTypeVisuals[product.product_type];
-  const fileVisual = productTypeFiles[product.product_type];
-  const FileIcon = fileVisual.Icon;
+  const Icon = visual.Icon;
 
   return (
     <div
@@ -187,37 +111,36 @@ export function ProductArtwork({
         className
       )}
     >
-      {/* Background ambient details */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/30 to-transparent" />
-      <div className="absolute -right-10 -top-10 size-40 rounded-full border border-foreground/5 bg-foreground/[0.01]" />
-      <div className="absolute -bottom-14 -left-10 size-44 rounded-full border border-foreground/5 bg-foreground/[0.01]" />
+      <div className="absolute -right-10 -top-10 size-40 rounded-full border border-foreground/10" />
+      <div className="absolute -bottom-14 -left-10 size-44 rounded-full border border-foreground/10" />
 
-      {/* Mock IDE Window */}
-      <div className="absolute inset-3 top-3.5 bottom-3 flex flex-col rounded-lg border border-border/80 bg-neutral-950/90 shadow-2xl backdrop-blur-md transition-all group-hover:border-foreground/20">
-        {/* IDE Header */}
-        <div className="flex h-7 shrink-0 items-center justify-between border-b border-border/60 bg-neutral-900/40 px-3">
-          <div className="flex items-center gap-1">
-            <span className="size-1.5 rounded-full bg-red-500/75" />
-            <span className="size-1.5 rounded-full bg-yellow-500/75" />
-            <span className="size-1.5 rounded-full bg-green-500/75" />
+      <div className="relative flex h-full flex-col justify-between p-5">
+        <div className="flex items-center justify-between gap-4">
+          <div className="grid gap-1">
+            <span className="text-xs font-medium uppercase tracking-normal text-muted-foreground">
+              DanCruShop
+            </span>
+            <span className="text-sm font-semibold">
+              {productTypeLabels[product.product_type]}
+            </span>
           </div>
-          <div className="flex items-center gap-1.5 rounded bg-neutral-900/80 px-2 py-0.5 text-[9px] font-medium text-muted-foreground border border-border/30">
-            <FileIcon className="size-2.5 text-primary" />
-            <span className="font-mono">{fileVisual.fileName}</span>
+          <div className="flex size-10 items-center justify-center rounded-lg border bg-background/70 text-foreground shadow-sm backdrop-blur">
+            <Icon aria-hidden="true" className="size-5" />
           </div>
-          <div className="w-8" /> {/* Spacer */}
         </div>
 
-        {/* IDE Code Content */}
-        <div className="flex-1 p-2 font-mono text-[9px] leading-[1.3] text-neutral-300 overflow-hidden select-none">
-          <div className="grid gap-0.5">
-            {fileVisual.codeLines.map((line, idx) => (
-              <div key={idx} className="flex gap-2 items-start">
-                <span className="w-3 text-right text-neutral-600 select-none text-[8px] pt-0.5">{idx + 1}</span>
-                <span className="truncate flex-1">{line}</span>
-              </div>
-            ))}
-          </div>
+        <div className="grid gap-2">
+          <div className="h-2 w-28 rounded-full bg-foreground/70" />
+          <div className="h-2 w-40 rounded-full bg-foreground/25" />
+          <div className="h-2 w-24 rounded-full bg-foreground/20" />
+        </div>
+
+        <div className="flex items-end justify-between gap-4">
+          <Code2Icon aria-hidden="true" className="size-8 text-foreground/45" />
+          <span className="rounded-md border bg-background/70 px-2 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
+            Ready
+          </span>
         </div>
       </div>
     </div>
@@ -257,12 +180,14 @@ export function ProductCard({ product }: ProductCardProps) {
           </span>
         ) : null}
 
-        {/* wishlist (top-right) */}
-        <FavoriteButton
-          className="absolute right-2.5 top-2.5 z-30"
-          productId={product.id}
-          productTitle={product.title}
-        />
+        {/* wishlist + compare (top-right) */}
+        <div className="absolute right-2.5 top-2.5 z-30 flex items-center gap-1.5">
+          <CompareButton product={getCompareProduct(product)} />
+          <FavoriteButton
+            productId={product.id}
+            productTitle={product.title}
+          />
+        </div>
 
         {/* hover overlay: View + Add */}
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center gap-2 bg-black/45 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover/product-card:pointer-events-auto group-hover/product-card:opacity-100">

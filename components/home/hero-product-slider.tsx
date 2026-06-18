@@ -135,7 +135,7 @@ export function HeroProductSlider({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       role="group"
-      aria-roledescription="Trình chiếu sản phẩm nổi bật"
+      aria-roledescription="Featured product carousel"
     >
       <div className="pointer-events-none absolute inset-x-6 bottom-2 top-8 rounded-full bg-primary/10 blur-3xl" />
 
@@ -204,9 +204,9 @@ export function HeroProductSlider({
 
 function SpotlightCard({ card }: { card: HeroSpotlightCard }) {
   const detailRows = [
-    // { label: "Loại", value: card.typeLabel },
-    // { label: "Giao hàng", value: card.deliveryLabel },
-    { label: "Giá", value: card.priceLabel },
+    // { label: "Type", value: card.typeLabel },
+    // { label: "Delivery", value: card.deliveryLabel },
+    { label: "Price", value: card.priceLabel },
   ];
 
   return (
@@ -225,7 +225,7 @@ function SpotlightCard({ card }: { card: HeroSpotlightCard }) {
         <div className="absolute inset-x-0 top-0 flex items-center justify-between p-2.5">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-background/85 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-[0.14em] text-muted-foreground shadow-sm backdrop-blur">
             <span className="size-1.5 rounded-full bg-emerald-400" />
-            Đang mở bán
+            On sale
           </span>
           <span className="rounded-full bg-background/85 px-2 py-0.5 text-[0.65rem] font-medium text-muted-foreground shadow-sm backdrop-blur">
             {card.typeLabel}
@@ -244,23 +244,32 @@ function SpotlightCard({ card }: { card: HeroSpotlightCard }) {
           </h2>
         </div>
 
-        {/* Rating + downloads */}
+        {/* Rating + downloads. With no reviews yet we show a neutral "New"
+            badge instead of "0.0 ★", which reads as a poorly-rated product. */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs">
-          <span className="inline-flex items-center gap-1 font-medium">
-            <StarIcon
-              aria-hidden="true"
-              className="size-3.5 fill-amber-400 text-amber-400"
-            />
-            {card.rating.toFixed(1)}
-            <span className="font-normal text-muted-foreground">đánh giá</span>
-          </span>
+          {card.ratingCount > 0 ? (
+            <span className="inline-flex items-center gap-1 font-medium">
+              <StarIcon
+                aria-hidden="true"
+                className="size-3.5 fill-amber-400 text-amber-400"
+              />
+              {card.rating.toFixed(1)}
+              <span className="font-normal text-muted-foreground">
+                ({card.ratingCount})
+              </span>
+            </span>
+          ) : (
+            <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[0.7rem] font-semibold text-emerald-600 dark:text-emerald-400">
+              New
+            </span>
+          )}
           <span className="inline-flex items-center gap-1 font-medium">
             <DownloadIcon
               aria-hidden="true"
               className="size-3.5 text-muted-foreground"
             />
             {formatDownloads(card.downloads)}
-            <span className="font-normal text-muted-foreground">lượt tải</span>
+            <span className="font-normal text-muted-foreground">downloads</span>
           </span>
         </div>
 
@@ -306,7 +315,7 @@ function SpotlightCard({ card }: { card: HeroSpotlightCard }) {
           nativeButton={false}
           variant="secondary"
         >
-          Xem chi tiết
+          View details
           <ArrowRightIcon aria-hidden="true" data-icon="inline-end" />
         </Button>
       </div>

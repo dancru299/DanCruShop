@@ -14,9 +14,9 @@ import { getStoreSettings } from "@/lib/store/settings";
 import { cn } from "@/lib/utils";
 
 const productLinks = [
-  { label: "Tất cả sản phẩm", href: "/products" },
-  { label: "Danh mục", href: "/#danh-muc" },
-  { label: "Bài viết", href: "/blog" },
+  { label: "All products", href: "/products" },
+  { label: "Categories", href: "/#danh-muc" },
+  { label: "Blog", href: "/blog" },
 ];
 
 function FooterColumn({
@@ -55,11 +55,11 @@ export async function SiteFooter() {
       <div className="mx-auto w-full max-w-6xl px-4 py-10 md:py-14">
         <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/80 px-6 py-10 text-center text-primary-foreground shadow-lg md:px-12 md:py-14">
           <h2 className="text-2xl font-bold tracking-tight md:text-4xl">
-            Sẵn sàng bắt đầu chưa?
+            Ready to get started?
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-primary-foreground/90 md:text-base">
-            Gia nhập cộng đồng khách hàng hài lòng và trải nghiệm kho sản phẩm số
-            đa dạng ngay hôm nay.
+            Join our community of happy customers and explore a diverse library
+            of digital products today.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -69,7 +69,7 @@ export async function SiteFooter() {
                 "border-transparent bg-white text-primary shadow-sm hover:bg-white/90 hover:text-primary"
               )}
             >
-              Khám phá ngay
+              Explore now
               <ArrowRightIcon aria-hidden="true" data-icon="inline-end" />
             </Link>
             <Link
@@ -79,7 +79,7 @@ export async function SiteFooter() {
                 "border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white"
               )}
             >
-              Xem ưu đãi
+              View deals
               <GiftIcon aria-hidden="true" data-icon="inline-end" />
             </Link>
           </div>
@@ -92,8 +92,8 @@ export async function SiteFooter() {
           <div className="flex flex-col gap-4">
             <DanCruShopLogo />
             <p className="max-w-xs text-sm leading-6 text-muted-foreground">
-              Nền tảng bán tool, source code và tài nguyên số uy tín — giao ngay
-              sau thanh toán.
+              A trusted marketplace for tools, source code, and digital
+              resources — delivered instantly after payment.
             </p>
             {socials.length > 0 ? (
               <div className="flex flex-wrap gap-2">
@@ -120,17 +120,17 @@ export async function SiteFooter() {
                 aria-hidden="true"
                 className="size-3.5 text-emerald-500"
               />
-              Giao dịch an toàn
+              Secure transactions
             </span>
           </div>
 
-          <FooterColumn title="Sản phẩm" links={productLinks} />
+          <FooterColumn title="Products" links={productLinks} />
 
           <FooterColumn
-            title="Thông tin"
+            title="Information"
             links={[
               {
-                label: "Liên hệ hỗ trợ",
+                label: "Contact support",
                 href: getSupportMailto("DanCruShop support"),
               },
               ...policyLinks,
@@ -138,7 +138,7 @@ export async function SiteFooter() {
           />
 
           <div className="flex flex-col gap-3">
-            <h3 className="text-sm font-semibold tracking-normal">Cộng đồng</h3>
+            <h3 className="text-sm font-semibold tracking-normal">Community</h3>
             {socials.length > 0 ? (
               <>
                 <ul className="flex flex-col gap-2.5 text-sm text-muted-foreground">
@@ -161,12 +161,12 @@ export async function SiteFooter() {
                   ))}
                 </ul>
                 <p className="text-xs leading-5 text-muted-foreground">
-                  Có sản phẩm mới sẽ được đăng tại đây — tham gia để không bỏ lỡ.
+                  New products are announced here — join so you never miss one.
                 </p>
               </>
             ) : (
               <p className="text-sm leading-6 text-muted-foreground">
-                Thêm kênh cộng đồng (Telegram, Facebook...) trong{" "}
+                Add community channels (Telegram, Facebook...) in{" "}
                 <Link href="/admin/settings" className="hover:text-foreground">
                   /admin/settings
                 </Link>
@@ -186,8 +186,8 @@ export async function SiteFooter() {
       {/* Copyright */}
       <div className="border-t border-border/60">
         <div className="mx-auto w-full max-w-6xl px-4 py-5 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} DanCruShop. Tool, source code và tài nguyên
-          số cho builder.
+          © {new Date().getFullYear()} DanCruShop. Tools, source code, and
+          digital resources for builders.
         </div>
       </div>
     </footer>

@@ -22,16 +22,16 @@ const COPY: Record<
   { heading: string; intro: string; preview: string }
 > = {
   signup: {
-    heading: "Xác nhận đăng ký DanCruShop",
+    heading: "Confirm your DanCruShop sign-up",
     intro:
-      "Nhập mã bên dưới để kích hoạt tài khoản DanCruShop của bạn.",
-    preview: "Mã kích hoạt tài khoản DanCruShop của bạn.",
+      "Enter the code below to activate your DanCruShop account.",
+    preview: "Your DanCruShop account activation code.",
   },
   password_reset: {
-    heading: "Đặt lại mật khẩu DanCruShop",
+    heading: "Reset your DanCruShop password",
     intro:
-      "Nhập mã bên dưới để đặt lại mật khẩu cho tài khoản DanCruShop của bạn.",
-    preview: "Mã đặt lại mật khẩu DanCruShop của bạn.",
+      "Enter the code below to reset the password for your DanCruShop account.",
+    preview: "Your DanCruShop password reset code.",
   },
 };
 
@@ -53,8 +53,8 @@ export default function VerificationCodeEmail({
             <Text style={codeText}>{code}</Text>
           </Section>
           <Text style={mutedText}>
-            Mã có hiệu lực trong 10 phút và chỉ dùng được một lần. Nếu bạn không
-            yêu cầu, hãy bỏ qua email này.
+            The code is valid for 10 minutes and can be used only once. If you
+            didn't request it, you can ignore this email.
           </Text>
           <Hr style={hr} />
           <Text style={footer}>DanCruShop</Text>

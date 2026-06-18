@@ -57,12 +57,12 @@ export async function createProductReview(
   const rating = getRating(formData);
 
   if (!productId || !slug) {
-    return { error: "Thiếu dữ liệu sản phẩm.", success: null };
+    return { error: "Product data is missing.", success: null };
   }
 
   if (comment.length < 12) {
     return {
-      error: "Hãy viết ít nhất 12 ký tự cho phần đánh giá.",
+      error: "Please write at least 12 characters for your review.",
       success: null,
     };
   }
@@ -70,14 +70,14 @@ export async function createProductReview(
   const user = await getRequiredViewer();
 
   if (!user) {
-    return { error: "Hãy đăng nhập trước khi gửi đánh giá.", success: null };
+    return { error: "Please log in before submitting a review.", success: null };
   }
 
   const hasPurchased = await checkUserAccess(user.id, productId);
 
   if (!hasPurchased) {
     return {
-      error: "Chỉ người mua đã xác minh mới có thể đánh giá sản phẩm này.",
+      error: "Only verified buyers can review this product.",
       success: null,
     };
   }
@@ -104,12 +104,12 @@ export async function createProductReview(
 
     revalidatePath(`/products/${slug}`);
 
-    return { error: null, success: "Đã đăng đánh giá." };
+    return { error: null, success: "Review submitted." };
   } catch (error) {
     console.error("Failed to create product review", error);
 
     return {
-      error: error instanceof Error ? error.message : "Không thể đăng đánh giá.",
+      error: error instanceof Error ? error.message : "Couldn't submit the review.",
       success: null,
     };
   }
@@ -125,22 +125,22 @@ export async function createProductReviewReply(
   const comment = getString(formData, "comment");
 
   if (!productId || !reviewId || !slug) {
-    return { error: "Thiếu dữ liệu phản hồi.", success: null };
+    return { error: "Reply data is missing.", success: null };
   }
 
   if (comment.length < 3) {
-    return { error: "Phản hồi quá ngắn.", success: null };
+    return { error: "Your reply is too short.", success: null };
   }
 
   const user = await getRequiredViewer();
 
   if (!user) {
-    return { error: "Hãy đăng nhập trước khi phản hồi.", success: null };
+    return { error: "Please log in before replying.", success: null };
   }
 
   if (!(await canParticipateInReviews(user.id, productId))) {
     return {
-      error: "Chỉ người mua đã xác minh mới có thể phản hồi ở đây.",
+      error: "Only verified buyers can reply here.",
       success: null,
     };
   }
@@ -160,12 +160,12 @@ export async function createProductReviewReply(
 
     revalidatePath(`/products/${slug}`);
 
-    return { error: null, success: "Đã đăng phản hồi." };
+    return { error: null, success: "Reply posted." };
   } catch (error) {
     console.error("Failed to create product review reply", error);
 
     return {
-      error: error instanceof Error ? error.message : "Không thể đăng phản hồi.",
+      error: error instanceof Error ? error.message : "Couldn't post the reply.",
       success: null,
     };
   }

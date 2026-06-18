@@ -29,7 +29,7 @@ type AccountMenuProps = {
 };
 
 function getInitials(name: string, email: string | null) {
-  const source = name.trim() || email?.trim() || "Khách";
+  const source = name.trim() || email?.trim() || "Guest";
   const parts = source
     .split(/[\s@._-]+/)
     .filter((part) => part.length > 0)
@@ -77,7 +77,7 @@ export function AccountMenu({ user, isAdmin = false }: AccountMenuProps) {
         type="button"
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-label="Mở menu tài khoản"
+        aria-label="Open account menu"
         className={cn(
           "flex h-8 items-center gap-1 rounded-full border bg-background px-1 pr-2 text-foreground transition-colors hover:bg-muted focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
           open && "bg-muted"
@@ -121,20 +121,20 @@ export function AccountMenu({ user, isAdmin = false }: AccountMenuProps) {
           {isAdmin ? (
             <div className="border-b py-1">
               <AccountMenuLink href="/admin" icon={ShieldCheckIcon} emphasis>
-                Quản trị viên
+                Admin
               </AccountMenuLink>
             </div>
           ) : null}
 
           <div className="py-1">
             <AccountMenuLink href="/profile" icon={UserRoundIcon}>
-              Hồ sơ
+              Profile
             </AccountMenuLink>
             <AccountMenuLink href="/dashboard" icon={PackageOpenIcon}>
-              Thư viện đã mua
+              Purchased library
             </AccountMenuLink>
             <AccountMenuLink href="/settings" icon={SettingsIcon}>
-              Cài đặt
+              Settings
             </AccountMenuLink>
           </div>
 
@@ -145,7 +145,7 @@ export function AccountMenu({ user, isAdmin = false }: AccountMenuProps) {
                 className="flex h-9 w-full items-center gap-2 rounded-md px-2.5 text-left text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus-visible:bg-destructive/10 focus-visible:outline-none"
               >
                 <LogOutIcon aria-hidden="true" className="size-4" />
-                Đăng xuất
+                Log out
               </button>
             </form>
           </div>

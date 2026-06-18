@@ -34,34 +34,34 @@ type MobileNavSheetProps = {
 
 const navItems = [
   {
-    description: "Kho source code, template và tool đang mở bán.",
+    description: "Source code, templates, and tools on sale.",
     href: "/products",
     icon: SparklesIcon,
-    label: "Sản phẩm",
+    label: "Products",
   },
   {
-    description: "Quét nhanh các nhóm tài nguyên đang có trong shop.",
+    description: "Quickly browse the resource categories in the shop.",
     href: "/#danh-muc",
     icon: Grid2x2Icon,
-    label: "Danh mục",
+    label: "Categories",
   },
   {
-    description: "Ghi chú triển khai, launch notes và bài viết mới.",
+    description: "Implementation notes, launch notes, and new posts.",
     href: "/blog",
     icon: BookOpenIcon,
-    label: "Bài viết",
+    label: "Blog",
   },
   {
-    description: "Xem các món đã chọn và đi đến checkout.",
+    description: "Review your selected items and head to checkout.",
     href: "/cart",
     icon: ShoppingCartIcon,
-    label: "Giỏ hàng",
+    label: "Cart",
   },
   {
-    description: "Mở lại các sản phẩm bạn đã lưu để cân nhắc sau.",
+    description: "Reopen the products you saved to consider later.",
     href: "/favorites",
     icon: HeartIcon,
-    label: "Yêu thích",
+    label: "Favorites",
   },
 ] as const;
 
@@ -77,15 +77,15 @@ export function MobileNavSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         className="md:hidden"
-        render={<Button size="icon-sm" variant="outline" aria-label="Mở menu" />}
+        render={<Button size="icon-sm" variant="outline" aria-label="Open menu" />}
       >
         <MenuIcon />
       </SheetTrigger>
       <SheetContent side="right" className="gap-0 bg-[var(--popover)]">
         <SheetHeader className="border-b border-border/80 pb-4">
-          <SheetTitle>Khám phá DanCruShop</SheetTitle>
+          <SheetTitle>Explore DanCruShop</SheetTitle>
           <SheetDescription>
-            Mở nhanh sản phẩm, danh mục và giỏ hàng ngay trên mobile.
+            Quickly open products, categories, and your cart on mobile.
           </SheetDescription>
         </SheetHeader>
 
@@ -137,7 +137,7 @@ export function MobileNavSheet({
               onClick={() => setOpen(false)}
               variant="secondary"
             >
-              Quản trị cửa hàng
+              Store admin
             </Button>
           ) : null}
           <Button
@@ -147,7 +147,7 @@ export function MobileNavSheet({
             onClick={() => setOpen(false)}
             variant={isAdmin ? "outline" : "default"}
           >
-            Đăng nhập
+            Log in
           </Button>
         </SheetFooter>
       </SheetContent>

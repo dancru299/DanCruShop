@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 const PLACEHOLDERS = [
-  "Tìm Office, Canva, ChatGPT...",
-  "Tìm tài khoản, key bản quyền...",
-  "Tìm source code, template...",
-  "Tìm tool AI, VPN...",
+  "Search Office, Canva, ChatGPT...",
+  "Search accounts, license keys...",
+  "Search source code, templates...",
+  "Search AI tools, VPN...",
 ];
 
 export function HeaderSearch({ className }: { className?: string }) {
@@ -76,7 +76,7 @@ export function HeaderSearch({ className }: { className?: string }) {
         value={value}
         onChange={(event) => setValue(event.target.value)}
         placeholder={PLACEHOLDERS[placeholderIndex]}
-        aria-label="Tìm kiếm sản phẩm"
+        aria-label="Search products"
         className="h-11 rounded-full border-border/80 bg-card pl-10 pr-16 text-sm shadow-sm"
       />
       <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 items-center gap-1 rounded border border-border bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground lg:inline-flex">

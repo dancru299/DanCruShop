@@ -40,6 +40,6 @@ describe("product metadata helpers", () => {
     expect(getProductRequirements(baseProduct)[0]).toContain("DanCruShop");
     expect(getProductCompatibility(baseProduct)).toBe(baseProduct.short_description);
     expect(getProductUpdatePolicy(baseProduct)).toContain("dashboard");
-    expect(getProductSupportNote(baseProduct)).toContain("7 ngày");
+    expect(getProductSupportNote(baseProduct)).toContain("7 days");
   });
 });

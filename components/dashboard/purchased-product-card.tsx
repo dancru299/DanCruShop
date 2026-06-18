@@ -40,7 +40,7 @@ export function PurchasedProductCard({ purchase }: PurchasedProductCardProps) {
             <Badge variant="secondary">
               {productTypeLabels[product.product_type]}
             </Badge>
-            {product.is_free ? <Badge variant="outline">Miễn phí</Badge> : null}
+            {product.is_free ? <Badge variant="outline">Free</Badge> : null}
           </div>
           <div className="flex flex-col gap-1">
             <Link
@@ -50,7 +50,7 @@ export function PurchasedProductCard({ purchase }: PurchasedProductCardProps) {
               {product.title}
             </Link>
             <p className="text-sm text-muted-foreground">
-              Đã mua {dateFormatter.format(new Date(purchase.purchased_at))}
+              Purchased {dateFormatter.format(new Date(purchase.purchased_at))}
             </p>
           </div>
         </div>
@@ -61,7 +61,7 @@ export function PurchasedProductCard({ purchase }: PurchasedProductCardProps) {
             render={<Link href={`/products/${product.slug}`} />}
             nativeButton={false}
           >
-            Xem chi tiết
+            View details
             <ArrowUpRightIcon data-icon="inline-end" aria-hidden="true" />
           </Button>
           <DownloadButton productId={product.id} />

@@ -15,8 +15,8 @@ import { createClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Yêu thích",
-  description: "Các sản phẩm bạn đã lưu trong DanCruShop.",
+  title: "Favorites",
+  description: "The products you've saved on DanCruShop.",
 };
 
 type FavoriteProductRow = {
@@ -86,10 +86,10 @@ export default async function FavoritesPage() {
             DanCruShop
           </p>
           <h1 className="text-3xl font-semibold leading-tight tracking-normal md:text-5xl">
-            Sản phẩm yêu thích
+            Favorite products
           </h1>
           <p className="max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">
-            Những sản phẩm bạn đã lưu để xem lại, so sánh hoặc mua sau.
+            The products you saved to revisit, compare, or buy later.
           </p>
         </div>
       </section>
@@ -108,10 +108,10 @@ export default async function FavoritesPage() {
             </div>
             <div className="flex max-w-md flex-col gap-2">
               <h2 className="text-xl font-semibold tracking-normal">
-                Chưa có sản phẩm yêu thích
+                No favorite products yet
               </h2>
               <p className="text-sm leading-6 text-muted-foreground">
-                Bấm biểu tượng trái tim trên sản phẩm để lưu lại tại đây.
+                Tap the heart icon on a product to save it here.
               </p>
             </div>
             <Button
@@ -119,7 +119,7 @@ export default async function FavoritesPage() {
               nativeButton={false}
               variant="outline"
             >
-              Khám phá sản phẩm
+              Browse products
             </Button>
           </div>
         )}

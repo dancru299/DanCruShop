@@ -81,7 +81,7 @@ export function BlogCard({ post }: BlogCardProps) {
 
         <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
           {post.excerpt ??
-            "Ghi chú thực chiến cho creator đang xây và bán sản phẩm số."}
+            "Hands-on notes for creators building and selling digital products."}
         </p>
       </div>
     </Link>

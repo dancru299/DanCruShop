@@ -3,6 +3,10 @@
 import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/roles";
+import {
+  checkGithubRepoConnection,
+  type GithubRepoCheckResult,
+} from "@/lib/github/changelog";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
 import type {
@@ -451,5 +455,16 @@ export async function updateProduct(
   } catch (error) {
     console.error("Unexpected error while updating product", error);
     return { ok: false, error: getErrorMessage(error) };
+  }
+}
+
+export async function checkProductGithubRepo(
+  repoInput: string
+): Promise<GithubRepoCheckResult> {
+  try {
+    await requireAdmin();
+    return await checkGithubRepoConnection(repoInput);
+  } catch (error) {
+    return { ok: false, message: getErrorMessage(error) };
   }
 }

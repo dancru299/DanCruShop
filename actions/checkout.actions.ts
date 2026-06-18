@@ -144,7 +144,7 @@ function parseCartProductIds(value: FormDataEntryValue | null) {
 }
 
 function getServerActionErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Không thể bắt đầu thanh toán.";
+  return error instanceof Error ? error.message : "Couldn't start checkout.";
 }
 
 function isNextRedirectError(error: unknown) {
@@ -161,7 +161,7 @@ async function getPublishedCheckoutProducts(productIds: string[]) {
   const normalizedProductIds = normalizeProductIds(productIds);
 
   if (normalizedProductIds.length === 0) {
-    throw new Error("Giỏ hàng của bạn đang trống.");
+    throw new Error("Your cart is empty.");
   }
 
   const supabase = await createClient();
@@ -186,13 +186,13 @@ async function getPublishedCheckoutProducts(productIds: string[]) {
 
   if (error) {
     console.error("Failed to load cart products for checkout", error);
-    throw new Error("Không thể tải sản phẩm trong giỏ hàng.");
+    throw new Error("Couldn't load the products in your cart.");
   }
 
   const products = (data ?? []) as CheckoutProduct[];
 
   if (products.length !== normalizedProductIds.length) {
-    throw new Error("Một số sản phẩm trong giỏ hàng không còn khả dụng.");
+    throw new Error("Some products in your cart are no longer available.");
   }
 
   const byId = new Map(products.map((product) => [product.id, product]));
@@ -347,7 +347,7 @@ async function createLemonSqueezyCartCheckout(
   );
 
   if (currencies.size > 1) {
-    throw new Error("Giỏ hàng hiện chỉ hỗ trợ thanh toán với một loại tiền tệ.");
+    throw new Error("Checkout currently supports only a single currency per cart.");
   }
 
   const totalCents = paidProducts.reduce(
@@ -486,7 +486,7 @@ export async function createCartCheckoutFromForm(
     if (couponCode) {
       if (paidCurrencies.size !== 1) {
         return {
-          error: "Mã giảm giá chỉ áp dụng cho giỏ hàng dùng một loại tiền tệ.",
+          error: "The discount code only applies to a single-currency cart.",
         };
       }
 
@@ -551,7 +551,7 @@ export async function createCartCheckoutFromForm(
 
     return {
       error:
-        "Giỏ hàng này chưa thể thanh toán vì một số sản phẩm trả phí còn thiếu cấu hình thanh toán.",
+        "This cart can't be checked out yet because some paid products are missing payment configuration.",
     };
   } catch (error) {
     if (isNextRedirectError(error)) {
@@ -606,7 +606,7 @@ export async function createVietQrOrder(productId: string) {
   const product = await getPublishedCheckoutProduct(productId);
 
   if (product.is_free) {
-    throw new Error("Sản phẩm miễn phí không cần thanh toán qua VietQR.");
+    throw new Error("Free products don't need to be paid via VietQR.");
   }
 
   if (product.currency !== "VND") {

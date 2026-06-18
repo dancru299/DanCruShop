@@ -130,8 +130,8 @@ export default async function DashboardProductPage({
                 {licenseKey}
               </code>
               <p className="text-xs text-muted-foreground">
-                Dùng key này để kích hoạt sản phẩm. Giữ kín, không chia sẻ công
-                khai.
+                Use this key to activate the product. Keep it private — don't
+                share it publicly.
               </p>
             </div>
           ) : null}

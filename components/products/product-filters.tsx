@@ -68,7 +68,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
 
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-muted-foreground">
-          Loại:
+          Type:
         </span>
         {productTypes.map((t) => (
           <FilterPill
@@ -86,7 +86,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
           onClick={clearAll}
           className="w-fit text-xs text-muted-foreground underline-offset-4 hover:underline"
         >
-          Xóa bộ lọc
+          Clear filters
         </button>
       )}
     </div>

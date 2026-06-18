@@ -219,7 +219,7 @@ export async function applyCouponToCart(input: {
     ).slice(0, 50);
 
     if (ids.length === 0) {
-      return { error: "Giỏ hàng đang trống.", ok: false };
+      return { error: "Your cart is empty.", ok: false };
     }
 
     const { data, error } = await supabase
@@ -230,7 +230,7 @@ export async function applyCouponToCart(input: {
 
     if (error) {
       console.error("Failed to load cart for coupon", error);
-      return { error: "Không tải được giỏ hàng.", ok: false };
+      return { error: "Couldn't load your cart.", ok: false };
     }
 
     const paidProducts = ((data ?? []) as CartPricingProduct[]).filter(
@@ -238,7 +238,7 @@ export async function applyCouponToCart(input: {
     );
 
     if (paidProducts.length === 0) {
-      return { error: "Giỏ chỉ có sản phẩm miễn phí.", ok: false };
+      return { error: "Your cart only has free products.", ok: false };
     }
 
     const currencies = new Set(
@@ -247,7 +247,7 @@ export async function applyCouponToCart(input: {
 
     if (currencies.size > 1) {
       return {
-        error: "Mã chỉ áp dụng cho giỏ hàng dùng một loại tiền tệ.",
+        error: "The code only applies to a single-currency cart.",
         ok: false,
       };
     }

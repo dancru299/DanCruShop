@@ -6,18 +6,18 @@ import { DanCruShopLogo, DanCruShopMark } from "@/components/shared/dancrushop-l
 const highlights = [
   {
     icon: ZapIcon,
-    title: "Giao sản phẩm số tức thì",
-    description: "Thanh toán xong là nhận link tải và license ngay trong tài khoản.",
+    title: "Instant digital delivery",
+    description: "Once payment clears, get your download link and license right in your account.",
   },
   {
     icon: ShieldCheckIcon,
-    title: "Bảo mật & riêng tư",
-    description: "Đăng nhập an toàn với mã xác thực 6 số và đăng nhập Google.",
+    title: "Secure & private",
+    description: "Sign in safely with a 6-digit verification code or Google login.",
   },
   {
     icon: SparklesIcon,
-    title: "Cập nhật trọn đời",
-    description: "Mua một lần, nhận mọi bản cập nhật mới của sản phẩm bạn sở hữu.",
+    title: "Lifetime updates",
+    description: "Buy once and receive every new update for the products you own.",
   },
 ];
 
@@ -55,11 +55,11 @@ export default function AuthLayout({
 
         <div className="relative max-w-md">
           <h2 className="text-3xl font-semibold leading-tight tracking-normal">
-            Cửa hàng sản phẩm số dành cho lập trình viên.
+            The digital product store for developers.
           </h2>
           <p className="mt-3 text-sm leading-6 text-primary-foreground/80">
-            Source code, template và công cụ chất lượng — mua nhanh, nhận ngay,
-            dùng trọn đời.
+            Quality source code, templates, and tools — buy fast, get them
+            instantly, use them for life.
           </p>
 
           <ul className="mt-10 flex flex-col gap-6">
@@ -80,7 +80,7 @@ export default function AuthLayout({
         </div>
 
         <p className="relative text-xs text-primary-foreground/60">
-          © {new Date().getFullYear()} DanCruShop. Mọi quyền được bảo lưu.
+          © {new Date().getFullYear()} DanCruShop. All rights reserved.
         </p>
       </aside>
 
@@ -95,7 +95,7 @@ export default function AuthLayout({
             className="inline-flex items-center gap-1 text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
           >
             <ArrowLeftIcon className="size-3.5" aria-hidden="true" />
-            Về cửa hàng
+            Back to store
           </Link>
         </div>
 
@@ -111,7 +111,7 @@ export default function AuthLayout({
             className="inline-flex items-center gap-1 text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
           >
             <ArrowLeftIcon className="size-3.5" aria-hidden="true" />
-            Về cửa hàng
+            Back to store
           </Link>
         </div>
       </div>

@@ -17,16 +17,16 @@ import {
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Sản phẩm",
+  title: "Products",
   description:
-    "Khám phá toàn bộ tool, source code và tài nguyên số trên DanCruShop.",
+    "Explore all the tools, source code, and digital resources on DanCruShop.",
   alternates: {
     canonical: "/products",
   },
   openGraph: {
-    title: "Sản phẩm | DanCruShop",
+    title: "Products | DanCruShop",
     description:
-      "Khám phá toàn bộ tool, source code và tài nguyên số trên DanCruShop.",
+      "Explore all the tools, source code, and digital resources on DanCruShop.",
     url: "/products",
     type: "website",
   },
@@ -43,23 +43,23 @@ type ProductsPageProps = {
 
 const upcomingProducts = [
   {
-    title: "Starter full-stack",
+    title: "Full-stack starter",
     type: "Source code",
-    description: "Bộ code mẫu có auth, database, dashboard và payment flow.",
+    description: "A sample codebase with auth, database, dashboard, and payment flow.",
     className: "from-emerald-500/25 via-cyan-500/10 to-background",
   },
   {
-    title: "Ghi chú workflow AI",
-    type: "Tài liệu học",
+    title: "AI workflow notes",
+    type: "Learning material",
     description:
-      "Ghi chú triển khai AI app, agent workflow và cách đóng gói sản phẩm.",
+      "Notes on shipping AI apps, agent workflows, and how to package a product.",
     className: "from-cyan-500/25 via-amber-500/10 to-background",
   },
   {
-    title: "Mini tool cho builder",
+    title: "Mini tools for builders",
     type: "Mini tool",
     description:
-      "Công cụ nhỏ phục vụ automation, productivity và vận hành shop.",
+      "Small tools for automation, productivity, and running your shop.",
     className: "from-rose-500/20 via-emerald-500/10 to-background",
   },
 ];
@@ -103,11 +103,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             DanCruShop
           </p>
           <h1 className="text-3xl font-semibold leading-tight tracking-normal md:text-5xl">
-            Kho sản phẩm
+            Product catalog
           </h1>
           <p className="max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">
-            Quét nhanh toàn bộ source code, template, tool và tài nguyên số
-            đang mở bán.
+            Browse all the source code, templates, tools, and digital resources
+            on sale.
           </p>
         </div>
       </section>
@@ -153,10 +153,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               </div>
               <div className="flex max-w-md flex-col gap-2">
                 <h2 className="text-xl font-semibold tracking-normal">
-                  Không tìm thấy sản phẩm
+                  No products found
                 </h2>
                 <p className="text-sm leading-6 text-muted-foreground">
-                  Thử thay đổi từ khóa hoặc xóa bộ lọc để xem thêm sản phẩm.
+                  Try a different keyword or clear the filters to see more products.
                 </p>
               </div>
               <Button
@@ -164,7 +164,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 render={<Link href="/products" />}
                 nativeButton={false}
               >
-                Xem tất cả sản phẩm
+                View all products
               </Button>
             </div>
           ) : (
@@ -176,12 +176,12 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                   </div>
                   <div className="grid gap-2">
                     <h2 className="text-xl font-semibold tracking-normal">
-                      Sản phẩm đang được chuẩn bị
+                      Products are being prepared
                     </h2>
                     <p className="text-sm leading-6 text-muted-foreground">
-                      Khi có sản phẩm được publish, danh sách thật sẽ xuất hiện
-                      tại đây. Trong lúc chờ dữ liệu live, đây là các kệ nội
-                      dung mà storefront được thiết kế để phục vụ.
+                      Once products are published, the real list will appear
+                      here. While we wait for live data, these are the content
+                      shelves the storefront is designed to serve.
                     </p>
                   </div>
                 </div>
@@ -191,7 +191,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                   render={<Link href="/blog" />}
                   nativeButton={false}
                 >
-                  Đọc blog
+                  Read the blog
                 </Button>
               </div>
 
@@ -227,7 +227,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                         {item.description}
                       </p>
                       <p className="mt-auto border-t pt-4 text-sm font-medium text-muted-foreground">
-                        Đang chuẩn bị publish
+                        Preparing to publish
                       </p>
                     </div>
                   </div>

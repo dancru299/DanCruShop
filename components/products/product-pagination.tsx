@@ -46,7 +46,7 @@ export function ProductPagination({
   return (
     <div className="flex flex-col items-center gap-3">
       <p className="text-xs text-muted-foreground">
-        {total} sản phẩm · Trang {page} / {totalPages}
+        {total} products · Page {page} / {totalPages}
       </p>
 
       <nav

@@ -14,7 +14,7 @@ describe("cart checkout readiness", () => {
       isFreeOnly: true,
       paidCurrencies: [],
     });
-    expect(getCartCheckoutWarning(items)).toContain("miễn phí");
+    expect(getCartCheckoutWarning(items)).toContain("free resources");
   });
 
   it("detects VND carts that can use VietQR", () => {
@@ -33,6 +33,6 @@ describe("cart checkout readiness", () => {
     ];
 
     expect(getCartCheckoutReadiness(items).hasMixedCurrencies).toBe(true);
-    expect(getCartCheckoutWarning(items)).toContain("nhiều loại tiền tệ");
+    expect(getCartCheckoutWarning(items)).toContain("multiple currencies");
   });
 });

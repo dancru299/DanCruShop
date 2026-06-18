@@ -32,7 +32,7 @@ const initialState: ProfileActionState = {
 };
 
 function getInitials(name: string, email: string | null) {
-  const source = name.trim() || email?.trim() || "Khách";
+  const source = name.trim() || email?.trim() || "Guest";
   const parts = source
     .split(/[\s@._-]+/)
     .filter((part) => part.length > 0)
@@ -78,11 +78,11 @@ export function ProfileForm({
       }
 
       setAvatarUrl(result.url);
-      toast.success("Đã cập nhật ảnh đại diện.");
+      toast.success("Avatar updated.");
     } catch (error) {
       console.error("Profile avatar upload failed", error);
       toast.error(
-        error instanceof Error ? error.message : "Không thể tải ảnh đại diện lên."
+        error instanceof Error ? error.message : "Couldn't upload the avatar."
       );
     } finally {
       setIsUploadingAvatar(false);
@@ -100,13 +100,13 @@ export function ProfileForm({
           type="button"
           className="group/avatar relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary text-xl font-semibold text-secondary-foreground outline-none transition-transform hover:scale-[1.02] focus-visible:ring-3 focus-visible:ring-ring/50"
           disabled={isBusy}
-          aria-label="Tải ảnh đại diện"
+          aria-label="Upload avatar"
           onClick={() => avatarInputRef.current?.click()}
         >
           {avatarUrl ? (
             <img
               src={avatarUrl}
-              alt={fullName || "Ảnh đại diện"}
+              alt={fullName || "Avatar"}
               className="size-full object-cover"
             />
           ) : (
@@ -122,7 +122,7 @@ export function ProfileForm({
         </button>
         <input
           ref={avatarInputRef}
-          aria-label="Chọn ảnh đại diện"
+          aria-label="Choose avatar"
           className="hidden"
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif"
@@ -130,30 +130,30 @@ export function ProfileForm({
           onChange={handleAvatarChange}
         />
         <div>
-          <p className="font-medium">Hồ sơ mua hàng</p>
+          <p className="font-medium">Buyer profile</p>
           {email ? (
             <p className="mt-1 text-sm text-muted-foreground">{email}</p>
           ) : null}
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Di chuột vào ảnh đại diện rồi bấm biểu tượng camera để tải ảnh mới.
+            Hover over the avatar and click the camera icon to upload a new one.
           </p>
         </div>
       </div>
 
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="full-name">Tên hiển thị</FieldLabel>
+          <FieldLabel htmlFor="full-name">Display name</FieldLabel>
           <Input
             id="full-name"
             name="fullName"
             maxLength={80}
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
-            placeholder="Tên của bạn"
+            placeholder="Your name"
             disabled={isBusy}
           />
           <FieldDescription>
-            Tên này sẽ xuất hiện trong đánh giá, phản hồi và các khu vực tài khoản.
+            This name appears in reviews, replies, and account areas.
           </FieldDescription>
         </Field>
       </FieldGroup>
@@ -172,7 +172,7 @@ export function ProfileForm({
       <div className="flex justify-end">
         <Button type="submit" disabled={isBusy}>
           <SaveIcon data-icon="inline-start" aria-hidden="true" />
-          {isPending ? "Đang lưu..." : "Lưu hồ sơ"}
+          {isPending ? "Saving..." : "Save profile"}
         </Button>
       </div>
     </form>

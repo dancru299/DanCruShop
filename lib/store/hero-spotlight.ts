@@ -29,12 +29,14 @@ export type HeroSpotlightCard = {
   description: string;
   /** Product type label, e.g. "Template". */
   typeLabel: string;
-  /** Delivery label, e.g. "Giao ngay". */
+  /** Delivery label, e.g. "Instant delivery". */
   deliveryLabel: string;
   /** Pre-formatted price label, e.g. "$20.00". */
   priceLabel: string;
   /** Average review score, 0–5. */
   rating: number;
+  /** Number of published reviews. 0 -> show a "New" badge, not "0.0". */
+  ratingCount: number;
   /** Number of downloads / sales. */
   downloads: number;
   /** Link to the product detail page. */
@@ -49,14 +51,15 @@ export type HeroSpotlightCard = {
 export const heroSpotlightCards: HeroSpotlightCard[] = [
   {
     id: "laravel-tall-saas-starter",
-    eyebrow: "Gợi ý trong tuần",
+    eyebrow: "Pick of the week",
     title: "Laravel TALL Stack SaaS Starter + Filament",
     description:
-      "Bộ starter SaaS dựng sẵn cho người thuê — Auth, Billing, Admin panel.",
+      "A ready-made multi-tenant SaaS starter — Auth, Billing, Admin panel.",
     typeLabel: "Template",
-    deliveryLabel: "Giao ngay",
+    deliveryLabel: "Instant delivery",
     priceLabel: "$20.00",
     rating: 4.9,
+    ratingCount: 128,
     downloads: 1200,
     href: "/products",
     icons: [
@@ -68,28 +71,30 @@ export const heroSpotlightCards: HeroSpotlightCard[] = [
   },
   {
     id: "filament-admin-extensions",
-    eyebrow: "Bán chạy",
+    eyebrow: "Best seller",
     title: "Filament Advanced Admin Panel Extensions",
     description:
-      "Bộ tiện ích mở rộng nâng cao cho Filament: widget, bảng, biểu mẫu phức tạp.",
+      "Advanced Filament extensions: widgets, tables, and complex forms.",
     typeLabel: "Tool",
-    deliveryLabel: "Giao ngay",
+    deliveryLabel: "Instant delivery",
     priceLabel: "$15.00",
     rating: 4.8,
+    ratingCount: 86,
     downloads: 800,
     href: "/products",
     icons: [{ label: "Filament" }, { label: "Laravel" }, { label: "Tailwind" }],
   },
   {
     id: "tall-multi-vendor",
-    eyebrow: "Mới cập nhật",
+    eyebrow: "Just updated",
     title: "TALL Stack Multi-Vendor E-commerce Platform",
     description:
-      "Nền tảng thương mại điện tử đa nhà bán dựng trên TALL stack, kèm dashboard.",
+      "A multi-vendor e-commerce platform built on the TALL stack, with dashboard.",
     typeLabel: "Template",
-    deliveryLabel: "Giao ngay",
+    deliveryLabel: "Instant delivery",
     priceLabel: "$35.00",
     rating: 4.9,
+    ratingCount: 64,
     downloads: 500,
     href: "/products",
     icons: [
@@ -101,14 +106,15 @@ export const heroSpotlightCards: HeroSpotlightCard[] = [
   },
   {
     id: "nextjs-commerce-kit",
-    eyebrow: "Được yêu thích",
+    eyebrow: "Community favorite",
     title: "Next.js Commerce Kit + Supabase",
     description:
-      "Bộ khởi tạo cửa hàng số: giỏ hàng, thanh toán, license và trang quản trị.",
+      "A digital-store starter: cart, checkout, licensing, and an admin panel.",
     typeLabel: "Template",
-    deliveryLabel: "Giao ngay",
+    deliveryLabel: "Instant delivery",
     priceLabel: "$29.00",
     rating: 4.7,
+    ratingCount: 52,
     downloads: 640,
     href: "/products",
     icons: [
@@ -120,14 +126,15 @@ export const heroSpotlightCards: HeroSpotlightCard[] = [
   },
   {
     id: "design-system-pro",
-    eyebrow: "Combo tiết kiệm",
+    eyebrow: "Value bundle",
     title: "Design System Pro — UI Kit & Components",
     description:
-      "Thư viện component và design token sẵn sàng cho sản phẩm thật, dark-mode aware.",
+      "A production-ready component and design-token library, dark-mode aware.",
     typeLabel: "Bundle",
-    deliveryLabel: "Giao ngay",
+    deliveryLabel: "Instant delivery",
     priceLabel: "$45.00",
     rating: 5.0,
+    ratingCount: 41,
     downloads: 310,
     href: "/products",
     icons: [{ label: "Figma" }, { label: "React" }, { label: "Tailwind" }],
@@ -141,15 +148,15 @@ function heroEyebrow(
   signals: { maxSales: number; maxRating: number; newestAt: number }
 ): string {
   if (product.sales_count > 0 && product.sales_count === signals.maxSales) {
-    return "Bán chạy";
+    return "Best seller";
   }
   if (product.rating_count > 0 && product.rating_average === signals.maxRating) {
-    return "Đánh giá cao";
+    return "Top rated";
   }
   if (new Date(product.created_at).getTime() === signals.newestAt) {
-    return "Mới cập nhật";
+    return "Just updated";
   }
-  return "Gợi ý cho bạn";
+  return "Featured for you";
 }
 
 // Map the auto-ranked spotlight products into the card shape the slider renders.
@@ -178,9 +185,10 @@ export function buildHeroSpotlightCards(
     title: product.title,
     description: product.short_description ?? "",
     typeLabel: productTypeLabels[product.product_type],
-    deliveryLabel: product.is_free ? "Nhận miễn phí" : "Giao ngay",
+    deliveryLabel: product.is_free ? "Get it free" : "Instant delivery",
     priceLabel: formatProductPrice(product),
     rating: product.rating_average,
+    ratingCount: product.rating_count,
     downloads: product.sales_count,
     href: `/products/${product.slug}`,
     icons: product.tech_icons.map((icon) => ({

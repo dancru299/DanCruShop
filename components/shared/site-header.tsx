@@ -42,7 +42,7 @@ async function getViewerState() {
       claims?.user_metadata?.full_name ||
       claims?.user_metadata?.name ||
       claims?.email?.split("@")[0] ||
-      "Khách hàng";
+      "Customer";
     const user: AccountMenuUser = {
       avatarUrl: profile?.avatar_url ?? claims?.user_metadata?.avatar_url ?? null,
       email: claims?.email ?? null,
@@ -69,7 +69,7 @@ export async function SiteHeader() {
         <div className="mx-auto flex h-9 w-full max-w-6xl items-center justify-between px-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <SparklesIcon aria-hidden="true" className="size-3.5 text-primary" />
-            Tài nguyên số chính hãng — giao ngay sau thanh toán
+            Genuine digital resources — delivered instantly after payment
           </span>
           <nav className="flex items-center gap-5">
             <Link
@@ -77,21 +77,21 @@ export async function SiteHeader() {
               className="flex items-center gap-1.5 transition-colors hover:text-foreground"
             >
               <BookOpenIcon aria-hidden="true" className="size-3.5" />
-              Hướng dẫn mua hàng
+              Buying guide
             </Link>
             <Link
               href="/products"
               className="flex items-center gap-1.5 transition-colors hover:text-foreground"
             >
               <GiftIcon aria-hidden="true" className="size-3.5" />
-              Ưu đãi khách hàng
+              Customer deals
             </Link>
             <Link
               href={getSupportMailto("DanCruShop support")}
               className="flex items-center gap-1.5 transition-colors hover:text-foreground"
             >
               <HeadphonesIcon aria-hidden="true" className="size-3.5" />
-              Liên hệ hỗ trợ
+              Contact support
             </Link>
           </nav>
         </div>
@@ -111,13 +111,13 @@ export async function SiteHeader() {
 
         <nav className="ml-auto hidden shrink-0 items-center gap-5 text-sm text-muted-foreground lg:flex">
           <Link href="/products" className="transition-colors hover:text-foreground">
-            Sản phẩm
+            Products
           </Link>
           <Link href="/#danh-muc" className="transition-colors hover:text-foreground">
-            Danh mục
+            Categories
           </Link>
           <Link href="/blog" className="transition-colors hover:text-foreground">
-            Bài viết
+            Blog
           </Link>
         </nav>
 
@@ -136,7 +136,7 @@ export async function SiteHeader() {
               render={<Link href="/login" />}
               nativeButton={false}
             >
-              Đăng nhập
+              Log in
             </Button>
           )}
           <MobileNavSheet

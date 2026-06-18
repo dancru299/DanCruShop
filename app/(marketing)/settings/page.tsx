@@ -21,10 +21,10 @@ export default async function SettingsPage() {
   return (
     <section className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-10 md:py-14">
       <div className="flex flex-col gap-2">
-        <p className="text-sm text-muted-foreground">Tài khoản</p>
-        <h1 className="text-3xl font-semibold tracking-normal">Cài đặt</h1>
+        <p className="text-sm text-muted-foreground">Account</p>
+        <h1 className="text-3xl font-semibold tracking-normal">Settings</h1>
         <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-          Quản lý tùy chọn tài khoản và trải nghiệm mua hàng trên DanCruShop.
+          Manage your account preferences and shopping experience on DanCruShop.
         </p>
       </div>
 
@@ -32,21 +32,21 @@ export default async function SettingsPage() {
         {[
           {
             Icon: UserRoundIcon,
-            description: "Đổi tên hiển thị và ảnh đại diện của bạn.",
+            description: "Change your display name and avatar.",
             href: "/profile",
-            title: "Hồ sơ",
+            title: "Profile",
           },
           {
             Icon: BellIcon,
-            description: "Biên nhận mua hàng và email cập nhật sản phẩm.",
+            description: "Purchase receipts and product update emails.",
             href: "#",
-            title: "Thông báo",
+            title: "Notifications",
           },
           {
             Icon: ShieldCheckIcon,
-            description: "Đăng nhập, quyền truy cập và bảo mật thanh toán.",
+            description: "Login, access permissions, and payment security.",
             href: "#",
-            title: "Bảo mật",
+            title: "Security",
           },
         ].map((item) => (
           <div key={item.title} className="rounded-lg border bg-card/60 p-5 shadow-sm backdrop-blur-xl">
@@ -65,11 +65,11 @@ export default async function SettingsPage() {
                 render={<Link href={item.href} />}
                 nativeButton={false}
               >
-                Mở
+                Open
               </Button>
             ) : (
               <p className="mt-4 text-sm font-medium text-muted-foreground">
-                Sắp có
+                Coming soon
               </p>
             )}
           </div>

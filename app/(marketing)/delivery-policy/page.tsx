@@ -5,33 +5,33 @@ import { PolicyPageShell } from "@/components/policies/policy-page-shell";
 import { betaPolicies } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "Chính sách giao hàng",
+  title: "Delivery policy",
   description: betaPolicies.delivery,
 };
 
 export default function DeliveryPolicyPage() {
   return (
     <PolicyPageShell
-      title="Chính sách giao hàng tài nguyên số"
+      title="Digital resource delivery policy"
       description={betaPolicies.delivery}
       points={[
         {
           Icon: GaugeIcon,
-          title: "Dashboard là nơi nhận hàng",
+          title: "The dashboard is where you receive products",
           description:
-            "Sau khi thanh toán hoặc nhận miễn phí, tài nguyên xuất hiện trong dashboard của tài khoản mua hàng.",
+            "After payment or claiming a free item, the resource appears in the dashboard of the purchasing account.",
         },
         {
           Icon: Clock3Icon,
-          title: "Lemon Squeezy tự động",
+          title: "Lemon Squeezy is automatic",
           description:
-            "Đơn Lemon Squeezy được webhook mở khóa tự động sau khi thanh toán thành công.",
+            "Lemon Squeezy orders are unlocked automatically by webhook after a successful payment.",
         },
         {
           Icon: LandmarkIcon,
-          title: "VietQR duyệt thủ công",
+          title: "VietQR is approved manually",
           description:
-            "Đơn VietQR dành cho sản phẩm VND và được admin duyệt thủ công trong vòng 24h trong giai đoạn beta.",
+            "VietQR orders are for VND products and are approved manually by an admin within 24 hours during beta.",
         },
       ]}
     />

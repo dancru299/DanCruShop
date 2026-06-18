@@ -134,14 +134,14 @@ export function CartPageClient() {
           </div>
           <div className="flex max-w-md flex-col gap-2">
             <h1 className="text-2xl font-semibold tracking-normal">
-              Giỏ hàng đang trống
+              Your cart is empty
             </h1>
             <p className="text-sm leading-6 text-muted-foreground">
-              Chọn sản phẩm từ storefront rồi thanh toán gọn ở một nơi.
+              Pick products from the storefront and check out in one place.
             </p>
           </div>
           <Button render={<Link href="/products" />} nativeButton={false}>
-            Xem sản phẩm
+            Browse products
             <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
           </Button>
         </div>
@@ -153,10 +153,10 @@ export function CartPageClient() {
     <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-10 md:py-14 lg:grid-cols-[1fr_360px]">
       <section className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
-          <p className="text-sm text-muted-foreground">Giỏ hàng DanCruShop</p>
-          <h1 className="text-3xl font-semibold tracking-normal">Giỏ hàng</h1>
+          <p className="text-sm text-muted-foreground">DanCruShop cart</p>
+          <h1 className="text-3xl font-semibold tracking-normal">Cart</h1>
           <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-            Xem lại các tài nguyên đã chọn trước khi bắt đầu thanh toán.
+            Review the resources you selected before starting checkout.
           </p>
         </div>
 
@@ -189,7 +189,7 @@ export function CartPageClient() {
                   <Badge variant="outline">
                     {productTypeLabels[item.productType]}
                   </Badge>
-                  <Badge variant="secondary">Giao ngay</Badge>
+                  <Badge variant="secondary">Instant delivery</Badge>
                 </div>
                 <Link
                   href={`/products/${item.slug}`}
@@ -199,7 +199,7 @@ export function CartPageClient() {
                 </Link>
                 <p className="text-sm text-muted-foreground">
                   {item.isFree
-                    ? "Sản phẩm miễn phí"
+                    ? "Free product"
                     : formatPrice(item.priceCents, item.currency)}
                 </p>
               </div>
@@ -211,7 +211,7 @@ export function CartPageClient() {
                 onClick={() => removeItem(item.id)}
               >
                 <Trash2Icon aria-hidden="true" data-icon="inline-start" />
-                Xóa
+                Remove
               </Button>
             </div>
           ))}
@@ -223,14 +223,14 @@ export function CartPageClient() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-lg font-semibold tracking-normal">
-                Tóm tắt đơn hàng
+                Order summary
               </h2>
               <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                {itemCount} sản phẩm đã chọn
+                {itemCount} items selected
               </p>
             </div>
             <Button type="button" size="sm" variant="ghost" onClick={clearCart}>
-              Xóa hết
+              Clear all
             </Button>
           </div>
 
@@ -242,7 +242,7 @@ export function CartPageClient() {
                   className="flex items-center justify-between gap-4 text-sm"
                 >
                   <span className="text-muted-foreground">
-                    Tổng ({total.currency.toUpperCase()})
+                    Total ({total.currency.toUpperCase()})
                   </span>
                   <span className="font-semibold">
                     {formatPrice(total.totalCents, total.currency)}
@@ -251,8 +251,8 @@ export function CartPageClient() {
               ))
             ) : (
               <div className="flex items-center justify-between gap-4 text-sm">
-                <span className="text-muted-foreground">Tổng</span>
-                <span className="font-semibold">Miễn phí</span>
+                <span className="text-muted-foreground">Total</span>
+                <span className="font-semibold">Free</span>
               </div>
             )}
           </div>
@@ -273,11 +273,11 @@ export function CartPageClient() {
                       onClick={handleRemoveCoupon}
                     >
                       <XIcon aria-hidden="true" data-icon="inline-start" />
-                      Bỏ
+                      Remove
                     </Button>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Giảm giá</span>
+                    <span className="text-muted-foreground">Discount</span>
                     <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                       -
                       {formatPrice(
@@ -287,7 +287,7 @@ export function CartPageClient() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Tổng sau giảm</span>
+                    <span className="text-muted-foreground">Total after discount</span>
                     <span className="font-semibold">
                       {formatPrice(
                         effectiveCoupon.totalAfterCents,
@@ -304,7 +304,7 @@ export function CartPageClient() {
                       onChange={(event) =>
                         setCouponInput(event.target.value.toUpperCase())
                       }
-                      placeholder="Mã giảm giá"
+                      placeholder="Discount code"
                       disabled={isApplying}
                       className="uppercase"
                     />
@@ -314,7 +314,7 @@ export function CartPageClient() {
                       onClick={handleApplyCoupon}
                       disabled={isApplying || !couponInput.trim()}
                     >
-                      {isApplying ? "Đang áp..." : "Áp dụng"}
+                      {isApplying ? "Applying..." : "Apply"}
                     </Button>
                   </div>
                   {couponError ? (
@@ -331,7 +331,7 @@ export function CartPageClient() {
                 <CreditCardIcon aria-hidden="true" className="size-4" />
               </span>
               <div className="grid gap-1">
-                <p className="text-sm font-medium">Thanh toán & nhận hàng</p>
+                <p className="text-sm font-medium">Payment & delivery</p>
                 <p className="text-sm leading-6 text-muted-foreground">
                   {betaPolicies.delivery}
                 </p>
@@ -340,13 +340,13 @@ export function CartPageClient() {
             <div className="grid gap-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CreditCardIcon aria-hidden="true" className="size-4" />
-                <span>Lemon Squeezy tự động mở khóa sau thanh toán.</span>
+                <span>Lemon Squeezy unlocks automatically after payment.</span>
               </div>
               <div className="flex items-center gap-2">
                 <LandmarkIcon aria-hidden="true" className="size-4" />
                 <span>
-                  VietQR áp dụng cho đơn VND
-                  {checkoutReadiness.canUseVietQr ? " trong giỏ này." : "."}
+                  VietQR applies to VND orders
+                  {checkoutReadiness.canUseVietQr ? " in this cart." : "."}
                 </span>
               </div>
             </div>
@@ -376,12 +376,12 @@ export function CartPageClient() {
               value={effectiveCoupon?.code ?? ""}
             />
             <Button type="submit" size="lg" disabled={isPending}>
-              {isPending ? "Đang chuẩn bị checkout..." : "Thanh toán toàn bộ"}
+              {isPending ? "Preparing checkout..." : "Check out everything"}
               <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
             </Button>
             <p className="text-sm leading-6 text-muted-foreground">
-              Sản phẩm miễn phí sẽ mở trong dashboard. Sản phẩm trả phí sẽ đi
-              qua flow thanh toán đã cấu hình.
+              Free products open in your dashboard. Paid products go through the
+              configured payment flow.
             </p>
           </form>
         </div>
