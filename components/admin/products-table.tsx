@@ -3,7 +3,9 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useMemo, useState } from "react";
-import { ImageIcon, PackageCheckIcon } from "lucide-react";
+import { ImageIcon, PackageIcon } from "lucide-react";
+
+import { EmptyState } from "@/components/shared/empty-state";
 
 import {
   AdminActionMenu,
@@ -26,23 +28,23 @@ type ProductsTableProps = {
 };
 
 const statusLabels: Record<AdminProductListItem["status"], string> = {
-  archived: "Archived",
-  draft: "Draft",
-  published: "Published",
+  archived: "Đã lưu trữ",
+  draft: "Bản nháp",
+  published: "Đã xuất bản",
 };
 
 const productTypeLabels: Record<AdminProductListItem["product_type"], string> = {
-  bundle: "Bundle",
-  course: "Course",
-  digital_download: "Download",
-  free_resource: "Free",
-  template: "Template",
-  tool: "Tool",
+  bundle: "Bộ",
+  course: "Khóa học",
+  digital_download: "Tải về",
+  free_resource: "Miễn phí",
+  template: "Mẫu",
+  tool: "Công cụ",
 };
 
 function formatPrice(product: AdminProductListItem) {
   if (product.is_free) {
-    return "Free";
+    return "Miễn phí";
   }
 
   const currency = product.currency.trim().toUpperCase() || "USD";
@@ -69,7 +71,7 @@ function getStatusBadgeVariant(status: AdminProductListItem["status"]) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
+  return new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium" }).format(
     new Date(value)
   );
 }
@@ -121,7 +123,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
       <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
         <div className="flex flex-col gap-1 border-b p-5">
           <h2 className="text-base font-semibold tracking-normal">
-            Catalog workspace
+            Kho sản phẩm
           </h2>
           <p className="text-sm leading-6 text-muted-foreground">
             {filtered.length}/{products.length} sản phẩm đang hiển thị.
@@ -132,11 +134,11 @@ export function ProductsTable({ products }: ProductsTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[42%]">Product</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Updated</TableHead>
-                <TableHead className="text-right">Action</TableHead>
+                <TableHead className="w-[42%]">Sản phẩm</TableHead>
+                <TableHead>Giá</TableHead>
+                <TableHead>Trạng thái</TableHead>
+                <TableHead>Đã cập nhật</TableHead>
+                <TableHead className="text-right">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -154,7 +156,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
                             {productTypeLabels[product.product_type]}
                           </Badge>
                           {!product.thumbnail_url ? (
-                            <Badge variant="secondary">Needs image</Badge>
+                            <Badge variant="secondary">Cần ảnh</Badge>
                           ) : null}
                         </div>
                         <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
@@ -172,32 +174,32 @@ export function ProductsTable({ products }: ProductsTableProps) {
                   </TableCell>
                   <TableCell>{formatDate(product.updated_at)}</TableCell>
                   <TableCell className="text-right">
-                    <AdminActionMenu label={`Actions for ${product.title}`}>
+                    <AdminActionMenu label={`Thao tác cho ${product.title}`}>
                       <AdminActionMenuLink
                         href={`/products/${product.slug}`}
                         icon="external-link"
                       >
-                        View
+                        Xem
                       </AdminActionMenuLink>
                       <AdminActionMenuLink
                         href={`/admin/products/${product.id}/files`}
                         icon="paperclip"
                       >
-                        Files
+                        Tệp
                       </AdminActionMenuLink>
                       {product.product_type === "bundle" ? (
                         <AdminActionMenuLink
                           href={`/admin/products/${product.id}/bundle`}
                           icon="bundle"
                         >
-                          Bundle
+                          Bộ sản phẩm
                         </AdminActionMenuLink>
                       ) : null}
                       <AdminActionMenuLink
                         href={`/admin/products/${product.id}/edit`}
                         icon="pencil"
                       >
-                        Edit
+                        Sửa
                       </AdminActionMenuLink>
                     </AdminActionMenu>
                   </TableCell>
@@ -206,15 +208,20 @@ export function ProductsTable({ products }: ProductsTableProps) {
             </TableBody>
           </Table>
         ) : (
-          <div className="flex min-h-60 flex-col items-center justify-center gap-3 p-8 text-center">
-            <div className="flex size-12 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
-              <PackageCheckIcon aria-hidden="true" className="size-5" />
-            </div>
-            <p className="text-sm font-medium">
-              {products.length === 0
-                ? "Chưa có sản phẩm nào"
-                : "Không tìm thấy sản phẩm khớp tìm kiếm"}
-            </p>
+          <div className="p-6">
+            <EmptyState
+              icon={PackageIcon}
+              title={
+                products.length === 0
+                  ? "Chưa có sản phẩm nào"
+                  : "Không tìm thấy sản phẩm khớp tìm kiếm"
+              }
+              description={
+                products.length === 0
+                  ? "Tạo sản phẩm đầu tiên để bắt đầu bán hàng."
+                  : "Vui lòng thử tìm kiếm bằng từ khóa khác."
+              }
+            />
           </div>
         )}
       </div>

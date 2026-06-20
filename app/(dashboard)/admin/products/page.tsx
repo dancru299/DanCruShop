@@ -27,25 +27,25 @@ export default async function AdminProductsPage() {
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        eyebrow="Product management"
-        title="Products"
-        description="Manage catalog content, storefront thumbnails, downloadable files, and publishing status."
+        eyebrow="Quản lý sản phẩm"
+        title="Sản phẩm"
+        description="Quản lý nội dung danh mục, ảnh thumbnail, file tải về và trạng thái xuất bản."
         action={
           <Button
             render={<Link href="/admin/products/new" />}
             nativeButton={false}
           >
             <PlusIcon aria-hidden="true" data-icon="inline-start" />
-            New Product
+            Sản phẩm mới
           </Button>
         }
       />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <AdminMetric label="Total products" value={products.length} />
-        <AdminMetric label="Published" value={publishedCount} />
-        <AdminMetric label="Drafts" value={draftCount} />
-        <AdminMetric label="Missing images" value={missingImagesCount} />
+        <AdminMetric label="Tổng sản phẩm" value={products.length} />
+        <AdminMetric label="Đã xuất bản" value={publishedCount} />
+        <AdminMetric label="Bản nháp" value={draftCount} />
+        <AdminMetric label="Thiếu ảnh" value={missingImagesCount} />
       </div>
 
       <ProductsTable products={products} />
@@ -53,8 +53,7 @@ export default async function AdminProductsPage() {
       {archivedCount > 0 ? (
         <div className="flex items-center gap-3 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
           <ArchiveIcon aria-hidden="true" className="size-4" />
-          {archivedCount} archived product{archivedCount === 1 ? "" : "s"} are
-          hidden from the main catalog but kept for records.
+          Có {archivedCount} sản phẩm lưu trữ được ẩn khỏi catalog chính nhưng vẫn được lưu trong hồ sơ.
         </div>
       ) : null}
     </div>

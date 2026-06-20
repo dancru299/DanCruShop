@@ -166,7 +166,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="template">Template QR</FieldLabel>
+            <FieldLabel htmlFor="template">Mẫu QR</FieldLabel>
             <Input
               id="template"
               value={template}

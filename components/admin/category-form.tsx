@@ -11,7 +11,7 @@ import {
   updateCategory,
 } from "@/actions/category.actions";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { CategoryDetail } from "@/lib/supabase/queries/categories";
@@ -20,6 +20,11 @@ import { slugify } from "@/lib/utils";
 type CategoryFormProps = {
   mode: "create" | "edit";
   category?: CategoryDetail;
+};
+
+type CategoryFormErrors = {
+  name?: string;
+  slug?: string;
 };
 
 export function CategoryForm({ mode, category }: CategoryFormProps) {
@@ -31,6 +36,7 @@ export function CategoryForm({ mode, category }: CategoryFormProps) {
   const [description, setDescription] = useState(category?.description ?? "");
   const [icon, setIcon] = useState(category?.icon ?? "");
   const [imageUrl, setImageUrl] = useState(category?.image_url ?? "");
+  const [errors, setErrors] = useState<CategoryFormErrors>({});
 
   function handleNameChange(value: string) {
     setName(value);
@@ -40,13 +46,25 @@ export function CategoryForm({ mode, category }: CategoryFormProps) {
     }
   }
 
+  function validate() {
+    const nextErrors: CategoryFormErrors = {};
+
+    if (!name.trim()) {
+      nextErrors.name = "Vui lòng nhập tên danh mục.";
+    }
+
+    if (!slug.trim()) {
+      nextErrors.slug = "Vui lòng nhập slug.";
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  }
+
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!name.trim()) {
-      toast.error("Nhập tên category.");
-      return;
-    }
+    if (!validate()) return;
 
     startTransition(async () => {
       const payload = {
@@ -66,7 +84,7 @@ export function CategoryForm({ mode, category }: CategoryFormProps) {
         return;
       }
 
-      toast.success(mode === "create" ? "Đã tạo category." : "Đã lưu category.");
+      toast.success(mode === "create" ? "Đã tạo danh mục." : "Đã lưu danh mục.");
       router.push("/admin/categories");
       router.refresh();
     });
@@ -82,26 +100,28 @@ export function CategoryForm({ mode, category }: CategoryFormProps) {
           nativeButton={false}
         >
           <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-          Quay lại Categories
+          Quay lại danh mục
         </Button>
         <h1 className="text-3xl font-semibold tracking-normal">
-          {mode === "create" ? "Category mới" : "Sửa category"}
+          {mode === "create" ? "Danh mục mới" : "Sửa danh mục"}
         </h1>
       </div>
 
       <section className="flex max-w-2xl flex-col gap-4 rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
-        <Field>
+        <Field data-invalid={Boolean(errors.name)}>
           <FieldLabel htmlFor="category-name">Tên</FieldLabel>
           <Input
             id="category-name"
             value={name}
             onChange={(event) => handleNameChange(event.target.value)}
             placeholder="Source code"
+            aria-invalid={Boolean(errors.name)}
             disabled={isPending}
           />
+          <FieldError>{errors.name}</FieldError>
         </Field>
 
-        <Field>
+        <Field data-invalid={Boolean(errors.slug)}>
           <FieldLabel htmlFor="category-slug">Slug</FieldLabel>
           <Input
             id="category-slug"
@@ -111,11 +131,13 @@ export function CategoryForm({ mode, category }: CategoryFormProps) {
               setSlug(slugify(event.target.value));
             }}
             placeholder="source-code"
+            aria-invalid={Boolean(errors.slug)}
             disabled={isPending}
           />
           <FieldDescription>
             Dùng trong bộ lọc URL của storefront. Tự sinh từ tên.
           </FieldDescription>
+          <FieldError>{errors.slug}</FieldError>
         </Field>
 
         <Field>
@@ -178,7 +200,7 @@ export function CategoryForm({ mode, category }: CategoryFormProps) {
           ) : (
             <SaveIcon aria-hidden="true" data-icon="inline-start" />
           )}
-          {mode === "create" ? "Tạo category" : "Lưu thay đổi"}
+          {mode === "create" ? "Tạo danh mục" : "Lưu thay đổi"}
         </Button>
       </div>
     </form>

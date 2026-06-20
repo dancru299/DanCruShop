@@ -14,7 +14,7 @@ export default async function AdminHomeLayoutPage() {
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        eyebrow="Storefront"
+        eyebrow="Cửa hàng"
         title="Bố cục trang chủ"
         description="Thêm, sửa, sắp xếp và bật/tắt các section trên trang chủ. Bấm vào tên section để chỉnh sửa nội dung, rồi lưu lại."
       />

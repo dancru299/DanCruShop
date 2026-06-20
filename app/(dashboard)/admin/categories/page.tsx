@@ -22,24 +22,24 @@ export default async function AdminCategoriesPage() {
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        eyebrow="Catalog"
-        title="Categories"
-        description="Tạo và quản lý category để phân loại sản phẩm. Khách dùng category để lọc trong storefront."
+        eyebrow="Danh mục"
+        title="Danh mục"
+        description="Tạo và quản lý danh mục để phân loại sản phẩm. Khách dùng danh mục để lọc trong storefront."
         action={
           <Button
             render={<Link href="/admin/categories/new" />}
             nativeButton={false}
           >
             <PlusIcon aria-hidden="true" data-icon="inline-start" />
-            Category mới
+            Danh mục mới
           </Button>
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <AdminMetric label="Tổng category" value={categories.length} />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <AdminMetric label="Tổng danh mục" value={categories.length} />
         <AdminMetric label="Lượt gán sản phẩm" value={totalProducts} />
-        <AdminMetric label="Category trống" value={emptyCategories} />
+        <AdminMetric label="Danh mục trống" value={emptyCategories} />
       </div>
 
       <CategoryTable categories={categories} />

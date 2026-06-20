@@ -5,6 +5,8 @@ import { useMemo, useState, useTransition } from "react";
 import { KeyRoundIcon } from "lucide-react";
 import { toast } from "sonner";
 
+import { EmptyState } from "@/components/shared/empty-state";
+
 import { setLicenseStatus } from "@/actions/license.actions";
 import {
   AdminActionMenu,
@@ -27,7 +29,7 @@ type LicenseTableProps = {
 };
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
+  return new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium" }).format(
     new Date(value)
   );
 }
@@ -81,7 +83,7 @@ export function LicenseTable({ licenses }: LicenseTableProps) {
       <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
         <div className="flex flex-col gap-1 border-b p-5">
           <h2 className="text-base font-semibold tracking-normal">
-            License keys
+            Danh sách license key
           </h2>
           <p className="text-sm leading-6 text-muted-foreground">
             {filtered.length}/{licenses.length} key đang hiển thị.
@@ -92,7 +94,7 @@ export function LicenseTable({ licenses }: LicenseTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>License key</TableHead>
+                <TableHead>Mã license</TableHead>
                 <TableHead>Sản phẩm</TableHead>
                 <TableHead>Khách</TableHead>
                 <TableHead>Ngày</TableHead>
@@ -119,7 +121,7 @@ export function LicenseTable({ licenses }: LicenseTableProps) {
                         license.status === "active" ? "default" : "outline"
                       }
                     >
-                      {license.status === "active" ? "Active" : "Revoked"}
+                      {license.status === "active" ? "Đang hoạt động" : "Đã thu hồi"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -151,19 +153,20 @@ export function LicenseTable({ licenses }: LicenseTableProps) {
             </TableBody>
           </Table>
         ) : (
-          <div className="flex min-h-56 flex-col items-center justify-center gap-3 p-8 text-center">
-            <div className="flex size-12 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
-              <KeyRoundIcon aria-hidden="true" className="size-5" />
-            </div>
-            <p className="text-sm font-medium">
-              {licenses.length === 0
-                ? "Chưa có license key"
-                : "Không tìm thấy key khớp tìm kiếm"}
-            </p>
-            <p className="max-w-sm text-sm leading-6 text-muted-foreground">
-              Bật “Yêu cầu license key” trong sản phẩm; key sẽ tự sinh khi khách
-              mua.
-            </p>
+          <div className="p-6">
+            <EmptyState
+              icon={KeyRoundIcon}
+              title={
+                licenses.length === 0
+                  ? "Chưa có license key"
+                  : "Không tìm thấy license key khớp tìm kiếm"
+              }
+              description={
+                licenses.length === 0
+                  ? "Bật &ldquo;Yêu cầu license key&rdquo; trong sản phẩm; license key sẽ tự sinh khi khách mua."
+                  : "Vui lòng thử tìm kiếm bằng từ khóa khác."
+              }
+            />
           </div>
         )}
       </div>

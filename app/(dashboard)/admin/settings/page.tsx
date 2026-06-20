@@ -11,7 +11,7 @@ export default async function AdminSettingsPage() {
     <div className="flex flex-col gap-6">
       <AdminPageHeader
         eyebrow="Cấu hình"
-        title="Settings"
+        title="Cài đặt"
         description="Cấu hình thanh toán VietQR và thông tin shop. Giá trị để trống sẽ dùng biến môi trường làm mặc định."
       />
 

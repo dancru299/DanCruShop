@@ -5,6 +5,8 @@ import { useMemo, useState, useTransition } from "react";
 import { TicketPercentIcon } from "lucide-react";
 import { toast } from "sonner";
 
+import { EmptyState } from "@/components/shared/empty-state";
+
 import { deleteCoupon } from "@/actions/coupon.actions";
 import {
   AdminActionMenu,
@@ -149,18 +151,20 @@ export function CouponTable({ coupons }: CouponTableProps) {
             </TableBody>
           </Table>
         ) : (
-          <div className="flex min-h-56 flex-col items-center justify-center gap-3 p-8 text-center">
-            <div className="flex size-12 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
-              <TicketPercentIcon aria-hidden="true" className="size-5" />
-            </div>
-            <p className="text-sm font-medium">
-              {coupons.length === 0
-                ? "Chưa có mã giảm giá"
-                : "Không tìm thấy mã khớp tìm kiếm"}
-            </p>
-            <p className="max-w-sm text-sm leading-6 text-muted-foreground">
-              Tạo mã đầu tiên để chạy khuyến mãi. Khách nhập mã ở trang giỏ hàng.
-            </p>
+          <div className="p-6">
+            <EmptyState
+              icon={TicketPercentIcon}
+              title={
+                coupons.length === 0
+                  ? "Chưa có mã giảm giá"
+                  : "Không tìm thấy mã khớp tìm kiếm"
+              }
+              description={
+                coupons.length === 0
+                  ? "Tạo mã đầu tiên để chạy khuyến mãi. Khách nhập mã ở trang giỏ hàng."
+                  : "Vui lòng thử tìm kiếm bằng từ khóa khác."
+              }
+            />
           </div>
         )}
       </div>

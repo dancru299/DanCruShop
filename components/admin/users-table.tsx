@@ -3,6 +3,10 @@
 import { useMemo, useState } from "react";
 import { UsersIcon } from "lucide-react";
 
+import {
+  AdminActionMenu,
+  AdminActionMenuText,
+} from "@/components/admin/admin-action-menu";
 import { AdminSearchInput } from "@/components/admin/admin-search-input";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -15,6 +19,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { AdminCustomer } from "@/lib/supabase/queries/admin-users";
+
+const roleLabels: Record<string, string> = {
+  admin: "Quản trị viên",
+  customer: "Khách hàng",
+};
 
 type UsersTableProps = {
   customers: AdminCustomer[];
@@ -87,6 +96,7 @@ export function UsersTable({ customers }: UsersTableProps) {
                 <TableHead>Ngày tham gia</TableHead>
                 <TableHead className="text-right">Đơn hàng</TableHead>
                 <TableHead className="text-right">Tổng chi tiêu</TableHead>
+                <TableHead className="text-right">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -104,7 +114,7 @@ export function UsersTable({ customers }: UsersTableProps) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{customer.role}</Badge>
+                    <Badge variant="secondary">{roleLabels[customer.role] ?? customer.role}</Badge>
                   </TableCell>
                   <TableCell>{formatDate(customer.created_at)}</TableCell>
                   <TableCell className="text-right">
@@ -118,6 +128,15 @@ export function UsersTable({ customers }: UsersTableProps) {
                   </TableCell>
                   <TableCell className="text-right font-medium">
                     {formatSpent(customer)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <AdminActionMenu
+                      label={`Thao tác cho ${customer.full_name ?? "khách hàng"}`}
+                    >
+                      <AdminActionMenuText>
+                        {customer.purchase_count} đơn hàng
+                      </AdminActionMenuText>
+                    </AdminActionMenu>
                   </TableCell>
                 </TableRow>
               ))}

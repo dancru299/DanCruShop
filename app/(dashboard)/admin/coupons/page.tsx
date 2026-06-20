@@ -20,8 +20,8 @@ export default async function AdminCouponsPage() {
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        eyebrow="Marketing"
-        title="Coupons"
+        eyebrow="Tiếp thị"
+        title="Mã giảm giá"
         description="Tạo mã giảm giá theo phần trăm hoặc số tiền cố định. Khách áp mã ở giỏ hàng; giảm giá áp dụng cho cả VietQR và Lemon Squeezy."
         action={
           <Button

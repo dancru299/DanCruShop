@@ -27,16 +27,16 @@ export default async function AdminBlogPage() {
     <div className="flex flex-col gap-6">
       <AdminPageHeader
         eyebrow="Quản lý nội dung"
-        title="Blog"
+        title="Bài viết"
         description="Lên kế hoạch, viết bản nháp, xem trước và xuất bản các bài viết chuẩn SEO cho DanCruShop."
         action={headerAction}
       />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <AdminMetric label="Tổng số bài viết" value={String(posts.length)} />
-        <AdminMetric label="Đã xuất bản" value={String(publishedCount)} />
-        <AdminMetric label="Bản nháp" value={String(draftCount)} />
-        <AdminMetric label="Thiếu ảnh bìa" value={String(missingCoversCount)} />
+        <AdminMetric label="Tổng số bài viết" value={posts.length} />
+        <AdminMetric label="Đã xuất bản" value={publishedCount} />
+        <AdminMetric label="Bản nháp" value={draftCount} />
+        <AdminMetric label="Thiếu ảnh bìa" value={missingCoversCount} />
       </div>
 
       <BlogTable posts={posts} />

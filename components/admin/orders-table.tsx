@@ -121,7 +121,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                 <TableHead>Cổng thanh toán</TableHead>
                 <TableHead>Trạng thái</TableHead>
                 <TableHead>Tổng tiền</TableHead>
-                <TableHead className="text-right">Thành động</TableHead>
+                <TableHead className="text-right">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

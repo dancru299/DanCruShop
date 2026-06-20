@@ -12,7 +12,7 @@ import {
   type CouponInput,
 } from "@/actions/coupon.actions";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -55,6 +55,12 @@ function toLocalInput(iso: string) {
   return local.toISOString().slice(0, 16);
 }
 
+type CouponFormErrors = {
+  code?: string;
+  percentValue?: string;
+  amountValue?: string;
+};
+
 export function CouponForm({ mode, coupon }: CouponFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -95,14 +101,32 @@ export function CouponForm({ mode, coupon }: CouponFormProps) {
     coupon?.expires_at ? toLocalInput(coupon.expires_at) : ""
   );
   const [isActive, setIsActive] = useState(coupon?.is_active ?? true);
+  const [errors, setErrors] = useState<CouponFormErrors>({});
+
+  function validate() {
+    const nextErrors: CouponFormErrors = {};
+
+    if (!code.trim()) {
+      nextErrors.code = "Vui lòng nhập mã giảm giá.";
+    }
+
+    if (discountType === "percent") {
+      const pct = Number(percentValue);
+      if (!Number.isFinite(pct) || pct < 1 || pct > 100) {
+        nextErrors.percentValue = "Phần trăm phải từ 1 đến 100.";
+      }
+    } else if (!amountValue.trim() || Number(amountValue) <= 0) {
+      nextErrors.amountValue = "Vui lòng nhập số tiền giảm.";
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!code.trim()) {
-      toast.error("Nhập mã giảm giá.");
-      return;
-    }
+    if (!validate()) return;
 
     const payload: CouponInput = {
       code: code.trim(),
@@ -156,7 +180,7 @@ export function CouponForm({ mode, coupon }: CouponFormProps) {
       </div>
 
       <section className="flex max-w-2xl flex-col gap-4 rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
-        <Field>
+        <Field data-invalid={Boolean(errors.code)}>
           <FieldLabel htmlFor="coupon-code">Mã</FieldLabel>
           <Input
             id="coupon-code"
@@ -164,8 +188,10 @@ export function CouponForm({ mode, coupon }: CouponFormProps) {
             onChange={(event) => setCode(event.target.value.toUpperCase())}
             placeholder="LAUNCH20"
             className="uppercase"
+            aria-invalid={Boolean(errors.code)}
             disabled={isPending}
           />
+          <FieldError>{errors.code}</FieldError>
         </Field>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -205,7 +231,7 @@ export function CouponForm({ mode, coupon }: CouponFormProps) {
         </div>
 
         {discountType === "percent" ? (
-          <Field>
+          <Field data-invalid={Boolean(errors.percentValue)}>
             <FieldLabel htmlFor="percent-value">Phần trăm giảm</FieldLabel>
             <Input
               id="percent-value"
@@ -214,12 +240,14 @@ export function CouponForm({ mode, coupon }: CouponFormProps) {
               max="100"
               value={percentValue}
               onChange={(event) => setPercentValue(event.target.value)}
+              aria-invalid={Boolean(errors.percentValue)}
               disabled={isPending}
             />
             <FieldDescription>Từ 1 đến 100.</FieldDescription>
+            <FieldError>{errors.percentValue}</FieldError>
           </Field>
         ) : (
-          <Field>
+          <Field data-invalid={Boolean(errors.amountValue)}>
             <FieldLabel htmlFor="amount-value">
               Số tiền giảm ({currency})
             </FieldLabel>
@@ -230,8 +258,10 @@ export function CouponForm({ mode, coupon }: CouponFormProps) {
               step={currency === "VND" ? "1" : "0.01"}
               value={amountValue}
               onChange={(event) => setAmountValue(event.target.value)}
+              aria-invalid={Boolean(errors.amountValue)}
               disabled={isPending}
             />
+            <FieldError>{errors.amountValue}</FieldError>
           </Field>
         )}
 

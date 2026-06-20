@@ -16,14 +16,14 @@ export default async function AdminLicensesPage() {
     <div className="flex flex-col gap-6">
       <AdminPageHeader
         eyebrow="Bảo mật"
-        title="Licenses"
+        title="License key"
         description="Key kích hoạt tự sinh cho sản phẩm bật “Yêu cầu license key”. Thu hồi key sẽ vô hiệu nó ngay."
       />
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <AdminMetric label="Tổng key" value={licenses.length} />
-        <AdminMetric label="Active" value={activeCount} />
-        <AdminMetric label="Revoked" value={revokedCount} />
+        <AdminMetric label="Đang hoạt động" value={activeCount} />
+        <AdminMetric label="Đã thu hồi" value={revokedCount} />
       </div>
 
       <LicenseTable licenses={licenses} />

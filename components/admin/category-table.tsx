@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { EmptyState } from "@/components/shared/empty-state";
 import type { AdminCategory } from "@/lib/supabase/queries/categories";
 
 type CategoryTableProps = {
@@ -65,7 +66,7 @@ export function CategoryTable({ categories }: CategoryTableProps) {
   function handleDelete(category: AdminCategory) {
     if (
       !window.confirm(
-        `Xóa category "${category.name}"? Sản phẩm sẽ bị gỡ khỏi category này.`
+        `Xóa danh mục "${category.name}"? Sản phẩm sẽ bị gỡ khỏi danh mục này.`
       )
     ) {
       return;
@@ -79,7 +80,7 @@ export function CategoryTable({ categories }: CategoryTableProps) {
         return;
       }
 
-      toast.success("Đã xóa category.");
+      toast.success("Đã xóa danh mục.");
       router.refresh();
     });
   }
@@ -89,16 +90,16 @@ export function CategoryTable({ categories }: CategoryTableProps) {
       <AdminSearchInput
         value={query}
         onChange={setQuery}
-        placeholder="Tìm category theo tên hoặc slug..."
+        placeholder="Tìm danh mục theo tên hoặc slug..."
       />
 
       <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
         <div className="flex flex-col gap-1 border-b p-5">
           <h2 className="text-base font-semibold tracking-normal">
-            Tất cả category
+            Tất cả danh mục
           </h2>
           <p className="text-sm leading-6 text-muted-foreground">
-            {filtered.length}/{categories.length} category đang hiển thị.
+            {filtered.length}/{categories.length} danh mục đang hiển thị.
           </p>
         </div>
 
@@ -106,7 +107,7 @@ export function CategoryTable({ categories }: CategoryTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Category</TableHead>
+                <TableHead>Danh mục</TableHead>
                 <TableHead>Sản phẩm</TableHead>
                 <TableHead className="text-right">Thao tác</TableHead>
               </TableRow>
@@ -176,18 +177,20 @@ export function CategoryTable({ categories }: CategoryTableProps) {
             </TableBody>
           </Table>
         ) : (
-          <div className="flex min-h-56 flex-col items-center justify-center gap-3 p-8 text-center">
-            <div className="flex size-12 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
-              <TagIcon aria-hidden="true" className="size-5" />
-            </div>
-            <p className="text-sm font-medium">
-              {categories.length === 0
-                ? "Chưa có category"
-                : "Không tìm thấy category khớp tìm kiếm"}
-            </p>
-            <p className="max-w-sm text-sm leading-6 text-muted-foreground">
-              Tạo category để khách lọc sản phẩm theo chủ đề.
-            </p>
+          <div className="p-6">
+            <EmptyState
+              icon={TagIcon}
+              title={
+                categories.length === 0
+                  ? "Chưa có danh mục"
+                  : "Không tìm thấy danh mục khớp tìm kiếm"
+              }
+              description={
+                categories.length === 0
+                  ? "Tạo danh mục để khách lọc sản phẩm theo chủ đề."
+                  : "Vui lòng thử tìm kiếm bằng từ khóa khác."
+              }
+            />
           </div>
         )}
       </div>
