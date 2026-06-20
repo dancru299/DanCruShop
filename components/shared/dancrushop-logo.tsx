@@ -9,6 +9,10 @@ export function DanCruShopMark({
   ...props
 }: DanCruShopMarkProps) {
   return (
+    // Static, fixed-size brand mark. next/image optimization adds no value for a
+    // tiny inline icon and would change the HTMLImageElement prop contract this
+    // component spreads onto callers.
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src="/logo_cyberwing_mark.png"
       alt="DanCruShop Logo Mark"

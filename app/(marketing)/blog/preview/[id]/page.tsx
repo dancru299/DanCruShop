@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isValidElement, type ReactNode } from "react";
-import ReactMarkdown from "react-markdown";
 import { MdxContent } from "@/components/blog/mdx-content";
 import {
   ArrowLeftIcon,

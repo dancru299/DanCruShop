@@ -25,7 +25,7 @@ export default function RefundNotificationEmail({
         <Container style={container}>
           <Heading style={heading}>Your order has been refunded</Heading>
           <Text style={text}>
-            We've processed a refund for your recent DanCruShop purchase. Access
+            We&apos;ve processed a refund for your recent DanCruShop purchase. Access
             to the associated products has been removed from your account.
           </Text>
           <Text style={text}>

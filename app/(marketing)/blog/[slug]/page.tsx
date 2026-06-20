@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isValidElement, type ReactNode } from "react";
-import ReactMarkdown from "react-markdown";
 import { MdxContent } from "@/components/blog/mdx-content";
 import {
   ArrowLeftIcon,
@@ -287,7 +286,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   <SparklesIcon aria-hidden="true" className="size-5" />
                 </div>
                 <div className="grid gap-1">
-                  <p className="text-sm font-semibold">A builder's perspective</p>
+                  <p className="text-sm font-semibold">A builder&apos;s perspective</p>
                   <p className="text-sm leading-6 text-muted-foreground">
                     Notes, tactics, and product thinking for building a sharper storefront.
                   </p>

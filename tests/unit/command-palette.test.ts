@@ -10,7 +10,11 @@ function makeContext(
   overrides: Partial<PaletteActionContext> = {}
 ): PaletteActionContext {
   return {
-    router: { push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() } as any,
+    router: {
+      push: vi.fn(),
+      refresh: vi.fn(),
+      prefetch: vi.fn(),
+    } as unknown as PaletteActionContext["router"],
     setTheme: vi.fn(),
     theme: "light",
     closePalette: vi.fn(),

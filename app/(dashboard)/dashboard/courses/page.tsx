@@ -48,7 +48,7 @@ export default async function CoursesPage() {
         <p className="text-sm text-muted-foreground">DanCruShop dashboard</p>
         <h1 className="text-3xl font-semibold tracking-normal">My Courses</h1>
         <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-          The courses you've purchased. Pick up right where you left off.
+          The courses you&apos;ve purchased. Pick up right where you left off.
         </p>
       </div>
 

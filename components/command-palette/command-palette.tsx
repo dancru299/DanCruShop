@@ -1,7 +1,6 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
-import { useEffect, useRef, useMemo, useState, useCallback } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Command } from "cmdk";
@@ -79,23 +78,37 @@ export function CommandPalette() {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   // ── Auth check — lightweight: check Supabase session via getUser() on open ─
-  const checkAuth = useCallback(async () => {
-    try {
-      // Dynamically import to avoid bundling into every page
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      const { data } = await supabase.auth.getUser();
-      setIsAuthenticated(!!data.user);
-    } catch {
-      setIsAuthenticated(false);
-    }
-  }, []);
-
+  // The state update runs only after the async getUser() resolves (never
+  // synchronously inside the effect) and is guarded so it can't fire after the
+  // palette has closed or unmounted.
   useEffect(() => {
-    if (open) {
-      checkAuth();
+    if (!open) {
+      return;
     }
-  }, [open, checkAuth]);
+
+    let active = true;
+
+    void (async () => {
+      try {
+        // Dynamically import to avoid bundling into every page
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const { data } = await supabase.auth.getUser();
+
+        if (active) {
+          setIsAuthenticated(!!data.user);
+        }
+      } catch {
+        if (active) {
+          setIsAuthenticated(false);
+        }
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [open]);
 
   // ── Analytics ───────────────────────────────────────────────────
   useEffect(() => {
