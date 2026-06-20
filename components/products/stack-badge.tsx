@@ -11,7 +11,7 @@ const badgeStyles = (percent: number) => {
     return {
       label: "100% Match",
       className:
-        "border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+        "border-emerald-500/35 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
       showIcon: true,
     };
   }
@@ -20,7 +20,7 @@ const badgeStyles = (percent: number) => {
     return {
       label: `${percent}% Match`,
       className:
-        "border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-400",
+        "border-amber-500/35 bg-amber-500/15 text-amber-600 dark:text-amber-400",
       showIcon: false,
     };
   }
@@ -29,7 +29,7 @@ const badgeStyles = (percent: number) => {
     return {
       label: `${percent}% Match`,
       className:
-        "border-muted-foreground/30 bg-muted/60 text-muted-foreground",
+        "border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400",
       showIcon: false,
     };
   }
@@ -37,7 +37,7 @@ const badgeStyles = (percent: number) => {
   return {
     label: "Near match",
     className:
-      "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
+      "border-border bg-muted/40 text-foreground/70 dark:text-foreground/50",
     showIcon: false,
   };
 };

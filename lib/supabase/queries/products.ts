@@ -273,7 +273,7 @@ export async function getAdminProducts(): Promise<AdminProductListItem[]> {
 export type SearchProductsParams = {
   query?: string;
   category?: string;
-  type?: ProductType;
+  type?: string;
   page?: number;
   perPage?: number;
 };
@@ -329,17 +329,20 @@ export async function searchPublishedProducts(
     let categoryProductIds: string[] | null = null;
 
     if (category) {
-      const { data: categoryMap } = await supabase
-        .from("product_category_map")
-        .select("product_id, product_categories!inner ( slug )")
-        .eq("product_categories.slug", category);
+      const categoriesList = category.split(",").map((c) => c.trim()).filter(Boolean);
+      if (categoriesList.length > 0) {
+        const { data: categoryMap } = await supabase
+          .from("product_category_map")
+          .select("product_id, product_categories!inner ( slug )")
+          .in("product_categories.slug", categoriesList);
 
-      categoryProductIds = (categoryMap ?? []).map(
-        (row: { product_id: string }) => row.product_id
-      );
+        categoryProductIds = (categoryMap ?? []).map(
+          (row: { product_id: string }) => row.product_id
+        );
 
-      if (categoryProductIds.length === 0) {
-        return defaultResult;
+        if (categoryProductIds.length === 0) {
+          return defaultResult;
+        }
       }
     }
 
@@ -355,7 +358,10 @@ export async function searchPublishedProducts(
     }
 
     if (type) {
-      dbQuery = dbQuery.eq("product_type", type);
+      const typesList = type.split(",").map((t) => t.trim()).filter(Boolean);
+      if (typesList.length > 0) {
+        dbQuery = dbQuery.in("product_type", typesList);
+      }
     }
 
     if (categoryProductIds !== null) {

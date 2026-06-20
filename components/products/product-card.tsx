@@ -34,6 +34,7 @@ import { TiltSpotlight } from "@/components/ui/tilt-spotlight";
 type ProductCardProps = {
   product: PublishedProduct;
   matchPercent?: number;
+  layout?: "grid" | "list";
 };
 
 const productTypeVisuals: Record<
@@ -149,120 +150,242 @@ export function ProductArtwork({
   );
 }
 
-export function ProductCard({ product, matchPercent }: ProductCardProps) {
+export function ProductCard({ product, matchPercent, layout = "grid" }: ProductCardProps) {
   const visual = productTypeVisuals[product.product_type];
   const TypeIcon = visual.Icon;
   const discount = getProductDiscount(product);
 
   const isPerfectMatch = matchPercent === 100;
+  const isList = layout === "list";
+
+  if (isList) {
+    return (
+      <TiltSpotlight
+        className={cn(
+          "group/product-card backdrop-blur-xl",
+          isPerfectMatch &&
+            "ring-2 ring-emerald-500/70 shadow-[0_0_22px_rgba(16,185,129,0.45)]"
+        )}
+      >
+        <div className="flex flex-col sm:flex-row gap-4 p-3 h-full w-full">
+          {/* Left Side: Image */}
+          <div className="relative aspect-[4/3] sm:aspect-video w-full sm:w-52 md:w-60 shrink-0 overflow-hidden bg-muted rounded-lg">
+            {product.thumbnail_url ? (
+              <img
+                src={product.thumbnail_url}
+                alt={product.title}
+                className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover/product-card:scale-105"
+              />
+            ) : (
+              <ProductArtwork product={product} />
+            )}
+
+            {/* bottom vignette */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/30 to-transparent" />
+
+            {/* match badge */}
+            {matchPercent != null ? (
+              <div className="absolute left-2.5 top-2.5 z-20">
+                <StackBadge matchPercent={matchPercent} />
+              </div>
+            ) : null}
+
+            {/* status badge */}
+            {matchPercent == null && product.is_free ? (
+              <span className="absolute left-2.5 top-2.5 z-20 inline-flex items-center rounded-full bg-emerald-500/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
+                Free
+              </span>
+            ) : matchPercent == null && discount ? (
+              <span className="absolute left-2.5 top-2.5 z-20 inline-flex items-center rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                -{discount.percent}%
+              </span>
+            ) : null}
+
+            {/* wishlist + compare */}
+            <div className="absolute right-2 top-2 z-30 flex items-center gap-1">
+              <CompareButton product={getCompareProduct(product)} />
+              <FavoriteButton
+                productId={product.id}
+                productTitle={product.title}
+              />
+            </div>
+          </div>
+
+          {/* Right Side: Content */}
+          <div className="flex flex-1 flex-col justify-between gap-3 py-1">
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between gap-4">
+                <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                  <TypeIcon aria-hidden="true" className="size-3" />
+                  {productTypeLabels[product.product_type]}
+                </span>
+              </div>
+
+              <Link
+                href={`/products/${product.slug}`}
+                className="focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
+                <h3 className="text-base font-semibold leading-5 tracking-normal transition-colors hover:text-foreground/80">
+                  {product.title}
+                </h3>
+              </Link>
+
+              {product.short_description && (
+                <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5 leading-relaxed">
+                  {product.short_description}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between gap-4 pt-1 mt-auto">
+              <div className="flex min-w-0 flex-col leading-tight">
+                {discount ? (
+                  <span className="text-[10px] text-muted-foreground line-through">
+                    {discount.originalLabel}
+                  </span>
+                ) : null}
+                <span className="text-lg font-bold tracking-tight text-primary">
+                  {formatProductPrice(product)}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/products/${product.slug}`}
+                  aria-label={`View ${product.title}`}
+                  className={cn(
+                    buttonVariants({ size: "sm", variant: "outline" }),
+                    "h-8 rounded-full px-3 text-[11px] font-medium"
+                  )}
+                >
+                  <EyeIcon aria-hidden="true" className="size-3.5 mr-1" />
+                  View
+                </Link>
+                <AddToCartButton
+                  product={getCartProduct(product)}
+                  size="sm"
+                  variant="default"
+                  className="h-8 rounded-full px-4 text-[11px] font-semibold"
+                >
+                  Add
+                </AddToCartButton>
+              </div>
+            </div>
+          </div>
+        </div>
+      </TiltSpotlight>
+    );
+  }
 
   return (
     <TiltSpotlight
       className={cn(
-        "group/product-card flex h-full flex-col backdrop-blur-xl",
+        "group/product-card backdrop-blur-xl",
         isPerfectMatch &&
           "ring-2 ring-emerald-500/70 shadow-[0_0_22px_rgba(16,185,129,0.45)]"
       )}
     >
-      {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        {product.thumbnail_url ? (
-          <img
-            src={product.thumbnail_url}
-            alt={product.title}
-            className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover/product-card:scale-105"
-          />
-        ) : (
-          <ProductArtwork product={product} />
-        )}
+      <div className="flex h-full flex-col">
+        {/* Image */}
+        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+          {product.thumbnail_url ? (
+            <img
+              src={product.thumbnail_url}
+              alt={product.title}
+              className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover/product-card:scale-105"
+            />
+          ) : (
+            <ProductArtwork product={product} />
+          )}
 
-        {/* bottom vignette for depth */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/45 to-transparent" />
+          {/* bottom vignette for depth */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/45 to-transparent" />
 
-        {/* match badge (top-left): stack match indicator */}
-        {matchPercent != null ? (
-          <div className="absolute left-2.5 top-2.5 z-20">
-            <StackBadge matchPercent={matchPercent} />
+          {/* match badge (top-left): stack match indicator */}
+          {matchPercent != null ? (
+            <div className="absolute left-2.5 top-2.5 z-20">
+              <StackBadge matchPercent={matchPercent} />
+            </div>
+          ) : null}
+
+          {/* status badge (top-left): free takes precedence over discount */}
+          {matchPercent == null && product.is_free ? (
+            <span className="absolute left-2.5 top-2.5 z-20 inline-flex items-center rounded-full bg-emerald-500/90 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm backdrop-blur">
+              Free
+            </span>
+          ) : matchPercent == null && discount ? (
+            <span className="absolute left-2.5 top-2.5 z-20 inline-flex items-center rounded-full bg-rose-500 px-2 py-0.5 text-[11px] font-bold text-white shadow-sm">
+              -{discount.percent}%
+            </span>
+          ) : null}
+
+          {/* wishlist + compare (top-right) */}
+          <div className="absolute right-2.5 top-2.5 z-30 flex items-center gap-1.5">
+            <CompareButton product={getCompareProduct(product)} />
+            <FavoriteButton
+              productId={product.id}
+              productTitle={product.title}
+            />
           </div>
-        ) : null}
 
-        {/* status badge (top-left): free takes precedence over discount */}
-        {matchPercent == null && product.is_free ? (
-          <span className="absolute left-2.5 top-2.5 z-20 inline-flex items-center rounded-full bg-emerald-500/90 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm backdrop-blur">
-            Free
-          </span>
-        ) : matchPercent == null && discount ? (
-          <span className="absolute left-2.5 top-2.5 z-20 inline-flex items-center rounded-full bg-rose-500 px-2 py-0.5 text-[11px] font-bold text-white shadow-sm">
-            -{discount.percent}%
-          </span>
-        ) : null}
-
-        {/* wishlist + compare (top-right) */}
-        <div className="absolute right-2.5 top-2.5 z-30 flex items-center gap-1.5">
-          <CompareButton product={getCompareProduct(product)} />
-          <FavoriteButton
-            productId={product.id}
-            productTitle={product.title}
-          />
+          {/* hover overlay: View + Add */}
+          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center gap-2 bg-black/45 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover/product-card:pointer-events-auto group-hover/product-card:opacity-100">
+            <Link
+              href={`/products/${product.slug}`}
+              aria-label={`View ${product.title}`}
+              className={cn(
+                buttonVariants({ size: "sm", variant: "secondary" }),
+                "h-8 min-w-20 rounded-full bg-white/95 px-4 text-neutral-900 shadow-lg hover:bg-white"
+              )}
+            >
+              <EyeIcon aria-hidden="true" data-icon="inline-start" />
+              View
+            </Link>
+            <div className="relative z-10">
+              <AddToCartButton
+                product={getCartProduct(product)}
+                size="sm"
+                variant="default"
+                className="h-8 min-w-20 rounded-full px-4 shadow-lg"
+              >
+                Add
+              </AddToCartButton>
+            </div>
+          </div>
         </div>
 
-        {/* hover overlay: View + Add */}
-        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center gap-2 bg-black/45 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover/product-card:pointer-events-auto group-hover/product-card:opacity-100">
+        {/* Body — compact: type tag, title, price */}
+        <div className="flex flex-1 flex-col gap-2 p-3">
+          <span className="inline-flex w-fit items-center gap-1 rounded-full border border-border/70 bg-muted/40 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+            <TypeIcon aria-hidden="true" className="size-3" />
+            {productTypeLabels[product.product_type]}
+          </span>
+
           <Link
             href={`/products/${product.slug}`}
-            aria-label={`View ${product.title}`}
-            className={cn(
-              buttonVariants({ size: "sm", variant: "secondary" }),
-              "h-8 min-w-20 rounded-full bg-white/95 px-4 text-neutral-900 shadow-lg hover:bg-white"
-            )}
+            className="focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
           >
-            <EyeIcon aria-hidden="true" data-icon="inline-start" />
-            View
+            <h3 className="line-clamp-2 min-h-10 text-sm font-semibold leading-5 tracking-normal transition-colors group-hover/product-card:text-foreground/80">
+              {product.title}
+            </h3>
           </Link>
-          <div className="relative z-10">
-            <AddToCartButton
-              product={getCartProduct(product)}
-              size="sm"
-              variant="default"
-              className="h-8 min-w-20 rounded-full px-4 shadow-lg"
-            >
-              Add
-            </AddToCartButton>
-          </div>
-        </div>
-      </div>
 
-      {/* Body — compact: type tag, title, price */}
-      <div className="flex flex-1 flex-col gap-2 p-3">
-        <span className="inline-flex w-fit items-center gap-1 rounded-full border border-border/70 bg-muted/40 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-          <TypeIcon aria-hidden="true" className="size-3" />
-          {productTypeLabels[product.product_type]}
-        </span>
-
-        <Link
-          href={`/products/${product.slug}`}
-          className="focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          <h3 className="line-clamp-2 min-h-10 text-sm font-semibold leading-5 tracking-normal transition-colors group-hover/product-card:text-foreground/80">
-            {product.title}
-          </h3>
-        </Link>
-
-        <div className="mt-auto flex items-end justify-between gap-2 pt-1">
-          <div className="flex min-w-0 flex-col leading-tight">
-            {discount ? (
-              <span className="text-xs text-muted-foreground line-through">
-                {discount.originalLabel}
+          <div className="mt-auto flex items-end justify-between gap-2 pt-1">
+            <div className="flex min-w-0 flex-col leading-tight">
+              {discount ? (
+                <span className="text-xs text-muted-foreground line-through">
+                  {discount.originalLabel}
+                </span>
+              ) : null}
+              <span className="text-base font-bold tracking-tight text-primary">
+                {formatProductPrice(product)}
               </span>
-            ) : null}
-            <span className="text-base font-bold tracking-tight text-primary">
-              {formatProductPrice(product)}
-            </span>
+            </div>
+            <ArrowUpRightIcon
+              aria-hidden="true"
+              className="mb-0.5 shrink-0 text-muted-foreground transition-[color,transform] duration-300 group-hover/product-card:-translate-y-0.5 group-hover/product-card:translate-x-0.5 group-hover/product-card:text-foreground"
+            />
           </div>
-          <ArrowUpRightIcon
-            aria-hidden="true"
-            className="mb-0.5 shrink-0 text-muted-foreground transition-[color,transform] duration-300 group-hover/product-card:-translate-y-0.5 group-hover/product-card:translate-x-0.5 group-hover/product-card:text-foreground"
-          />
         </div>
       </div>
     </TiltSpotlight>

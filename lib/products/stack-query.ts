@@ -18,12 +18,18 @@ export type StackMatchProduct = PublishedProduct & {
 
 type SearchParams = {
   selectedTechs: string[];
+  category?: string;
+  type?: string;
+  query?: string;
   page?: number;
   perPage?: number;
 };
 
 export async function searchByStack({
   selectedTechs,
+  category,
+  type,
+  query,
   page = 1,
   perPage = 12,
 }: SearchParams) {
@@ -34,11 +40,27 @@ export async function searchByStack({
   const supabase = await createClient();
   const selectedSet = new Set(selectedTechs.map((t) => t.toLowerCase()));
 
+  // 1. Fetch matching product IDs if category filter is active
+  let categoryProductIdsSet: Set<string> | null = null;
+  if (category) {
+    const categoriesList = category.split(",").map((c) => c.trim()).filter(Boolean);
+    if (categoriesList.length > 0) {
+      const { data: categoryMap } = await supabase
+        .from("product_category_map")
+        .select("product_id, product_categories!inner ( slug )")
+        .in("product_categories.slug", categoriesList);
+
+      categoryProductIdsSet = new Set(
+        (categoryMap ?? []).map((row: { product_id: string }) => row.product_id)
+      );
+
+      if (categoryProductIdsSet.size === 0) {
+        return { products: [], total: 0, totalPages: 0 };
+      }
+    }
+  }
+
   // Fetch all published products with non-empty tech_stack metadata.
-  // Supabase doesn't support array-overlap filtering on nested jsonb arrays
-  // through the JS client in a single query with scoring, so we fetch
-  // candidates with metadata and score in-memory. For a small catalog
-  // (< 500 products) this is fast and reliable.
   const { data, error } = await supabase
     .from("products")
     .select(
@@ -68,6 +90,29 @@ export async function searchByStack({
   const scored: StackMatchProduct[] = [];
 
   for (const row of data) {
+    // Filter by category map
+    if (categoryProductIdsSet && !categoryProductIdsSet.has(String(row.id))) {
+      continue;
+    }
+
+    // Filter by product type
+    if (type) {
+      const typesList = type.split(",").map((t) => t.trim()).filter(Boolean);
+      if (typesList.length > 0 && !typesList.includes(row.product_type)) {
+        continue;
+      }
+    }
+
+    // Filter by text search query
+    if (query && query.trim()) {
+      const qLower = query.toLowerCase().trim();
+      const titleMatch = String(row.title).toLowerCase().includes(qLower);
+      const descMatch = String(row.short_description || "").toLowerCase().includes(qLower);
+      if (!titleMatch && !descMatch) {
+        continue;
+      }
+    }
+
     const metadata = (row.metadata ?? {}) as ProductMetadata;
     const productTechStack = getProductTechSlugs(metadata);
 
