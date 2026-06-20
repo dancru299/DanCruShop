@@ -11,6 +11,7 @@ import {
   PackageIcon,
   ReceiptTextIcon,
   SettingsIcon,
+  SlidersHorizontalIcon,
   StoreIcon,
   TagIcon,
   TicketPercentIcon,
@@ -70,6 +71,11 @@ const adminNavItems = [
     href: "/admin/users",
     icon: UsersIcon,
     label: "Customers",
+  },
+  {
+    href: "/admin/specs",
+    icon: SlidersHorizontalIcon,
+    label: "Thông số kỹ thuật",
   },
   {
     href: "/admin/settings",

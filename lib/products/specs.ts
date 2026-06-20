@@ -371,3 +371,64 @@ export function validateTechSlugs(raw: string[]): string[] {
     )
   ).sort();
 }
+
+// ─── DB-backed fetch (primary source, hardcoded data as fallback) ───
+
+import { cache } from "react";
+import { getAdminSpecGroups as fetchAdminSpecGroups, getPublicSpecGroups as fetchPublicSpecGroups } from "@/lib/supabase/queries/specs";
+import type { SpecGroupRow, SpecFieldRow, SpecOptionRow } from "@/lib/supabase/queries/specs";
+
+function mapOption(row: SpecOptionRow): SpecOption {
+  return {
+    value: row.value,
+    label: row.label,
+    labelEn: row.label_en ?? undefined,
+    className: row.class_name ?? undefined,
+    logo: row.logo ?? undefined,
+  };
+}
+
+function mapField(row: SpecFieldRow): SpecField {
+  return {
+    key: row.key,
+    label: row.label,
+    labelEn: row.label_en,
+    type: row.type,
+    hint: row.hint ?? undefined,
+    options: (row.options ?? []).map(mapOption),
+  };
+}
+
+function mapGroup(row: SpecGroupRow): SpecGroup {
+  return {
+    id: row.id,
+    label: row.label,
+    labelEn: row.label_en,
+    kind: row.kind,
+    fields: (row.fields ?? []).map(mapField),
+  };
+}
+
+function mapGroups(rows: SpecGroupRow[]): SpecGroup[] {
+  return rows.map(mapGroup);
+}
+
+export const getSpecGroupsFromDB = cache(async (): Promise<SpecGroup[]> => {
+  try {
+    const groups = await fetchPublicSpecGroups();
+    if (groups.length > 0) return mapGroups(groups);
+  } catch (e) {
+    console.warn("Failed to fetch specs from DB, using fallback", e);
+  }
+  return SPEC_GROUPS;
+});
+
+export const getAdminSpecGroupsFromDB = cache(async (): Promise<SpecGroup[]> => {
+  try {
+    const groups = await fetchAdminSpecGroups();
+    if (groups.length > 0) return mapGroups(groups);
+  } catch (e) {
+    console.warn("Failed to fetch admin specs from DB, using fallback", e);
+  }
+  return SPEC_GROUPS;
+});
