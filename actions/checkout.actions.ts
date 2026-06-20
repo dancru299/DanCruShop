@@ -285,7 +285,8 @@ async function createVietQrCartOrder(
     .single();
 
   if (orderError) {
-    throw new Error(`Could not create VietQR cart order: ${orderError.message}`);
+    console.error("Failed to create VietQR cart order", orderError);
+    throw new Error("Couldn't start checkout. Please try again.");
   }
 
   const orderId = String(order.id);
@@ -304,7 +305,8 @@ async function createVietQrCartOrder(
       .update({ status: "failed" })
       .eq("id", orderId);
 
-    throw new Error(`Could not create VietQR cart items: ${itemError.message}`);
+    console.error("Failed to create VietQR cart items", itemError);
+    throw new Error("Couldn't start checkout. Please try again.");
   }
 
   await unlockFreeProducts(
@@ -644,7 +646,8 @@ export async function createVietQrOrder(productId: string) {
       .single();
 
     if (orderError) {
-      throw new Error(`Could not create VietQR order: ${orderError.message}`);
+      console.error("Failed to create VietQR order", orderError);
+      throw new Error("Couldn't start checkout. Please try again.");
     }
 
     orderId = String(order.id);
@@ -662,7 +665,8 @@ export async function createVietQrOrder(productId: string) {
         .update({ status: "failed" })
         .eq("id", orderId);
 
-      throw new Error(`Could not create VietQR order item: ${itemError.message}`);
+      console.error("Failed to create VietQR order item", itemError);
+      throw new Error("Couldn't start checkout. Please try again.");
     }
 
     await recordAnalyticsEvent({

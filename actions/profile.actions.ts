@@ -194,7 +194,7 @@ export async function uploadProfileAvatar(
       console.error("Failed to upload profile avatar", uploadError);
 
       return {
-        error: uploadError.message,
+        error: "Couldn't upload your photo. Please try again.",
         ok: false,
       };
     }

@@ -58,7 +58,7 @@ async function updateReviewStatus(
   } catch (error) {
     console.error("Failed to update review status", error);
     return {
-      error: error instanceof Error ? error.message : "Could not update review.",
+      error: "Không thể cập nhật đánh giá.",
       success: null,
     };
   }

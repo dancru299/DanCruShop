@@ -38,7 +38,7 @@ export async function updateHomeLayout(
 
     if (error) {
       console.error("Failed to update home layout", error);
-      return { ok: false, error: error.message };
+      return { ok: false, error: "Không thể cập nhật bố cục trang chủ. Vui lòng thử lại." };
     }
 
     revalidatePath("/");

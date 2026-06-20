@@ -302,7 +302,8 @@ async function syncProductCategories(
     .eq("product_id", productId);
 
   if (deleteError) {
-    throw new Error(`Could not update categories: ${deleteError.message}`);
+    console.error("Failed to clear product categories", deleteError);
+    throw new Error("Không thể cập nhật danh mục sản phẩm. Vui lòng thử lại.");
   }
 
   if (uniqueIds.length === 0) {
@@ -319,7 +320,8 @@ async function syncProductCategories(
     );
 
   if (insertError) {
-    throw new Error(`Could not attach categories: ${insertError.message}`);
+    console.error("Failed to attach product categories", insertError);
+    throw new Error("Không thể gắn danh mục cho sản phẩm. Vui lòng thử lại.");
   }
 }
 
@@ -349,7 +351,7 @@ export async function createProduct(
 
     if (error) {
       console.error("Failed to create product", error);
-      return { ok: false, error: error.message };
+      return { ok: false, error: "Không thể tạo sản phẩm. Vui lòng thử lại." };
     }
 
     await syncProductCategories(supabase, String(product.id), data.categoryIds);
@@ -392,7 +394,7 @@ export async function updateProduct(
 
       if (error) {
         console.error("Failed to update product", error);
-        return { ok: false, error: error.message };
+        return { ok: false, error: "Không thể cập nhật sản phẩm. Vui lòng thử lại." };
       }
     }
 

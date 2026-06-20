@@ -49,7 +49,8 @@ async function loadVietQrOrder(orderId: string) {
     .maybeSingle();
 
   if (error) {
-    throw new Error(`Could not load order: ${error.message}`);
+    console.error("Failed to load VietQR order", error);
+    throw new Error("Không thể tải đơn hàng. Vui lòng thử lại.");
   }
 
   if (!data) {
@@ -67,7 +68,8 @@ async function loadOrderProductIds(orderId: string) {
     .eq("order_id", orderId);
 
   if (error) {
-    throw new Error(`Could not load order items: ${error.message}`);
+    console.error("Failed to load order items", error);
+    throw new Error("Không thể tải sản phẩm trong đơn. Vui lòng thử lại.");
   }
 
   const productIds = Array.from(
@@ -91,7 +93,8 @@ async function loadProducts(productIds: string[]) {
     .in("id", productIds);
 
   if (error) {
-    throw new Error(`Could not load products: ${error.message}`);
+    console.error("Failed to load order products", error);
+    throw new Error("Không thể tải sản phẩm. Vui lòng thử lại.");
   }
 
   if (!data || data.length === 0) {
@@ -151,7 +154,8 @@ export async function approveVietQrOrder(
       .single();
 
     if (orderError) {
-      throw new Error(`Could not approve order: ${orderError.message}`);
+      console.error("Failed to approve VietQR order", orderError);
+      throw new Error("Không thể duyệt đơn hàng. Vui lòng thử lại.");
     }
 
     await grantProductAccess(supabaseAdmin, {

@@ -123,7 +123,7 @@ export async function createCoupon(
 
     if (error) {
       console.error("Failed to create coupon", error);
-      return { error: error.message, ok: false };
+      return { error: "Không thể tạo mã giảm giá. Vui lòng thử lại.", ok: false };
     }
 
     revalidateCouponSurfaces();
@@ -159,7 +159,7 @@ export async function updateCoupon(
 
     if (error) {
       console.error("Failed to update coupon", error);
-      return { error: error.message, ok: false };
+      return { error: "Không thể cập nhật mã giảm giá. Vui lòng thử lại.", ok: false };
     }
 
     revalidateCouponSurfaces();
@@ -186,7 +186,7 @@ export async function deleteCoupon(id: string): Promise<CouponDeleteResult> {
 
     if (error) {
       console.error("Failed to delete coupon", error);
-      return { error: error.message, ok: false };
+      return { error: "Không thể xóa mã giảm giá. Vui lòng thử lại.", ok: false };
     }
 
     revalidateCouponSurfaces();

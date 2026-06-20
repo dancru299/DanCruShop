@@ -125,7 +125,7 @@ export async function uploadAdminImage(
 
     if (error) {
       console.error("Failed to upload admin image", error);
-      return { ok: false, error: error.message };
+      return { ok: false, error: "Không thể tải ảnh lên. Vui lòng thử lại." };
     }
 
     const {

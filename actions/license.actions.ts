@@ -40,7 +40,7 @@ export async function setLicenseStatus(
 
     if (error) {
       console.error("Failed to update license status", error);
-      return { error: error.message, ok: false };
+      return { error: "Không thể cập nhật trạng thái license. Vui lòng thử lại.", ok: false };
     }
 
     revalidatePath("/admin/licenses");

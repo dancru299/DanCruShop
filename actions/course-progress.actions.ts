@@ -60,7 +60,7 @@ export async function markLessonComplete(
   } catch (error) {
     console.error("Failed to mark lesson complete", error);
     return {
-      error: error instanceof Error ? error.message : "Could not update progress.",
+      error: "Could not update progress.",
       success: null,
     };
   }
@@ -94,7 +94,7 @@ export async function markLessonIncomplete(
   } catch (error) {
     console.error("Failed to mark lesson incomplete", error);
     return {
-      error: error instanceof Error ? error.message : "Could not update progress.",
+      error: "Could not update progress.",
       success: null,
     };
   }

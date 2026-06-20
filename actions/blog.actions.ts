@@ -190,7 +190,7 @@ export async function createBlogPost(
 
     if (error) {
       console.error("Failed to create blog post", error);
-      return { ok: false, error: error.message };
+      return { ok: false, error: "Không thể tạo bài viết. Vui lòng thử lại." };
     }
 
     revalidateBlogSurfaces(String(payload.slug));
@@ -235,7 +235,7 @@ export async function updateBlogPost(
 
       if (loadError) {
         console.error("Failed to load blog post before publish", loadError);
-        return { ok: false, error: loadError.message };
+        return { ok: false, error: "Không thể tải bài viết. Vui lòng thử lại." };
       }
 
       if (!currentPost?.published_at) {
@@ -254,7 +254,7 @@ export async function updateBlogPost(
 
     if (error) {
       console.error("Failed to update blog post", error);
-      return { ok: false, error: error.message };
+      return { ok: false, error: "Không thể cập nhật bài viết. Vui lòng thử lại." };
     }
 
     revalidateBlogSurfaces(

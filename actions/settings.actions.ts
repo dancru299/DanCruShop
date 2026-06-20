@@ -117,7 +117,7 @@ export async function updateStoreSettings(
 
     if (error) {
       console.error("Failed to update store settings", error);
-      return { error: error.message, ok: false };
+      return { error: "Không thể cập nhật cài đặt. Vui lòng thử lại.", ok: false };
     }
 
     revalidatePath("/admin/settings");

@@ -92,7 +92,7 @@ export async function addProductFile(
 
     if (countError) {
       console.error("Failed to count product files", countError);
-      return { ok: false, error: countError.message };
+      return { ok: false, error: "Không thể tải danh sách tệp. Vui lòng thử lại." };
     }
 
     const { error } = await supabase.from("product_files").insert({
@@ -106,7 +106,7 @@ export async function addProductFile(
 
     if (error) {
       console.error("Failed to add product file record", error);
-      return { ok: false, error: error.message };
+      return { ok: false, error: "Không thể thêm tệp. Vui lòng thử lại." };
     }
 
     revalidateProductFiles(productId);
@@ -136,7 +136,7 @@ export async function deleteProductFile(
 
     if (loadError) {
       console.error("Failed to load product file before delete", loadError);
-      return { ok: false, error: loadError.message };
+      return { ok: false, error: "Không thể tải tệp. Vui lòng thử lại." };
     }
 
     if (!fileRecord) {
@@ -152,7 +152,7 @@ export async function deleteProductFile(
 
     if (storageError) {
       console.error("Failed to delete product file from storage", storageError);
-      return { ok: false, error: storageError.message };
+      return { ok: false, error: "Không thể xóa tệp khỏi kho lưu trữ. Vui lòng thử lại." };
     }
 
     const { error: deleteError } = await supabaseAdmin
@@ -162,7 +162,7 @@ export async function deleteProductFile(
 
     if (deleteError) {
       console.error("Failed to delete product file record", deleteError);
-      return { ok: false, error: deleteError.message };
+      return { ok: false, error: "Không thể xóa tệp. Vui lòng thử lại." };
     }
 
     if (fileRecord.is_primary) {
@@ -176,7 +176,7 @@ export async function deleteProductFile(
 
       if (nextPrimaryError) {
         console.error("Failed to load replacement primary file", nextPrimaryError);
-        return { ok: false, error: nextPrimaryError.message };
+        return { ok: false, error: "Không thể cập nhật tệp chính. Vui lòng thử lại." };
       }
 
       if (nextPrimary) {
@@ -187,7 +187,7 @@ export async function deleteProductFile(
 
         if (updateError) {
           console.error("Failed to promote replacement primary file", updateError);
-          return { ok: false, error: updateError.message };
+          return { ok: false, error: "Không thể cập nhật tệp chính. Vui lòng thử lại." };
         }
       }
     }
@@ -276,7 +276,7 @@ export async function updateProductFileLimit(
 
     if (error) {
       console.error("Failed to update file download limit", error);
-      return { ok: false, error: error.message };
+      return { ok: false, error: "Không thể cập nhật giới hạn tải. Vui lòng thử lại." };
     }
 
     revalidateProductFiles(String(fileRecord.product_id));

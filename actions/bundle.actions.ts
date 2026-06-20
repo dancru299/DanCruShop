@@ -36,7 +36,8 @@ export async function setBundleItems(
       .eq("bundle_product_id", normalizedBundleId);
 
     if (deleteError) {
-      throw new Error(`Could not reset bundle: ${deleteError.message}`);
+      console.error("Failed to reset bundle", deleteError);
+      throw new Error("Không thể đặt lại bundle. Vui lòng thử lại.");
     }
 
     if (uniqueChildIds.length > 0) {
@@ -49,7 +50,8 @@ export async function setBundleItems(
       );
 
       if (insertError) {
-        throw new Error(`Could not save bundle items: ${insertError.message}`);
+        console.error("Failed to save bundle items", insertError);
+        throw new Error("Không thể lưu bundle. Vui lòng thử lại.");
       }
     }
 

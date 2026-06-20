@@ -97,7 +97,7 @@ export async function createCategory(
 
     if (error) {
       console.error("Failed to create category", error);
-      return { error: error.message, ok: false };
+      return { error: "Không thể tạo danh mục. Vui lòng thử lại.", ok: false };
     }
 
     revalidateCategorySurfaces();
@@ -133,7 +133,7 @@ export async function updateCategory(
 
     if (error) {
       console.error("Failed to update category", error);
-      return { error: error.message, ok: false };
+      return { error: "Không thể cập nhật danh mục. Vui lòng thử lại.", ok: false };
     }
 
     revalidateCategorySurfaces();
@@ -166,7 +166,7 @@ export async function moveCategory(
 
     if (error) {
       console.error("Failed to load categories for reorder", error);
-      return { error: error.message, ok: false };
+      return { error: "Không thể tải danh mục. Vui lòng thử lại.", ok: false };
     }
 
     const ordered = (rows ?? []) as { id: string; position: number }[];
@@ -202,7 +202,7 @@ export async function moveCategory(
     if (first.error || second.error) {
       console.error("Failed to reorder categories", first.error ?? second.error);
       return {
-        error: (first.error ?? second.error)?.message ?? "Reorder failed.",
+        error: "Không thể sắp xếp lại danh mục. Vui lòng thử lại.",
         ok: false,
       };
     }
@@ -236,7 +236,7 @@ export async function deleteCategory(
 
     if (error) {
       console.error("Failed to delete category", error);
-      return { error: error.message, ok: false };
+      return { error: "Không thể xóa danh mục. Vui lòng thử lại.", ok: false };
     }
 
     revalidateCategorySurfaces();

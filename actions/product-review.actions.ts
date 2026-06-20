@@ -109,7 +109,7 @@ export async function createProductReview(
     console.error("Failed to create product review", error);
 
     return {
-      error: error instanceof Error ? error.message : "Couldn't submit the review.",
+      error: "Couldn't submit the review.",
       success: null,
     };
   }
@@ -165,7 +165,7 @@ export async function createProductReviewReply(
     console.error("Failed to create product review reply", error);
 
     return {
-      error: error instanceof Error ? error.message : "Couldn't post the reply.",
+      error: "Couldn't post the reply.",
       success: null,
     };
   }
