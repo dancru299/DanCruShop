@@ -65,22 +65,40 @@ ALTER TABLE spec_groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE spec_fields ENABLE ROW LEVEL SECURITY;
 ALTER TABLE spec_options ENABLE ROW LEVEL SECURITY;
 
--- Admin: full access
-CREATE POLICY admin_all_spec_groups ON spec_groups FOR ALL TO authenticated
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
-CREATE POLICY admin_all_spec_fields ON spec_fields FOR ALL TO authenticated
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
-CREATE POLICY admin_all_spec_options ON spec_options FOR ALL TO authenticated
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
-
--- Public: read-only
-CREATE POLICY public_read_spec_groups ON spec_groups FOR SELECT TO anon, authenticated USING (true);
-CREATE POLICY public_read_spec_fields ON spec_fields FOR SELECT TO anon, authenticated USING (true);
-CREATE POLICY public_read_spec_options ON spec_options FOR SELECT TO anon, authenticated USING (true);
+-- Admin: full access (skip if policies already exist)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'admin_all_spec_groups' AND tablename = 'spec_groups') THEN
+    CREATE POLICY admin_all_spec_groups ON spec_groups FOR ALL TO authenticated
+      USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'admin_all_spec_fields' AND tablename = 'spec_fields') THEN
+    CREATE POLICY admin_all_spec_fields ON spec_fields FOR ALL TO authenticated
+      USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'admin_all_spec_options' AND tablename = 'spec_options') THEN
+    CREATE POLICY admin_all_spec_options ON spec_options FOR ALL TO authenticated
+      USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'public_read_spec_groups' AND tablename = 'spec_groups') THEN
+    CREATE POLICY public_read_spec_groups ON spec_groups FOR SELECT TO anon, authenticated USING (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'public_read_spec_fields' AND tablename = 'spec_fields') THEN
+    CREATE POLICY public_read_spec_fields ON spec_fields FOR SELECT TO anon, authenticated USING (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'public_read_spec_options' AND tablename = 'spec_options') THEN
+    CREATE POLICY public_read_spec_options ON spec_options FOR SELECT TO anon, authenticated USING (true);
+  END IF;
+END $$;
 
 -- ============================================================================
--- Seed Data: chuyển từ hardcode trong lib/products/specs.ts
+-- Seed Data: chuyển từ hardcode trong lib/products/specs.ts (idempotent)
 -- ============================================================================
+
+-- Chỉ seed nếu bảng chưa có dữ liệu
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM spec_groups LIMIT 1) THEN
 
 -- Groups
 INSERT INTO spec_groups (id, label, label_en, kind, sort_order) VALUES
@@ -193,3 +211,6 @@ INSERT INTO spec_options (value, label, label_en, class_name, logo, field_id, so
   ('github', 'GitHub Issues', 'GitHub Issues', 'border-foreground/25 bg-foreground/5 text-foreground', NULL, '10000000-0000-0000-0000-000000000011', 3),
   ('telegram', 'Telegram', 'Telegram', 'border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400', NULL, '10000000-0000-0000-0000-000000000011', 4),
   ('zalo', 'Zalo', 'Zalo', 'border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400', NULL, '10000000-0000-0000-0000-000000000011', 5);
+
+  END IF;
+END $$;
