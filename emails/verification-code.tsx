@@ -54,7 +54,7 @@ export default function VerificationCodeEmail({
           </Section>
           <Text style={mutedText}>
             The code is valid for 10 minutes and can be used only once. If you
-            didn't request it, you can ignore this email.
+            didn&apos;t request it, you can ignore this email.
           </Text>
           <Hr style={hr} />
           <Text style={footer}>DanCruShop</Text>
