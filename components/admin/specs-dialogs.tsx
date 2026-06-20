@@ -96,30 +96,33 @@ export function GroupDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80">
-      <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
-        <h3 className="text-lg font-semibold">{group ? "Sửa nhóm" : "Thêm nhóm"}</h3>
-        <form onSubmit={handleSubmit} className="mt-4">
-          <FieldGroup>
-            <Field data-invalid={Boolean(errors.label)}>
-              <FieldLabel htmlFor="g-label">Tên (VI)</FieldLabel>
-              <Input id="g-label" value={label} onChange={(e) => setLabel(e.target.value)} disabled={isPending} />
-              <FieldError>{errors.label}</FieldError>
-            </Field>
-            <Field data-invalid={Boolean(errors.label_en)}>
-              <FieldLabel htmlFor="g-label-en">Tên (EN)</FieldLabel>
-              <Input id="g-label-en" value={labelEn} onChange={(e) => setLabelEn(e.target.value)} disabled={isPending} />
-              <FieldError>{errors.label_en}</FieldError>
-            </Field>
-            <Field>
-              <FieldLabel>Loại</FieldLabel>
-              <NativeSelect value={kind} onChange={(v) => setKind(v as "tech" | "meta")} options={[
-                { value: "tech", label: "Công nghệ (tech)" },
-                { value: "meta", label: "Meta (license, support...)" },
-              ]} />
-            </Field>
-          </FieldGroup>
-          <div className="mt-6 flex justify-end gap-2">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-background/80" onClick={onClose} />
+      <div className="relative w-full max-w-lg rounded-xl border bg-card p-6 shadow-lg max-h-[90dvh] flex flex-col z-10">
+        <h3 className="text-lg font-semibold shrink-0">{group ? "Sửa nhóm" : "Thêm nhóm"}</h3>
+        <form onSubmit={handleSubmit} className="mt-4 flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto pr-1.5 -mr-1.5 py-1">
+            <FieldGroup>
+              <Field data-invalid={Boolean(errors.label)}>
+                <FieldLabel htmlFor="g-label">Tên (VI)</FieldLabel>
+                <Input id="g-label" value={label} onChange={(e) => setLabel(e.target.value)} disabled={isPending} />
+                <FieldError>{errors.label}</FieldError>
+              </Field>
+              <Field data-invalid={Boolean(errors.label_en)}>
+                <FieldLabel htmlFor="g-label-en">Tên (EN)</FieldLabel>
+                <Input id="g-label-en" value={labelEn} onChange={(e) => setLabelEn(e.target.value)} disabled={isPending} />
+                <FieldError>{errors.label_en}</FieldError>
+              </Field>
+              <Field>
+                <FieldLabel>Loại</FieldLabel>
+                <NativeSelect value={kind} onChange={(v) => setKind(v as "tech" | "meta")} options={[
+                  { value: "tech", label: "Công nghệ (tech)" },
+                  { value: "meta", label: "Meta (license, support...)" },
+                ]} />
+              </Field>
+            </FieldGroup>
+          </div>
+          <div className="mt-6 flex justify-end gap-2 shrink-0 pt-4 border-t">
             <Button variant="outline" type="button" onClick={onClose} disabled={isPending}>Hủy</Button>
             <Button type="submit" disabled={isPending}>
               {isPending ? <Loader2Icon className="animate-spin" data-icon="inline-start" /> : <SaveIcon data-icon="inline-start" />}
@@ -191,43 +194,46 @@ export function FieldDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80">
-      <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
-        <h3 className="text-lg font-semibold">{field ? "Sửa field" : "Thêm field"}</h3>
-        <form onSubmit={handleSubmit} className="mt-4">
-          <FieldGroup>
-            <Field data-invalid={Boolean(errors.label)}>
-              <FieldLabel htmlFor="f-label">Tên (VI)</FieldLabel>
-              <Input id="f-label" value={label} onChange={(e) => handleLabelChange(e.target.value)} disabled={isPending} />
-              <FieldError>{errors.label}</FieldError>
-            </Field>
-            <Field data-invalid={Boolean(errors.key)}>
-              <FieldLabel htmlFor="f-key">Key (slug)</FieldLabel>
-              <Input id="f-key" value={key} onChange={(e) => { setKeyTouched(true); setKey(e.target.value); }} disabled={isPending} />
-              <FieldDescription>Tự sinh từ tên. Dùng làm key trong metadata.</FieldDescription>
-              <FieldError>{errors.key}</FieldError>
-            </Field>
-            <Field data-invalid={Boolean(errors.label_en)}>
-              <FieldLabel htmlFor="f-label-en">Tên (EN)</FieldLabel>
-              <Input id="f-label-en" value={labelEn} onChange={(e) => setLabelEn(e.target.value)} disabled={isPending} />
-              <FieldError>{errors.label_en}</FieldError>
-            </Field>
-            <Field>
-              <FieldLabel>Kiểu chọn</FieldLabel>
-              <NativeSelect value={type} onChange={(v) => setType(v as typeof type)} options={[
-                { value: "multi", label: "Nhiều lựa chọn (multi)" },
-                { value: "single", label: "Một lựa chọn (single)" },
-                { value: "boolean", label: "Bật / Tắt (boolean)" },
-              ]} />
-            </Field>
-            {type === "boolean" ? (
-              <Field>
-                <FieldLabel htmlFor="f-hint">Gợi ý</FieldLabel>
-                <Input id="f-hint" value={hint} onChange={(e) => setHint(e.target.value)} placeholder="VD: Người mua nhận update mãi mãi." disabled={isPending} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-background/80" onClick={onClose} />
+      <div className="relative w-full max-w-lg rounded-xl border bg-card p-6 shadow-lg max-h-[90dvh] flex flex-col z-10">
+        <h3 className="text-lg font-semibold shrink-0">{field ? "Sửa field" : "Thêm field"}</h3>
+        <form onSubmit={handleSubmit} className="mt-4 flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto pr-1.5 -mr-1.5 py-1">
+            <FieldGroup>
+              <Field data-invalid={Boolean(errors.label)}>
+                <FieldLabel htmlFor="f-label">Tên (VI)</FieldLabel>
+                <Input id="f-label" value={label} onChange={(e) => handleLabelChange(e.target.value)} disabled={isPending} />
+                <FieldError>{errors.label}</FieldError>
               </Field>
-            ) : null}
-          </FieldGroup>
-          <div className="mt-6 flex justify-end gap-2">
+              <Field data-invalid={Boolean(errors.key)}>
+                <FieldLabel htmlFor="f-key">Key (slug)</FieldLabel>
+                <Input id="f-key" value={key} onChange={(e) => { setKeyTouched(true); setKey(e.target.value); }} disabled={isPending} />
+                <FieldDescription>Tự sinh từ tên. Dùng làm key trong metadata.</FieldDescription>
+                <FieldError>{errors.key}</FieldError>
+              </Field>
+              <Field data-invalid={Boolean(errors.label_en)}>
+                <FieldLabel htmlFor="f-label-en">Tên (EN)</FieldLabel>
+                <Input id="f-label-en" value={labelEn} onChange={(e) => setLabelEn(e.target.value)} disabled={isPending} />
+                <FieldError>{errors.label_en}</FieldError>
+              </Field>
+              <Field>
+                <FieldLabel>Kiểu chọn</FieldLabel>
+                <NativeSelect value={type} onChange={(v) => setType(v as typeof type)} options={[
+                  { value: "multi", label: "Nhiều lựa chọn (multi)" },
+                  { value: "single", label: "Một lựa chọn (single)" },
+                  { value: "boolean", label: "Bật / Tắt (boolean)" },
+                ]} />
+              </Field>
+              {type === "boolean" ? (
+                <Field>
+                  <FieldLabel htmlFor="f-hint">Gợi ý</FieldLabel>
+                  <Input id="f-hint" value={hint} onChange={(e) => setHint(e.target.value)} placeholder="VD: Người mua nhận update mãi mãi." disabled={isPending} />
+                </Field>
+              ) : null}
+            </FieldGroup>
+          </div>
+          <div className="mt-6 flex justify-end gap-2 shrink-0 pt-4 border-t">
             <Button variant="outline" type="button" onClick={onClose} disabled={isPending}>Hủy</Button>
             <Button type="submit" disabled={isPending}>
               {isPending ? <Loader2Icon className="animate-spin" data-icon="inline-start" /> : <SaveIcon data-icon="inline-start" />}
@@ -300,58 +306,61 @@ export function OptionDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80">
-      <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
-        <h3 className="text-lg font-semibold">{option ? "Sửa option" : "Thêm option"}</h3>
-        <form onSubmit={handleSubmit} className="mt-4">
-          <FieldGroup>
-            <Field data-invalid={Boolean(errors.label)}>
-              <FieldLabel htmlFor="o-label">Tên (VI)</FieldLabel>
-              <Input id="o-label" value={label} onChange={(e) => handleLabelChange(e.target.value)} disabled={isPending} />
-              <FieldError>{errors.label}</FieldError>
-            </Field>
-            <Field data-invalid={Boolean(errors.value)}>
-              <FieldLabel htmlFor="o-value">Value (slug)</FieldLabel>
-              <Input id="o-value" value={value} onChange={(e) => { setValueTouched(true); setValue(e.target.value); }} disabled={isPending} />
-              <FieldDescription>Tự sinh từ tên. Dùng làm key trong metadata.</FieldDescription>
-              <FieldError>{errors.value}</FieldError>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="o-label-en">Tên (EN)</FieldLabel>
-              <Input id="o-label-en" value={labelEn} onChange={(e) => setLabelEn(e.target.value)} placeholder="Để trống sẽ dùng tên VI" disabled={isPending} />
-            </Field>
-            <Field>
-              <FieldLabel>Màu badge</FieldLabel>
-              <NativeSelect value={className} onChange={setClassName} options={BADGE_COLORS} />
-            </Field>
-            <AdminMediaUploadField
-              folder="products"
-              id="o-logo"
-              label="Logo"
-              description="URL hoặc upload ảnh logo (vuông, nền trong suốt)."
-              placeholder="https://... hoặc /logo_tech/..."
-              value={logo}
-              onChange={setLogo}
-              disabled={isPending}
-            />
-            <div className="flex items-center justify-between rounded-lg border p-3">
-              <span className="text-sm font-medium">Kích hoạt</span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={isActive}
-                onClick={() => setIsActive((v) => !v)}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-background/80" onClick={onClose} />
+      <div className="relative w-full max-w-lg rounded-xl border bg-card p-6 shadow-lg max-h-[90dvh] flex flex-col z-10">
+        <h3 className="text-lg font-semibold shrink-0">{option ? "Sửa option" : "Thêm option"}</h3>
+        <form onSubmit={handleSubmit} className="mt-4 flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto pr-1.5 -mr-1.5 py-1">
+            <FieldGroup>
+              <Field data-invalid={Boolean(errors.label)}>
+                <FieldLabel htmlFor="o-label">Tên (VI)</FieldLabel>
+                <Input id="o-label" value={label} onChange={(e) => handleLabelChange(e.target.value)} disabled={isPending} />
+                <FieldError>{errors.label}</FieldError>
+              </Field>
+              <Field data-invalid={Boolean(errors.value)}>
+                <FieldLabel htmlFor="o-value">Value (slug)</FieldLabel>
+                <Input id="o-value" value={value} onChange={(e) => { setValueTouched(true); setValue(e.target.value); }} disabled={isPending} />
+                <FieldDescription>Tự sinh từ tên. Dùng làm key trong metadata.</FieldDescription>
+                <FieldError>{errors.value}</FieldError>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="o-label-en">Tên (EN)</FieldLabel>
+                <Input id="o-label-en" value={labelEn} onChange={(e) => setLabelEn(e.target.value)} placeholder="Để trống sẽ dùng tên VI" disabled={isPending} />
+              </Field>
+              <Field>
+                <FieldLabel>Màu badge</FieldLabel>
+                <NativeSelect value={className} onChange={setClassName} options={BADGE_COLORS} />
+              </Field>
+              <AdminMediaUploadField
+                folder="products"
+                id="o-logo"
+                label="Logo"
+                description="URL hoặc upload ảnh logo (vuông, nền trong suốt)."
+                placeholder="https://... hoặc /logo_tech/..."
+                value={logo}
+                onChange={setLogo}
                 disabled={isPending}
-                className={cn(
-                  "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors",
-                  isActive ? "bg-primary" : "bg-muted"
-                )}
-              >
-                <span className={cn("inline-block size-4 rounded-full bg-background shadow transition-transform", isActive ? "translate-x-5" : "translate-x-1")} />
-              </button>
-            </div>
-          </FieldGroup>
-          <div className="mt-6 flex justify-end gap-2">
+              />
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <span className="text-sm font-medium">Kích hoạt</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isActive}
+                  onClick={() => setIsActive((v) => !v)}
+                  disabled={isPending}
+                  className={cn(
+                    "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors",
+                    isActive ? "bg-primary" : "bg-muted"
+                  )}
+                >
+                  <span className={cn("inline-block size-4 rounded-full bg-background shadow transition-transform", isActive ? "translate-x-5" : "translate-x-1")} />
+                </button>
+              </div>
+            </FieldGroup>
+          </div>
+          <div className="mt-6 flex justify-end gap-2 shrink-0 pt-4 border-t">
             <Button variant="outline" type="button" onClick={onClose} disabled={isPending}>Hủy</Button>
             <Button type="submit" disabled={isPending}>
               {isPending ? <Loader2Icon className="animate-spin" data-icon="inline-start" /> : <SaveIcon data-icon="inline-start" />}

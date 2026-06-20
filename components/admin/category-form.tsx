@@ -85,7 +85,7 @@ export function CategoryForm({ mode, category }: CategoryFormProps) {
       }
 
       toast.success(mode === "create" ? "Đã tạo danh mục." : "Đã lưu danh mục.");
-      router.push("/admin/categories");
+      router.push("/admin/specs");
       router.refresh();
     });
   }
@@ -96,7 +96,7 @@ export function CategoryForm({ mode, category }: CategoryFormProps) {
         <Button
           className="w-fit"
           variant="ghost"
-          render={<Link href="/admin/categories" />}
+          render={<Link href="/admin/specs" />}
           nativeButton={false}
         >
           <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
@@ -184,7 +184,7 @@ export function CategoryForm({ mode, category }: CategoryFormProps) {
       <div className="flex max-w-2xl flex-col-reverse gap-2 border-t pt-5 sm:flex-row sm:justify-end">
         <Button
           variant="outline"
-          render={<Link href="/admin/categories" />}
+          render={<Link href="/admin/specs" />}
           nativeButton={false}
           disabled={isPending}
         >

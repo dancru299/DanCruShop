@@ -13,7 +13,6 @@ import {
   SettingsIcon,
   SlidersHorizontalIcon,
   StoreIcon,
-  TagIcon,
   TicketPercentIcon,
   UsersIcon,
 } from "lucide-react";
@@ -36,11 +35,6 @@ const adminNavItems = [
     href: "/admin/products",
     icon: PackageIcon,
     label: "Products",
-  },
-  {
-    href: "/admin/categories",
-    icon: TagIcon,
-    label: "Categories",
   },
   {
     href: "/admin/coupons",
@@ -75,7 +69,7 @@ const adminNavItems = [
   {
     href: "/admin/specs",
     icon: SlidersHorizontalIcon,
-    label: "Thông số kỹ thuật",
+    label: "Thông số & Danh mục",
   },
   {
     href: "/admin/settings",
@@ -104,7 +98,7 @@ export function AdminSidebar() {
         >
           <DanCruShopLogo
             eyebrow="Admin CMS"
-            markClassName="size-4"
+            markClassName="size-8"
             markContainerClassName="size-8 rounded-md"
             wordmarkClassName="text-base"
           />
