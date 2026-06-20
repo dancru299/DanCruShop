@@ -373,11 +373,38 @@ export function validateTechSlugs(raw: string[]): string[] {
 }
 
 // ─── DB-backed fetch (primary source, hardcoded data as fallback) ───
+// NOTE: define mapping types inline to avoid importing @/lib/supabase/queries/specs
+// which would pull server-only deps (next/headers) into client bundles.
 
 import { cache } from "react";
-import type { SpecGroupRow, SpecFieldRow, SpecOptionRow } from "@/lib/supabase/queries/specs";
 
-function mapOption(row: SpecOptionRow): SpecOption {
+type SpecGroupRowLike = {
+  id: string;
+  label: string;
+  label_en: string;
+  kind: "tech" | "meta";
+  fields?: SpecFieldRowLike[];
+};
+
+type SpecFieldRowLike = {
+  key: string;
+  label: string;
+  label_en: string;
+  type: SpecFieldType;
+  hint: string | null;
+  options?: SpecOptionRowLike[];
+};
+
+type SpecOptionRowLike = {
+  value: string;
+  label: string;
+  label_en: string | null;
+  class_name: string | null;
+  logo: string | null;
+  is_active: boolean;
+};
+
+function mapOption(row: SpecOptionRowLike): SpecOption {
   return {
     value: row.value,
     label: row.label,
@@ -387,7 +414,7 @@ function mapOption(row: SpecOptionRow): SpecOption {
   };
 }
 
-function mapField(row: SpecFieldRow): SpecField {
+function mapField(row: SpecFieldRowLike): SpecField {
   return {
     key: row.key,
     label: row.label,
@@ -398,7 +425,7 @@ function mapField(row: SpecFieldRow): SpecField {
   };
 }
 
-function mapGroup(row: SpecGroupRow): SpecGroup {
+function mapGroup(row: SpecGroupRowLike): SpecGroup {
   return {
     id: row.id,
     label: row.label,
@@ -408,7 +435,7 @@ function mapGroup(row: SpecGroupRow): SpecGroup {
   };
 }
 
-function mapGroups(rows: SpecGroupRow[]): SpecGroup[] {
+function mapGroups(rows: SpecGroupRowLike[]): SpecGroup[] {
   return rows.map(mapGroup);
 }
 

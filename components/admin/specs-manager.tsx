@@ -21,8 +21,38 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { SpecGroupRow, SpecFieldRow, SpecOptionRow } from "@/lib/supabase/queries/specs";
 import { GroupDialog, FieldDialog, OptionDialog } from "@/components/admin/specs-dialogs";
+
+type SpecGroupRow = {
+  id: string;
+  label: string;
+  label_en: string;
+  kind: "tech" | "meta";
+  sort_order: number;
+  fields?: SpecFieldRow[];
+};
+
+type SpecFieldRow = {
+  id: string;
+  key: string;
+  label: string;
+  label_en: string;
+  type: "single" | "multi" | "boolean";
+  hint: string | null;
+  sort_order: number;
+  options?: SpecOptionRow[];
+};
+
+type SpecOptionRow = {
+  id: string;
+  value: string;
+  label: string;
+  label_en: string | null;
+  class_name: string | null;
+  logo: string | null;
+  sort_order: number;
+  is_active: boolean;
+};
 
 type SpecsManagerProps = {
   groups: SpecGroupRow[];

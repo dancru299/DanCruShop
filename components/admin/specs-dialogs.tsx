@@ -30,7 +30,10 @@ import {
 } from "@/components/admin/home-layout-builder/builder-primitives";
 import { slugify } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import type { SpecGroupRow, SpecFieldRow, SpecOptionRow } from "@/lib/supabase/queries/specs";
+
+type SpecGroupRow = { id: string; label: string; label_en: string; kind: "tech" | "meta"; sort_order: number; };
+type SpecFieldRow = { id: string; key: string; label: string; label_en: string; type: "single" | "multi" | "boolean"; hint: string | null; options?: SpecOptionRow[]; sort_order: number; };
+type SpecOptionRow = { id: string; value: string; label: string; label_en: string | null; class_name: string | null; logo: string | null; sort_order: number; is_active: boolean; };
 
 const BADGE_COLORS = [
   { value: "", label: "Không màu" },
