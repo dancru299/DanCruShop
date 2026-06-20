@@ -130,7 +130,7 @@ export default async function DashboardProductPage({
                 {licenseKey}
               </code>
               <p className="text-xs text-muted-foreground">
-                Use this key to activate the product. Keep it private — don't
+                Use this key to activate the product. Keep it private — don&apos;t
                 share it publicly.
               </p>
             </div>

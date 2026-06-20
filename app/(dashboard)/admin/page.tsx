@@ -15,7 +15,6 @@ import {
   ShoppingBagIcon,
   UserRoundIcon,
   UsersIcon,
-  type LucideIcon,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -141,14 +140,6 @@ type BetaFunnel = {
 };
 
 type Tone = "amber" | "emerald" | "rose" | "sky" | "violet";
-
-const toneClasses: Record<Tone, string> = {
-  amber: "bg-amber-400 text-amber-950",
-  emerald: "bg-emerald-400 text-emerald-950",
-  rose: "bg-rose-400 text-rose-950",
-  sky: "bg-sky-400 text-sky-950",
-  violet: "bg-violet-400 text-violet-950",
-};
 
 const dotClasses: Record<Tone, string> = {
   amber: "bg-amber-400",

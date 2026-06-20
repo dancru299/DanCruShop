@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { SearchIcon } from "lucide-react";
 
 import { useCommandPalette } from "@/components/command-palette/command-palette-provider";
@@ -13,6 +13,14 @@ const PLACEHOLDERS = [
   "Search AI tools, VPN...",
 ];
 
+// The shortcut label never changes after mount, so there is nothing to
+// subscribe to — return a no-op unsubscribe.
+const subscribeToShortcut = () => () => {};
+
+function getShortcutKey() {
+  return navigator.platform.toLowerCase().includes("mac") ? "⌘K" : "Ctrl+K";
+}
+
 /**
  * Header entry button for the global command palette.
  *
@@ -23,15 +31,15 @@ const PLACEHOLDERS = [
  */
 export function HeaderSearch({ className }: { className?: string }) {
   const { openPalette } = useCommandPalette();
-  const [shortcutKey, setShortcutKey] = useState("Ctrl+K");
-
-  // Detect OS after mount to avoid hydration mismatch
-  useEffect(() => {
-    const isMac =
-      typeof navigator !== "undefined" &&
-      navigator.platform.toLowerCase().includes("mac");
-    setShortcutKey(isMac ? "⌘K" : "Ctrl+K");
-  }, []);
+  // Read the platform-specific shortcut label on the client without a hydration
+  // mismatch: the server snapshot renders "Ctrl+K", then the client swaps in the
+  // real value after hydration. Keeping this in a store (not an effect) avoids a
+  // synchronous setState during render/commit.
+  const shortcutKey = useSyncExternalStore(
+    subscribeToShortcut,
+    getShortcutKey,
+    () => "Ctrl+K"
+  );
 
   return (
     <button

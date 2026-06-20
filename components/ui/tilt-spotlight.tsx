@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface TiltSpotlightProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -20,7 +20,6 @@ export function TiltSpotlight({
 }: TiltSpotlightProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [style, setStyle] = useState<React.CSSProperties>({});
-  const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = containerRef.current;
@@ -46,12 +45,7 @@ export function TiltSpotlight({
     });
   };
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-
   const handleMouseLeave = () => {
-    setIsHovered(false);
     const el = containerRef.current;
     if (el) {
       el.style.setProperty("--mouse-x", `-9999px`);
@@ -67,7 +61,6 @@ export function TiltSpotlight({
     <div
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={style}
       className={cn(
