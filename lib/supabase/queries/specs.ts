@@ -1,8 +1,15 @@
 import "server-only";
 
+import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import type { SpecFieldType } from "@/lib/products/specs";
+import {
+  SPEC_GROUPS,
+  type SpecFieldType,
+  type SpecGroup,
+  type SpecField,
+  type SpecOption,
+} from "@/lib/products/specs";
 
 export type SpecOptionRow = {
   id: string;
@@ -154,3 +161,60 @@ export async function getSpecGroupById(id: string): Promise<SpecGroupRow | null>
     .maybeSingle();
   return (data as SpecGroupRow | null) ?? null;
 }
+
+// ─── DB-backed fetch wrappers (Server-side only) ───
+
+function mapOption(row: SpecOptionRow): SpecOption {
+  return {
+    value: row.value,
+    label: row.label,
+    labelEn: row.label_en ?? undefined,
+    className: row.class_name ?? undefined,
+    logo: row.logo ?? undefined,
+  };
+}
+
+function mapField(row: SpecFieldRow): SpecField {
+  return {
+    key: row.key,
+    label: row.label,
+    labelEn: row.label_en,
+    type: row.type,
+    hint: row.hint ?? undefined,
+    options: (row.options ?? []).map(mapOption),
+  };
+}
+
+function mapGroup(row: SpecGroupRow): SpecGroup {
+  return {
+    id: row.id,
+    label: row.label,
+    labelEn: row.label_en,
+    kind: row.kind,
+    fields: (row.fields ?? []).map(mapField),
+  };
+}
+
+function mapGroups(rows: SpecGroupRow[]): SpecGroup[] {
+  return rows.map(mapGroup);
+}
+
+export const getSpecGroupsFromDB = cache(async (): Promise<SpecGroup[]> => {
+  try {
+    const groups = await getPublicSpecGroups();
+    if (groups.length > 0) return mapGroups(groups);
+  } catch (e) {
+    console.warn("Failed to fetch specs from DB, using fallback", e);
+  }
+  return SPEC_GROUPS;
+});
+
+export const getAdminSpecGroupsFromDB = cache(async (): Promise<SpecGroup[]> => {
+  try {
+    const groups = await getAdminSpecGroups();
+    if (groups.length > 0) return mapGroups(groups);
+  } catch (e) {
+    console.warn("Failed to fetch admin specs from DB, using fallback", e);
+  }
+  return SPEC_GROUPS;
+});
