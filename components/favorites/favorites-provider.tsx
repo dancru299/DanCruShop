@@ -131,7 +131,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     async (product: FavoriteProductInput) => {
       if (!isSchemaReady) {
         toast.error("Favorites are not enabled yet.", {
-          description: "Run supabase/product-favorites.sql on Supabase.",
+          description: "Run supabase/migrations/0002_product_favorites.sql on Supabase.",
         });
         return;
       }
@@ -189,7 +189,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
             error
           );
           toast.error("Favorites are not enabled yet.", {
-            description: "Run supabase/product-favorites.sql on Supabase.",
+            description: "Run supabase/migrations/0002_product_favorites.sql on Supabase.",
           });
         } else {
           warnFavoriteStorage("Failed to toggle favorite.", error);

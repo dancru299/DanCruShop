@@ -35,7 +35,7 @@
 | Compare hook | `components/compare/compare-provider.tsx` | `useCompare()` |
 | Theme | `components/theme-provider.tsx` (next-themes) | `attribute="class"`, light/dark, `enableSystem={false}` |
 | Coupon backend | `actions/coupon.actions.ts`, `lib/payments/coupons.ts` | `applyCouponToCart()`, `createCoupon()` |
-| Rate limit | `lib/rate-limit.ts`, `supabase/rate-limits.sql` | Dùng cho easter egg |
+| Rate limit | `lib/rate-limit.ts`, `supabase/migrations/0006_rate_limits.sql` | Dùng cho easter egg |
 | Mono font | `app/globals.css` `--font-mono` (Geist Mono) | Cho prompt terminal |
 | Dialog primitive | `components/ui/dialog.tsx` (**Base UI** — `@base-ui/react`) | **Không** dùng `Command.Dialog` của cmdk (kéo theo Radix); bọc bare `<Command>` bằng Base UI Dialog |
 | Ô search header hiện tại | `components/shared/header-search.tsx:44` | Đang bắt `⌘K` **và** `/`; sẽ chuyển thành **nút mở palette** (Option B) |
@@ -164,7 +164,7 @@ Tái dùng `trackAnalyticsEvent` (`lib/analytics/client.ts`): bắn `command_pal
 
 > ⚠️ **Không** in mã 10% cố định. Mã cố định lan truyền = giảm giá vĩnh viễn toàn site → ăn margin.
 
-**Bước 0 — xác minh schema** `supabase/coupons.sql` (`code, type, value, max_uses, used_count, expires_at, metadata...`) trước khi code.
+**Bước 0 — xác minh schema** `supabase/migrations/0008_coupons.sql` (`code, type, value, max_uses, used_count, expires_at, metadata...`) trước khi code.
 
 **Backend** — file mới `actions/easter-egg.actions.ts`:
 ```ts
@@ -175,12 +175,12 @@ export async function claimDevDiscount(): Promise<
 >
 ```
 Chống lạm dụng nhiều lớp:
-1. **Rate limit** qua `lib/rate-limit.ts` + `supabase/rate-limits.sql` — vd 1 lần / IP / ngày.
+1. **Rate limit** qua `lib/rate-limit.ts` + `supabase/migrations/0006_rate_limits.sql` — vd 1 lần / IP / ngày.
 2. **One-per-user**: đã đăng nhập → lưu claim theo `user_id`, chặn claim lần 2.
 3. **Mã động single-use**: tạo coupon mới mỗi lần — `code = "DEVMODE-" + nanoid(6)`, `type=percent`, `value=10`, `max_uses=1`, `expires_at = now()+48h`, `metadata={ source: "easter_egg", user_id }`.
 4. **Trần ngân sách**: tổng coupon easter-egg vượt ngưỡng N (cấu hình `store-settings`) → `budget_exhausted`.
 
-**Migration mới** `supabase/easter-egg-discount.sql` (phong cách an toàn như `drop-tech-icons.sql`): bảng `easter_egg_claims` (user_id/ip, code, created_at) + RLS + index; transaction-wrapped.
+**Migration mới** `supabase/migrations/0017_easter_egg_discount.sql` (phong cách an toàn như `0016_drop_tech_icons.sql`): bảng `easter_egg_claims` (user_id/ip, code, created_at) + RLS + index; transaction-wrapped.
 
 **Client**: gõ `sudo discount` → `claimDevDiscount()` → render rocket ASCII + mã + nút "Copy" + auto-apply vào cart qua `applyCouponToCart`.
 
@@ -200,7 +200,7 @@ Chống lạm dụng nhiều lớp:
 | 7 | `tests/unit/command-palette.test.ts` | mới |
 | — | **— mốc demo MVP —** | — |
 | 8 | `help` + console art | mới |
-| 9 | đọc `coupons.sql` → `actions/easter-egg.actions.ts` + `supabase/easter-egg-discount.sql` | mới |
+| 9 | đọc `migrations/0008_coupons.sql` → `actions/easter-egg.actions.ts` + `supabase/migrations/0017_easter_egg_discount.sql` | mới |
 | 10 | `sudo discount` UI + rate-limit | mới/sửa |
 
 ---

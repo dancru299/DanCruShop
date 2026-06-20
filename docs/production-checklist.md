@@ -16,9 +16,10 @@ Use this before deploying DanCruShop to a real domain.
 
 ## Supabase
 
-- Run the latest `supabase/schema.sql` against the production project.
-- For an existing project, run `supabase/beta-launch-readiness.sql` once to add
-  favorites and analytics without replaying the full schema.
+- For a fresh project, run every file in `supabase/migrations/` in numeric order
+  against the production project (see `supabase/README.md`).
+- For an existing project, run `supabase/migrations/0003_beta_launch_readiness.sql`
+  once to add favorites and analytics without replaying the full schema.
 - Confirm RLS is enabled on product, order, purchase, review, course, and
   download, favorites, and analytics tables.
 - Confirm `public.increment_download_count(uuid)` is executable only by
@@ -37,7 +38,7 @@ Use this before deploying DanCruShop to a real domain.
 
 ## Runtime Hardening
 
-- Apply `supabase/rate-limits.sql` so `lib/rate-limit.ts::enforceRateLimit`
+- Apply `supabase/migrations/0006_rate_limits.sql` so `lib/rate-limit.ts::enforceRateLimit`
   shares limits across serverless instances via the `consume_rate_limit`
   Postgres function. Without it the limiter fails back to per-process memory.
 - Add monitoring for webhook failures, email failures, and download failures.

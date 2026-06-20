@@ -25,7 +25,8 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-Run `supabase/schema.sql` in the Supabase SQL editor for a fresh database.
+For a fresh database, run the files in `supabase/migrations/` in numeric order
+(then the seeds in `supabase/seeds/`). See [supabase/README.md](supabase/README.md).
 Keep real secret values only in `.env.local` or the hosting provider's secret
 manager.
 
@@ -49,7 +50,7 @@ webhook, VietQR, support email, and email variables configured.
 - Product files are served through signed URLs from
   `/api/products/[identifier]/download`.
 - Download logging uses the service-role client and a restricted RPC in
-  `supabase/schema.sql`.
+  `supabase/migrations/0001_initial_schema.sql`.
 
 See [docs/production-checklist.md](docs/production-checklist.md) before a real
 launch.

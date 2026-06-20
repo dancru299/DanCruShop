@@ -79,7 +79,8 @@ type ConsumeRateLimitRow = {
 
 // Distributed fixed-window rate limit shared across every serverless instance
 // via the public.consume_rate_limit Postgres function (see
-// supabase/rate-limits.sql). If the RPC is unreachable we fall back to a local
+// supabase/migrations/0006_rate_limits.sql). If the RPC is unreachable we fall
+// back to a local
 // in-memory limiter — fail-degraded rather than fail-open.
 export async function enforceRateLimit(
   key: string,

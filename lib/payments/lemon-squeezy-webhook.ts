@@ -296,7 +296,7 @@ function buildOrderItems(
 }
 
 // Persists the order, its items, and the buyer's purchases atomically via the
-// fulfill_paid_order Postgres function (see supabase/fulfill-paid-order.sql) so
+// fulfill_paid_order Postgres function (see supabase/migrations/0005_fulfill_paid_order.sql) so
 // a partial failure cannot leave an order without its unlocked purchases.
 async function fulfillPaidOrder(
   supabaseAdmin: SupabaseClient,
