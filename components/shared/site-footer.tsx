@@ -53,11 +53,11 @@ export async function SiteFooter() {
     <footer className="border-t border-border/80 bg-muted/30">
       {/* CTA band */}
       <div className="mx-auto w-full max-w-6xl px-4 py-10 md:py-14">
-        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/80 px-6 py-10 text-center text-primary-foreground shadow-lg md:px-12 md:py-14">
+        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-card dark:to-card px-6 py-10 text-center text-white dark:text-foreground shadow-lg md:px-12 md:py-14 border border-blue-500/10 dark:border-border">
           <h2 className="text-2xl font-bold tracking-tight md:text-4xl">
             Ready to get started?
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-primary-foreground/90 md:text-base">
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-blue-100/90 dark:text-muted-foreground md:text-base">
             Join our community of happy customers and explore a diverse library
             of digital products today.
           </p>
@@ -65,8 +65,8 @@ export async function SiteFooter() {
             <Link
               href="/products"
               className={cn(
-                buttonVariants({ size: "lg", variant: "outline" }),
-                "border-transparent bg-white text-primary shadow-sm hover:bg-white/90 hover:text-primary"
+                buttonVariants({ size: "lg", variant: "default" }),
+                "border-transparent shadow-sm bg-white text-blue-600 hover:bg-zinc-100 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
               )}
             >
               Explore now
@@ -76,7 +76,7 @@ export async function SiteFooter() {
               href="/products"
               className={cn(
                 buttonVariants({ size: "lg", variant: "outline" }),
-                "border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                "border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white dark:border-border dark:bg-muted dark:text-foreground dark:hover:bg-muted/80"
               )}
             >
               View deals

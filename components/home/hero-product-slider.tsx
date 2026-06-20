@@ -276,23 +276,34 @@ function SpotlightCard({ card }: { card: HeroSpotlightCard }) {
         {/* Tech-stack icons — placeholder initials until real assets are uploaded */}
         {card.icons.length > 0 ? (
           <div className="flex flex-wrap items-center gap-1.5">
-            {card.icons.map((icon) => (
-              <span
-                key={icon.label}
-                title={icon.label}
-                className="flex size-7 items-center justify-center rounded-lg border border-border/80 bg-background/80 text-[0.6rem] font-semibold text-muted-foreground shadow-sm"
-              >
-                {icon.src ? (
-                  <img
-                    src={icon.src}
-                    alt={icon.label}
-                    className="size-4 object-contain"
-                  />
-                ) : (
-                  icon.label.slice(0, 2)
-                )}
-              </span>
-            ))}
+            {card.icons.map((icon) => {
+              const isMonochrome =
+                icon.src &&
+                (icon.src.includes("nextjs") ||
+                  icon.src.includes("vercel") ||
+                  icon.src.includes("openai"));
+
+              return (
+                <span
+                  key={icon.label}
+                  title={icon.label}
+                  className="flex size-7 items-center justify-center rounded-lg border border-border/80 bg-background/80 text-[0.6rem] font-semibold text-muted-foreground shadow-sm"
+                >
+                  {icon.src ? (
+                    <img
+                      src={icon.src}
+                      alt={icon.label}
+                      className={cn(
+                        "size-4 object-contain",
+                        isMonochrome && "invert dark:invert-0"
+                      )}
+                    />
+                  ) : (
+                    icon.label.slice(0, 2)
+                  )}
+                </span>
+              );
+            })}
           </div>
         ) : null}
 
