@@ -375,7 +375,6 @@ export function validateTechSlugs(raw: string[]): string[] {
 // ─── DB-backed fetch (primary source, hardcoded data as fallback) ───
 
 import { cache } from "react";
-import { getAdminSpecGroups as fetchAdminSpecGroups, getPublicSpecGroups as fetchPublicSpecGroups } from "@/lib/supabase/queries/specs";
 import type { SpecGroupRow, SpecFieldRow, SpecOptionRow } from "@/lib/supabase/queries/specs";
 
 function mapOption(row: SpecOptionRow): SpecOption {
@@ -415,7 +414,8 @@ function mapGroups(rows: SpecGroupRow[]): SpecGroup[] {
 
 export const getSpecGroupsFromDB = cache(async (): Promise<SpecGroup[]> => {
   try {
-    const groups = await fetchPublicSpecGroups();
+    const { getPublicSpecGroups } = await import("@/lib/supabase/queries/specs");
+    const groups = await getPublicSpecGroups();
     if (groups.length > 0) return mapGroups(groups);
   } catch (e) {
     console.warn("Failed to fetch specs from DB, using fallback", e);
@@ -425,7 +425,8 @@ export const getSpecGroupsFromDB = cache(async (): Promise<SpecGroup[]> => {
 
 export const getAdminSpecGroupsFromDB = cache(async (): Promise<SpecGroup[]> => {
   try {
-    const groups = await fetchAdminSpecGroups();
+    const { getAdminSpecGroups } = await import("@/lib/supabase/queries/specs");
+    const groups = await getAdminSpecGroups();
     if (groups.length > 0) return mapGroups(groups);
   } catch (e) {
     console.warn("Failed to fetch admin specs from DB, using fallback", e);

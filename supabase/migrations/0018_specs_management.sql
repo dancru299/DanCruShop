@@ -5,7 +5,7 @@
 -- ============================================================================
 -- Bảng 1: Nhóm thông số
 -- ============================================================================
-CREATE TABLE spec_groups (
+CREATE TABLE IF NOT EXISTS spec_groups (
   id         uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   label      text NOT NULL,
   label_en   text NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE spec_groups (
 -- ============================================================================
 -- Bảng 2: Field trong nhóm
 -- ============================================================================
-CREATE TABLE spec_fields (
+CREATE TABLE IF NOT EXISTS spec_fields (
   id         uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   key        text NOT NULL UNIQUE,
   label      text NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE spec_fields (
 -- ============================================================================
 -- Bảng 3: Option trong field
 -- ============================================================================
-CREATE TABLE spec_options (
+CREATE TABLE IF NOT EXISTS spec_options (
   id         uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   value      text NOT NULL,
   label      text NOT NULL,
@@ -51,12 +51,12 @@ CREATE TABLE spec_options (
 -- ============================================================================
 -- Indexes
 -- ============================================================================
-CREATE INDEX idx_spec_fields_group ON spec_fields(group_id);
-CREATE INDEX idx_spec_options_field ON spec_options(field_id);
-CREATE INDEX idx_spec_options_value ON spec_options(value);
-CREATE INDEX idx_spec_groups_sort ON spec_groups(sort_order);
-CREATE INDEX idx_spec_fields_sort ON spec_fields(sort_order);
-CREATE INDEX idx_spec_options_sort ON spec_options(sort_order);
+CREATE INDEX IF NOT EXISTS idx_spec_fields_group ON spec_fields(group_id);
+CREATE INDEX IF NOT EXISTS idx_spec_options_field ON spec_options(field_id);
+CREATE INDEX IF NOT EXISTS idx_spec_options_value ON spec_options(value);
+CREATE INDEX IF NOT EXISTS idx_spec_groups_sort ON spec_groups(sort_order);
+CREATE INDEX IF NOT EXISTS idx_spec_fields_sort ON spec_fields(sort_order);
+CREATE INDEX IF NOT EXISTS idx_spec_options_sort ON spec_options(sort_order);
 
 -- ============================================================================
 -- RLS Policies
