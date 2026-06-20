@@ -52,8 +52,8 @@ export const metadata: Metadata = {
     description: siteDescription,
   },
   icons: {
-    icon: [{ url: "/logo-mark.svg", type: "image/svg+xml" }],
-    shortcut: "/logo-mark.svg",
+    icon: [{ url: "/logo_cyberwing_mark.png", type: "image/png" }],
+    shortcut: "/logo_cyberwing_mark.png",
   },
 };
 

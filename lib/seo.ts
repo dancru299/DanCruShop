@@ -6,7 +6,7 @@ export function buildOrganizationJsonLd(): JsonLdObject {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    logo: absoluteUrl("/logo-mark.svg"),
+    logo: absoluteUrl("/logo_cyberwing_mark.png"),
     name: siteName,
     url: getSiteUrl(),
   };
@@ -119,7 +119,7 @@ export function buildArticleJsonLd(input: ArticleJsonLdInput): JsonLdObject {
     mainEntityOfPage: url,
     publisher: {
       "@type": "Organization",
-      logo: { "@type": "ImageObject", url: absoluteUrl("/logo-mark.svg") },
+      logo: { "@type": "ImageObject", url: absoluteUrl("/logo_cyberwing_mark.png") },
       name: siteName,
     },
     url,
