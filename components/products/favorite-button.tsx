@@ -51,8 +51,10 @@ export function FavoriteButton({
       <HeartIcon
         aria-hidden="true"
         className={cn(
-          "size-[18px] transition-colors",
-          active ? "fill-rose-500 text-rose-500" : "text-white/85"
+          "size-[18px] transition duration-200",
+          active
+            ? "scale-110 fill-rose-500 text-rose-500"
+            : "scale-100 text-white/85"
         )}
       />
     </button>

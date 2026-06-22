@@ -73,17 +73,17 @@ export function PricingFields({
       <section className="rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
         <div className="mb-5">
           <h2 className="text-base font-semibold tracking-normal">
-            Pricing and publishing
+            Giá &amp; xuất bản
           </h2>
           <p className="text-sm leading-6 text-muted-foreground">
-            Control catalog state, pricing, and product type.
+            Quản lý trạng thái catalog, giá bán và loại sản phẩm.
           </p>
         </div>
 
         <FieldGroup>
           <div className="grid gap-5 md:grid-cols-2">
             <Field data-invalid={Boolean(errors.priceUsd)}>
-              <FieldLabel htmlFor="price">Price ({currency})</FieldLabel>
+              <FieldLabel htmlFor="price">Giá bán ({currency})</FieldLabel>
               <Input
                 id="price"
                 type="number"
@@ -119,7 +119,7 @@ export function PricingFields({
             </Field>
 
             <Field>
-              <FieldLabel>Currency</FieldLabel>
+              <FieldLabel>Tiền tệ</FieldLabel>
               <Select
                 value={currency}
                 onValueChange={(value) => {
@@ -129,7 +129,7 @@ export function PricingFields({
                 }}
               >
                 <SelectTrigger className="w-full" disabled={isPending}>
-                  <SelectValue placeholder="Select currency" />
+                  <SelectValue placeholder="Chọn tiền tệ" />
                 </SelectTrigger>
                 <SelectContent>
                   {currencyOptions.map((option) => (
@@ -144,7 +144,7 @@ export function PricingFields({
 
           <div className="grid gap-5 md:grid-cols-2">
             <Field>
-              <FieldLabel>Product type</FieldLabel>
+              <FieldLabel>Loại sản phẩm</FieldLabel>
               <Select
                 value={productType}
                 onValueChange={(value) =>
@@ -152,7 +152,7 @@ export function PricingFields({
                 }
               >
                 <SelectTrigger className="w-full" disabled={isPending}>
-                  <SelectValue placeholder="Select product type" />
+                  <SelectValue placeholder="Chọn loại sản phẩm" />
                 </SelectTrigger>
                 <SelectContent>
                   {productTypeOptions.map((option) => (
@@ -165,13 +165,13 @@ export function PricingFields({
             </Field>
 
             <Field>
-              <FieldLabel>Status</FieldLabel>
+              <FieldLabel>Trạng thái</FieldLabel>
               <Select
                 value={status}
                 onValueChange={(value) => onStatusChange(value as ProductStatus)}
               >
                 <SelectTrigger className="w-full" disabled={isPending}>
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder="Chọn trạng thái" />
                 </SelectTrigger>
                 <SelectContent>
                   {productStatusOptions.map((option) => (
@@ -190,7 +190,7 @@ export function PricingFields({
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <h2 className="text-base font-semibold tracking-normal">
-              Categories & licensing
+              Danh mục &amp; license
             </h2>
             <p className="text-sm leading-6 text-muted-foreground">
               Gắn category để khách lọc sản phẩm, và bật license key cho tool
@@ -205,7 +205,7 @@ export function PricingFields({
 
         <div className="flex flex-col gap-4">
           <Field>
-            <FieldLabel>Categories</FieldLabel>
+            <FieldLabel>Danh mục</FieldLabel>
             {categories.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {categories.map((category) => {

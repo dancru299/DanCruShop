@@ -67,10 +67,16 @@ const statusOptions: Array<{
   label: string;
   value: BlogPostStatus;
 }> = [
-  { label: "Draft", value: "draft" },
-  { label: "Published", value: "published" },
-  { label: "Archived", value: "archived" },
+  { label: "Bản nháp", value: "draft" },
+  { label: "Đã xuất bản", value: "published" },
+  { label: "Đã lưu trữ", value: "archived" },
 ];
+
+const statusLabels: Record<BlogPostStatus, string> = {
+  archived: "Đã lưu trữ",
+  draft: "Bản nháp",
+  published: "Đã xuất bản",
+};
 
 const statusBadgeVariants: Record<BlogPostStatus, "default" | "outline" | "secondary"> = {
   archived: "outline",
@@ -81,7 +87,7 @@ const statusBadgeVariants: Record<BlogPostStatus, "default" | "outline" | "secon
 function slugify(value: string) {
   return value
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
@@ -102,12 +108,12 @@ function getPlainPreview(content: string) {
       .map((line) => line.trim())
       .filter(Boolean)
       .slice(0, 3)
-      .join(" ") || "Start writing to preview the first paragraph here."
+      .join(" ") || "Bắt đầu viết để xem trước đoạn đầu tại đây."
   );
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("vi-VN", {
     dateStyle: "medium",
   }).format(new Date(value));
 }
@@ -140,7 +146,7 @@ function BlogPreviewPanel({
     id: "preview",
     published_at: status === "published" ? createdAt : null,
     slug: slug || "post-slug",
-    title: title.trim() || "Untitled post",
+    title: title.trim() || "Bài viết chưa có tiêu đề",
   };
   const readingTime = getReadingTime(content);
 
@@ -158,7 +164,7 @@ function BlogPreviewPanel({
             <BlogCoverArtwork post={previewPost} />
           )}
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/80 to-transparent p-4">
-            <Badge variant={statusBadgeVariants[status]}>{status}</Badge>
+            <Badge variant={statusBadgeVariants[status]}>{statusLabels[status]}</Badge>
           </div>
         </div>
 
@@ -166,7 +172,7 @@ function BlogPreviewPanel({
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-normal text-muted-foreground">
-                {formatDate(createdAt)} - {readingTime} min read
+                {formatDate(createdAt)} - {readingTime} phút đọc
               </p>
               <h2 className="mt-1 line-clamp-2 text-lg font-semibold leading-7 tracking-normal">
                 {previewPost.title}
@@ -180,7 +186,7 @@ function BlogPreviewPanel({
 
           <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
             {previewPost.excerpt ??
-              "A concise excerpt will make blog cards more compelling."}
+              "Một đoạn tóm tắt ngắn gọn sẽ khiến thẻ bài viết hấp dẫn hơn."}
           </p>
         </div>
       </div>
@@ -188,7 +194,7 @@ function BlogPreviewPanel({
       <div className="rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold">Article preview</h3>
+            <h3 className="text-sm font-semibold">Xem trước bài viết</h3>
             <p className="text-xs text-muted-foreground">
               /blog/{previewPost.slug}
             </p>
@@ -197,7 +203,7 @@ function BlogPreviewPanel({
         </div>
 
         <div className="mt-4 rounded-lg bg-muted/40 p-3">
-          <p className="text-xs text-muted-foreground">Opening paragraph</p>
+          <p className="text-xs text-muted-foreground">Đoạn mở đầu</p>
           <p className="mt-2 line-clamp-4 text-xs leading-5">
             {getPlainPreview(content)}
           </p>
@@ -207,10 +213,10 @@ function BlogPreviewPanel({
       <div className="rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
         <div className="mb-3 flex items-center gap-2">
           <SearchIcon aria-hidden="true" className="size-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold">SEO preview</h3>
+          <h3 className="text-sm font-semibold">Xem trước SEO</h3>
         </div>
         <p className="line-clamp-1 text-sm font-medium text-sky-400">
-          {seoTitle.trim() || title.trim() || "Search result title"}
+          {seoTitle.trim() || title.trim() || "Tiêu đề kết quả tìm kiếm"}
         </p>
         <p className="mt-1 text-xs text-emerald-400">
           dancrushop.com/blog/{previewPost.slug}
@@ -218,7 +224,7 @@ function BlogPreviewPanel({
         <p className="mt-2 line-clamp-3 text-xs leading-5 text-muted-foreground">
           {seoDescription.trim() ||
             excerpt.trim() ||
-            "Add an SEO description or excerpt to control the search snippet."}
+            "Thêm mô tả SEO hoặc đoạn tóm tắt để kiểm soát đoạn trích tìm kiếm."}
         </p>
       </div>
     </aside>
@@ -250,7 +256,7 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
   const submitLabel = useMemo(
-    () => (mode === "create" ? "Create post" : "Save changes"),
+    () => (mode === "create" ? "Tạo bài viết" : "Lưu thay đổi"),
     [mode]
   );
 
@@ -264,7 +270,7 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
 
       window.open(url, "_blank", "noopener,noreferrer");
     } catch {
-      toast.error("Could not generate preview URL.");
+      toast.error("Không thể tạo URL xem trước.");
     } finally {
       setIsLoadingPreview(false);
     }
@@ -283,15 +289,15 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
     const normalizedSlug = slugify(slug);
 
     if (!title.trim()) {
-      nextErrors.title = "Title is required.";
+      nextErrors.title = "Vui lòng nhập tiêu đề.";
     }
 
     if (!normalizedSlug) {
-      nextErrors.slug = "Slug is required.";
+      nextErrors.slug = "Vui lòng nhập slug.";
     }
 
     if (!content.trim()) {
-      nextErrors.content = "Markdown content is required.";
+      nextErrors.content = "Vui lòng nhập nội dung Markdown.";
     }
 
     setErrors(nextErrors);
@@ -334,7 +340,7 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
         return;
       }
 
-      toast.success(mode === "create" ? "Post created." : "Post updated.");
+      toast.success(mode === "create" ? "Đã tạo bài viết." : "Đã cập nhật bài viết.");
       router.push("/admin/blog");
       router.refresh();
     });
@@ -350,16 +356,16 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
           nativeButton={false}
         >
           <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-          Back to posts
+          Quay lại danh sách bài viết
         </Button>
 
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-semibold tracking-normal">
-            {mode === "create" ? "Write New Post" : "Edit Post"}
+            {mode === "create" ? "Viết bài mới" : "Sửa bài viết"}
           </h1>
           <p className="text-sm leading-6 text-muted-foreground">
-            Draft the article, tune SEO, upload a cover, and preview the public
-            blog card while you write.
+            Soạn bài viết, tinh chỉnh SEO, tải ảnh bìa và xem trước thẻ blog công
+            khai ngay khi viết.
           </p>
         </div>
       </div>
@@ -370,23 +376,23 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-base font-semibold tracking-normal">
-                  Article basics
+                  Thông tin cơ bản
                 </h2>
                 <p className="text-sm leading-6 text-muted-foreground">
-                  Title, URL, excerpt, and publish state for the public blog.
+                  Tiêu đề, URL, tóm tắt và trạng thái xuất bản cho blog công khai.
                 </p>
               </div>
-              <Badge variant={statusBadgeVariants[status]}>{status}</Badge>
+              <Badge variant={statusBadgeVariants[status]}>{statusLabels[status]}</Badge>
             </div>
 
             <FieldGroup>
               <Field data-invalid={Boolean(errors.title)}>
-                <FieldLabel htmlFor="title">Title</FieldLabel>
+                <FieldLabel htmlFor="title">Tiêu đề</FieldLabel>
                 <Input
                   id="title"
                   value={title}
                   onChange={(event) => handleTitleChange(event.target.value)}
-                  placeholder="How to ship digital products faster"
+                  placeholder="Cách giao sản phẩm số nhanh hơn"
                   aria-invalid={Boolean(errors.title)}
                   disabled={isPending}
                 />
@@ -408,13 +414,13 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
                     disabled={isPending}
                   />
                   <FieldDescription>
-                    Used in the public URL. It is auto-generated from the title.
+                    Dùng trong URL công khai. Tự động tạo từ tiêu đề.
                   </FieldDescription>
                   <FieldError>{errors.slug}</FieldError>
                 </Field>
 
                 <Field>
-                  <FieldLabel>Status</FieldLabel>
+                  <FieldLabel>Trạng thái</FieldLabel>
                   <Select
                     value={status}
                     onValueChange={(value) =>
@@ -422,7 +428,7 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
                     }
                   >
                     <SelectTrigger className="w-full" disabled={isPending}>
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="Chọn trạng thái" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
@@ -438,12 +444,12 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
               </div>
 
               <Field>
-                <FieldLabel htmlFor="excerpt">Excerpt</FieldLabel>
+                <FieldLabel htmlFor="excerpt">Tóm tắt</FieldLabel>
                 <Textarea
                   id="excerpt"
                   value={excerpt}
                   onChange={(event) => setExcerpt(event.target.value)}
-                  placeholder="A concise summary for blog cards and previews."
+                  placeholder="Tóm tắt ngắn gọn cho thẻ blog và phần xem trước."
                   disabled={isPending}
                 />
               </Field>
@@ -453,19 +459,19 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
           <section className="rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
             <div className="mb-5">
               <h2 className="text-base font-semibold tracking-normal">
-                Cover image
+                Ảnh bìa
               </h2>
               <p className="text-sm leading-6 text-muted-foreground">
-                Upload the visual used in blog cards and article headers.
+                Tải ảnh hiển thị trên thẻ blog và đầu bài viết.
               </p>
             </div>
 
             <AdminMediaUploadField
-              description="Recommended ratio: 16:9. Images are uploaded to the public media bucket."
+              description="Tỉ lệ khuyến nghị: 16:9. Ảnh được tải lên kho media công khai."
               disabled={isPending}
               folder="blog"
               id="cover-image-url"
-              label="Cover image URL"
+              label="URL ảnh bìa"
               onChange={setCoverImageUrl}
               placeholder="https://example.com/cover.jpg"
               value={coverImageUrl}
@@ -476,11 +482,11 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-base font-semibold tracking-normal">
-                  Content
+                  Nội dung
                 </h2>
                 <p className="text-sm leading-6 text-muted-foreground">
-                  Write in Markdown. The side preview shows the public opening
-                  snippet and reading time.
+                  Viết bằng Markdown. Phần xem trước bên cạnh hiển thị đoạn mở đầu
+                  công khai và thời gian đọc.
                 </p>
               </div>
               <FileTextIcon
@@ -491,13 +497,13 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
 
             <FieldGroup>
               <Field data-invalid={Boolean(errors.content)}>
-                <FieldLabel htmlFor="content">Content (Markdown)</FieldLabel>
+                <FieldLabel htmlFor="content">Nội dung (Markdown)</FieldLabel>
                 <Textarea
                   id="content"
                   value={content}
                   onChange={(event) => setContent(event.target.value)}
                   placeholder={
-                    "## Start writing\n\nUse Markdown for headings, links, lists, and code blocks."
+                    "## Bắt đầu viết\n\nDùng Markdown cho tiêu đề, liên kết, danh sách và khối mã."
                   }
                   className="min-h-[28rem] font-mono text-sm"
                   aria-invalid={Boolean(errors.content)}
@@ -511,34 +517,35 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
           <section className="rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
             <div className="mb-5">
               <h2 className="text-base font-semibold tracking-normal">
-                SEO metadata
+                Thông tin SEO
               </h2>
               <p className="text-sm leading-6 text-muted-foreground">
-                Optional fields for search previews and social snippets.
+                Các trường tùy chọn cho phần xem trước tìm kiếm và đoạn chia sẻ
+                mạng xã hội.
               </p>
             </div>
 
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="seo-title">SEO title</FieldLabel>
+                <FieldLabel htmlFor="seo-title">Tiêu đề SEO</FieldLabel>
                 <Input
                   id="seo-title"
                   value={seoTitle}
                   onChange={(event) => setSeoTitle(event.target.value)}
-                  placeholder="Optional custom search title"
+                  placeholder="Tiêu đề tìm kiếm tùy chỉnh (tùy chọn)"
                   disabled={isPending}
                 />
               </Field>
 
               <Field>
                 <FieldLabel htmlFor="seo-description">
-                  SEO description
+                  Mô tả SEO
                 </FieldLabel>
                 <Textarea
                   id="seo-description"
                   value={seoDescription}
                   onChange={(event) => setSeoDescription(event.target.value)}
-                  placeholder="Optional meta description"
+                  placeholder="Mô tả meta (tùy chọn)"
                   disabled={isPending}
                 />
               </Field>
@@ -566,7 +573,7 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
           nativeButton={false}
           disabled={isPending}
         >
-          Cancel
+          Hủy
         </Button>
         {mode === "edit" && post?.id ? (
           <Button
@@ -584,7 +591,7 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
             ) : (
               <ExternalLinkIcon aria-hidden="true" data-icon="inline-start" />
             )}
-            {isLoadingPreview ? "Generating..." : "Preview"}
+            {isLoadingPreview ? "Đang tạo..." : "Xem trước"}
           </Button>
         ) : null}
         <Button type="submit" disabled={isPending}>
@@ -597,7 +604,7 @@ export function BlogPostForm({ mode, post }: BlogPostFormProps) {
           ) : (
             <SaveIcon aria-hidden="true" data-icon="inline-start" />
           )}
-          {isPending ? "Saving..." : submitLabel}
+          {isPending ? "Đang lưu..." : submitLabel}
         </Button>
       </div>
     </form>

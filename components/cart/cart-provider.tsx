@@ -50,6 +50,9 @@ type AddToCartOptions = {
 type CartContextValue = {
   addItem: (product: CartProduct, options?: AddToCartOptions) => void;
   clearCart: () => void;
+  // False until the cart has been read from localStorage on the client, so
+  // consumers can show a placeholder instead of flashing an empty state.
+  hydrated: boolean;
   itemCount: number;
   items: CartItem[];
   removeItem: (productId: string) => void;
@@ -134,6 +137,7 @@ function getAnimationTransform(start: { x: number; y: number }) {
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [flyItems, setFlyItems] = useState<FlyItem[]>([]);
+  const [hydrated, setHydrated] = useState(false);
   const itemsRef = useRef<CartItem[]>([]);
 
   const syncItems = useCallback((nextItems: CartItem[]) => {
@@ -144,6 +148,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const hydrationTimer = window.setTimeout(() => {
       syncItems(readStoredCart());
+      setHydrated(true);
     }, 0);
 
     function handleExternalCartChange() {
@@ -250,11 +255,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     () => ({
       addItem,
       clearCart,
+      hydrated,
       itemCount: items.length,
       items,
       removeItem,
     }),
-    [addItem, clearCart, items, removeItem]
+    [addItem, clearCart, hydrated, items, removeItem]
   );
 
   return (

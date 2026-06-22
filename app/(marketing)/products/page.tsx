@@ -6,6 +6,7 @@ import { PackageOpenIcon, SlidersHorizontalIcon, XIcon, LayoutGridIcon, ListIcon
 import { SidebarFilters } from "@/components/products/sidebar-filters";
 import { ProductPagination } from "@/components/products/product-pagination";
 import { ProductCard } from "@/components/products/product-card";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -293,26 +294,20 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 </Suspense>
               </div>
             ) : hasActiveFilters ? (
-              <div className="flex min-h-60 flex-col items-center justify-center gap-4 rounded-lg border bg-card p-8 text-center">
-                <div className="flex size-12 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
-                  <PackageOpenIcon aria-hidden="true" />
-                </div>
-                <div className="flex max-w-md flex-col gap-2">
-                  <h2 className="text-xl font-semibold tracking-normal">
-                    No products found
-                  </h2>
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    Try a different keyword or clear the filters to see more products.
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  render={<Link href="/products" />}
-                  nativeButton={false}
-                >
-                  Clear all filters
-                </Button>
-              </div>
+              <EmptyState
+                icon={PackageOpenIcon}
+                title="No products found"
+                description="Try a different keyword or clear the filters to see more products."
+                action={
+                  <Button
+                    variant="outline"
+                    render={<Link href="/products" />}
+                    nativeButton={false}
+                  >
+                    Clear all filters
+                  </Button>
+                }
+              />
             ) : (
               <div className="grid gap-6">
                 <div className="flex flex-col gap-4 rounded-lg border bg-card p-6 text-card-foreground shadow-sm md:flex-row md:items-center md:justify-between">

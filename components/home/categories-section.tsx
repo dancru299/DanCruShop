@@ -3,7 +3,7 @@
 import { createElement } from "react";
 import Link from "next/link";
 import * as LucideIcons from "lucide-react";
-import { TagIcon, type LucideIcon } from "lucide-react";
+import { ArrowUpRightIcon, TagIcon, type LucideIcon } from "lucide-react";
 
 import {
   getHomeCategories,
@@ -36,10 +36,14 @@ function CategoryCard({ category }: { category: HomeCategory }) {
   return (
     <Link
       href={`/products?category=${encodeURIComponent(category.slug)}`}
-      className="group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-border/80 bg-card/55 p-4 text-card-foreground shadow-sm backdrop-blur-xl transition-[border-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-lg hover:shadow-black/20 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      className="group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-border/80 bg-card/55 p-4 text-card-foreground shadow-sm backdrop-blur-xl transition-[border-color,transform,box-shadow] duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
-      <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-primary/60 via-transparent to-transparent" />
-      <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/80 bg-background text-foreground shadow-sm">
+      {/* hover glow */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--primary),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-[0.08]" />
+      {/* top accent line — brightens on hover */}
+      <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-primary/60 via-transparent to-transparent transition-all duration-300 group-hover:from-primary group-hover:via-primary/30" />
+
+      <div className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/80 bg-gradient-to-br from-background to-muted text-foreground shadow-sm transition-[transform,color,border-color] duration-300 group-hover:scale-105 group-hover:border-primary/30 group-hover:text-primary">
         {category.image_url ? (
           <img
             src={category.image_url}
@@ -54,7 +58,14 @@ function CategoryCard({ category }: { category: HomeCategory }) {
         )}
       </div>
 
-      <h3 className="min-w-0 truncate text-base font-semibold">{category.name}</h3>
+      <h3 className="relative min-w-0 flex-1 truncate text-base font-semibold">
+        {category.name}
+      </h3>
+
+      <ArrowUpRightIcon
+        aria-hidden="true"
+        className="relative size-4 shrink-0 -translate-x-1 text-muted-foreground opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:text-primary group-hover:opacity-100"
+      />
     </Link>
   );
 }

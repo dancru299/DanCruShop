@@ -185,7 +185,7 @@ export function useProductForm({
   }
 
   const submitLabel = useMemo(
-    () => (mode === "create" ? "Create product" : "Save changes"),
+    () => (mode === "create" ? "Tạo sản phẩm" : "Lưu thay đổi"),
     [mode]
   );
   const previewPriceCents = parsePriceCents(priceUsd, currency) ?? 0;
@@ -309,7 +309,7 @@ export function useProductForm({
       }
 
       toast.success(
-        mode === "create" ? "Product created." : "Product updated."
+        mode === "create" ? "Đã tạo sản phẩm." : "Đã cập nhật sản phẩm."
       );
       router.push("/admin/products");
       router.refresh();

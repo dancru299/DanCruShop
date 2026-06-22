@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MarkdownEditor } from "@/components/admin/markdown-editor";
 import { AdminMediaUploadField } from "@/components/admin/media-upload-field";
-import { statusBadgeVariants } from "./constants";
+import { productStatusLabels, statusBadgeVariants } from "./constants";
 import type { ProductStatus } from "@/lib/supabase/queries/products";
 
 type StorefrontFieldsProps = {
@@ -53,23 +53,25 @@ export function StorefrontFields({
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <h2 className="text-base font-semibold tracking-normal">
-              Storefront content
+              Nội dung cửa hàng
             </h2>
             <p className="text-sm leading-6 text-muted-foreground">
-              These fields shape the product card and public detail page.
+              Các trường này định hình thẻ sản phẩm và trang chi tiết công khai.
             </p>
           </div>
-          <Badge variant={statusBadgeVariants[status]}>{status}</Badge>
+          <Badge variant={statusBadgeVariants[status]}>
+            {productStatusLabels[status]}
+          </Badge>
         </div>
 
         <FieldGroup>
           <Field data-invalid={Boolean(errors.title)}>
-            <FieldLabel htmlFor="title">Title</FieldLabel>
+            <FieldLabel htmlFor="title">Tiêu đề</FieldLabel>
             <Input
               id="title"
               value={title}
               onChange={(event) => onTitleChange(event.target.value)}
-              placeholder="Premium landing page kit"
+              placeholder="Bộ landing page cao cấp"
               aria-invalid={Boolean(errors.title)}
               disabled={isPending}
             />
@@ -87,26 +89,26 @@ export function StorefrontFields({
               disabled={isPending}
             />
             <FieldDescription>
-              Used in the product URL. It is auto-generated from the title.
+              Dùng trong URL sản phẩm. Tự động tạo từ tiêu đề.
             </FieldDescription>
             <FieldError>{errors.slug}</FieldError>
           </Field>
 
           <Field>
             <FieldLabel htmlFor="short-description">
-              Short description
+              Mô tả ngắn
             </FieldLabel>
             <Textarea
               id="short-description"
               value={shortDescription}
               onChange={(event) => onShortDescriptionChange(event.target.value)}
-              placeholder="A concise product summary for cards and SEO."
+              placeholder="Tóm tắt ngắn gọn cho thẻ sản phẩm và SEO."
               disabled={isPending}
             />
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="description">Full description</FieldLabel>
+            <FieldLabel htmlFor="description">Mô tả đầy đủ</FieldLabel>
             <MarkdownEditor
               id="description"
               value={description}
@@ -125,20 +127,20 @@ export function StorefrontFields({
       <section className="rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
         <div className="mb-5">
           <h2 className="text-base font-semibold tracking-normal">
-            Product media
+            Hình ảnh sản phẩm
           </h2>
           <p className="text-sm leading-6 text-muted-foreground">
-            Upload a thumbnail for product cards, or paste a remote image
-            URL when the asset already lives elsewhere.
+            Tải ảnh thumbnail cho thẻ sản phẩm, hoặc dán URL ảnh từ xa nếu ảnh
+            đã có sẵn nơi khác.
           </p>
         </div>
 
         <AdminMediaUploadField
-          description="Recommended ratio: 16:10. Images are uploaded to the public media bucket."
+          description="Tỉ lệ khuyến nghị: 16:10. Ảnh được tải lên kho media công khai."
           disabled={isPending}
           folder="products"
           id="thumbnail-url"
-          label="Thumbnail URL"
+          label="URL thumbnail"
           onChange={onThumbnailUrlChange}
           placeholder="https://example.com/product-thumbnail.jpg"
           value={thumbnailUrl}

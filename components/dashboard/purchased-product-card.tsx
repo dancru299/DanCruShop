@@ -13,7 +13,7 @@ type PurchasedProductCardProps = {
   purchase: UserPurchase;
 };
 
-const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
 });
 

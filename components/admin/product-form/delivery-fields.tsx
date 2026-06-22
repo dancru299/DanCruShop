@@ -59,10 +59,10 @@ export function DeliveryFields({
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <h2 className="text-base font-semibold tracking-normal">
-            Delivery and external links
+            Giao hàng &amp; liên kết ngoài
           </h2>
           <p className="text-sm leading-6 text-muted-foreground">
-            Connect demos, previews, and Lemon Squeezy references.
+            Kết nối demo, bản xem trước và tham chiếu Lemon Squeezy.
           </p>
         </div>
         <ExternalLinkIcon
@@ -74,7 +74,7 @@ export function DeliveryFields({
       <FieldGroup>
         <div className="grid gap-5 md:grid-cols-2">
           <Field>
-            <FieldLabel htmlFor="demo-url">Demo URL</FieldLabel>
+            <FieldLabel htmlFor="demo-url">URL demo</FieldLabel>
             <Input
               id="demo-url"
               value={demoUrl}
@@ -84,7 +84,7 @@ export function DeliveryFields({
             />
           </Field>
           <Field>
-            <FieldLabel htmlFor="preview-url">Preview URL</FieldLabel>
+            <FieldLabel htmlFor="preview-url">URL xem trước</FieldLabel>
             <Input
               id="preview-url"
               value={previewUrl}
@@ -98,25 +98,25 @@ export function DeliveryFields({
         <div className="grid gap-5 md:grid-cols-2">
           <Field>
             <FieldLabel htmlFor="lemon-product-id">
-              Lemon Squeezy product ID
+              ID sản phẩm Lemon Squeezy
             </FieldLabel>
             <Input
               id="lemon-product-id"
               value={lemonProductId}
               onChange={(event) => onLemonProductIdChange(event.target.value)}
-              placeholder="Optional"
+              placeholder="Tùy chọn"
               disabled={isPending}
             />
           </Field>
           <Field>
             <FieldLabel htmlFor="lemon-variant-id">
-              Lemon Squeezy variant ID
+              ID biến thể Lemon Squeezy
             </FieldLabel>
             <Input
               id="lemon-variant-id"
               value={lemonVariantId}
               onChange={(event) => onLemonVariantIdChange(event.target.value)}
-              placeholder="Optional"
+              placeholder="Tùy chọn"
               disabled={isPending}
             />
           </Field>
@@ -124,7 +124,7 @@ export function DeliveryFields({
 
         <Field>
           <FieldLabel htmlFor="github-repo">
-            GitHub repo (changelog)
+            GitHub repo (lịch sử cập nhật)
           </FieldLabel>
           <div className="flex flex-col gap-2 sm:flex-row">
             <Input

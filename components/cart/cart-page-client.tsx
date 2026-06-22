@@ -24,6 +24,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   getCartCheckoutReadiness,
   getCartCheckoutWarning,
@@ -63,7 +64,7 @@ const initialCheckoutState: CartCheckoutState = {
 };
 
 export function CartPageClient() {
-  const { clearCart, items, itemCount, removeItem } = useCart();
+  const { clearCart, hydrated, items, itemCount, removeItem } = useCart();
   const [checkoutState, checkoutAction, isPending] = useActionState(
     createCartCheckoutFromForm,
     initialCheckoutState
@@ -124,6 +125,10 @@ export function CartPageClient() {
     setAppliedCoupon(null);
     setCouponInput("");
     setCouponError(null);
+  }
+
+  if (!hydrated) {
+    return <CartSkeleton />;
   }
 
   if (items.length === 0) {
@@ -379,6 +384,58 @@ export function CartPageClient() {
               configured payment flow.
             </p>
           </form>
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+/** Shown while the cart is read from localStorage, mirroring the cart layout. */
+function CartSkeleton() {
+  return (
+    <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-10 md:py-14 lg:grid-cols-[1fr_360px]">
+      <section className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-9 w-24" />
+          <Skeleton className="h-4 w-full max-w-md" />
+        </div>
+
+        <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              className="grid gap-4 border-b p-4 last:border-b-0 md:grid-cols-[96px_1fr_auto] md:items-center"
+            >
+              <Skeleton className="aspect-[4/3] w-full rounded-lg" />
+              <div className="grid gap-2">
+                <div className="flex gap-2">
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                  <Skeleton className="h-5 w-24 rounded-full" />
+                </div>
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+              <Skeleton className="h-8 w-20" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <aside className="h-fit rounded-lg border bg-card p-5 shadow-sm lg:sticky lg:top-24">
+        <div className="flex flex-col gap-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="grid gap-2">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+            <Skeleton className="h-8 w-16" />
+          </div>
+          <div className="grid gap-3 border-y py-4">
+            <Skeleton className="h-5 w-full" />
+          </div>
+          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-11 w-full rounded-md" />
         </div>
       </aside>
     </div>

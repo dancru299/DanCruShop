@@ -29,7 +29,7 @@ type AdminMediaUploadFieldProps = {
 };
 
 function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Something went wrong.";
+  return error instanceof Error ? error.message : "Đã có lỗi xảy ra.";
 }
 
 export function AdminMediaUploadField({
@@ -69,7 +69,7 @@ export function AdminMediaUploadField({
       }
 
       onChange(result.url);
-      toast.success("Image uploaded.");
+      toast.success("Đã tải ảnh lên.");
     } catch (error) {
       console.error("Admin image upload failed", error);
       toast.error(getErrorMessage(error));
@@ -99,7 +99,7 @@ export function AdminMediaUploadField({
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-muted-foreground">
             <ImageIcon aria-hidden="true" className="size-6" />
-            <span className="text-xs">No image</span>
+            <span className="text-xs">Chưa có ảnh</span>
           </div>
         )}
       </div>
@@ -120,7 +120,7 @@ export function AdminMediaUploadField({
         <div className="flex flex-wrap gap-2">
           <Input
             ref={fileInputRef}
-            aria-label={`Upload ${label}`}
+            aria-label={`Tải lên ${label}`}
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
             className="hidden"
@@ -142,7 +142,7 @@ export function AdminMediaUploadField({
             ) : (
               <UploadCloudIcon aria-hidden="true" data-icon="inline-start" />
             )}
-            {isUploading ? "Uploading..." : "Upload image"}
+            {isUploading ? "Đang tải..." : "Tải ảnh lên"}
           </Button>
           {hasImage ? (
             <Button
@@ -152,7 +152,7 @@ export function AdminMediaUploadField({
               onClick={() => onChange("")}
             >
               <XIcon aria-hidden="true" data-icon="inline-start" />
-              Clear
+              Xóa
             </Button>
           ) : null}
         </div>

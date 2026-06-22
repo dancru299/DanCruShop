@@ -45,12 +45,12 @@ type ProductFileManagerProps = {
 };
 
 function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Something went wrong.";
+  return error instanceof Error ? error.message : "Đã có lỗi xảy ra.";
 }
 
 function formatBytes(value: number | null) {
   if (typeof value !== "number") {
-    return "Unknown";
+    return "Không rõ";
   }
 
   if (value === 0) {
@@ -147,7 +147,7 @@ export function ProductFileManager({
       }
 
       setUploadProgress(100);
-      toast.success("File uploaded.");
+      toast.success("Đã tải tệp lên.");
       await reload();
     } catch (error) {
       console.error("Product file upload failed", error);
@@ -164,7 +164,7 @@ export function ProductFileManager({
 
   function handleDelete(file: ProductFileRecord) {
     const confirmed = window.confirm(
-      `Delete "${file.file_name}"? This cannot be undone.`
+      `Xóa "${file.file_name}"? Không thể hoàn tác.`
     );
 
     if (!confirmed) {
@@ -182,7 +182,7 @@ export function ProductFileManager({
           return;
         }
 
-        toast.success("File deleted.");
+        toast.success("Đã xóa tệp.");
         await reload();
       } catch (error) {
         console.error("Product file delete failed", error);
@@ -198,7 +198,7 @@ export function ProductFileManager({
       <div className="rounded-lg border bg-card p-5 text-card-foreground shadow-sm">
         <FieldGroup>
           <Field data-disabled={isBusy}>
-            <FieldLabel htmlFor="product-file">Upload Product File</FieldLabel>
+            <FieldLabel htmlFor="product-file">Tải tệp sản phẩm lên</FieldLabel>
             <Input
               ref={fileInputRef}
               id="product-file"
@@ -207,8 +207,8 @@ export function ProductFileManager({
               onChange={handleFileChange}
             />
             <FieldDescription>
-              Files are uploaded to the private products bucket and saved under
-              this product id.
+              Tệp được tải lên kho products riêng tư và lưu theo id của sản
+              phẩm này.
             </FieldDescription>
           </Field>
 
@@ -221,7 +221,7 @@ export function ProductFileManager({
                     className="animate-spin"
                     data-icon="inline-start"
                   />
-                  Uploading
+                  Đang tải lên
                 </span>
                 <span className="text-muted-foreground">
                   {uploadProgress}%
@@ -247,13 +247,13 @@ export function ProductFileManager({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Size</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Downloads</TableHead>
-                <TableHead>Limit / user</TableHead>
-                <TableHead>Uploaded</TableHead>
-                <TableHead className="text-right">Action</TableHead>
+                <TableHead>Tên</TableHead>
+                <TableHead>Dung lượng</TableHead>
+                <TableHead>Loại</TableHead>
+                <TableHead>Lượt tải</TableHead>
+                <TableHead>Giới hạn / người</TableHead>
+                <TableHead>Đã tải lên</TableHead>
+                <TableHead className="text-right">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -275,7 +275,7 @@ export function ProductFileManager({
                                 aria-hidden="true"
                                 data-icon="inline-start"
                               />
-                              Primary
+                              Chính
                             </Badge>
                           ) : null}
                         </div>
@@ -286,7 +286,7 @@ export function ProductFileManager({
                     </div>
                   </TableCell>
                   <TableCell>{formatBytes(file.file_size_bytes)}</TableCell>
-                  <TableCell>{file.file_type ?? "Unknown"}</TableCell>
+                  <TableCell>{file.file_type ?? "Không rõ"}</TableCell>
                   <TableCell>{file.download_count}</TableCell>
                   <TableCell>
                     <DownloadLimitInput
@@ -296,14 +296,14 @@ export function ProductFileManager({
                   </TableCell>
                   <TableCell>{formatDate(file.created_at)}</TableCell>
                   <TableCell className="text-right">
-                    <AdminActionMenu label={`Actions for ${file.file_name}`}>
+                    <AdminActionMenu label={`Thao tác cho ${file.file_name}`}>
                       <AdminActionMenuButton
                         icon={deletingFileId === file.id ? "loader" : "trash"}
                         tone="destructive"
                         disabled={isBusy}
                         onClick={() => handleDelete(file)}
                       >
-                        Delete
+                        Xóa
                       </AdminActionMenuButton>
                     </AdminActionMenu>
                   </TableCell>
@@ -318,11 +318,11 @@ export function ProductFileManager({
             </div>
             <div className="flex max-w-md flex-col gap-2">
               <h2 className="text-xl font-semibold tracking-normal">
-                No files uploaded
+                Chưa có tệp nào
               </h2>
               <p className="text-sm leading-6 text-muted-foreground">
-                Upload the primary downloadable file for this product. The first
-                file becomes the primary file used by secure delivery.
+                Tải lên tệp tải về chính cho sản phẩm này. Tệp đầu tiên sẽ là
+                tệp chính dùng cho giao hàng bảo mật.
               </p>
             </div>
           </div>
@@ -378,7 +378,7 @@ function DownloadLimitInput({
         onBlur={handleBlur}
         disabled={isSaving}
         className="w-20"
-        aria-label="Max downloads per user"
+        aria-label="Số lượt tải tối đa mỗi người"
       />
       {isSaving && (
         <Loader2Icon aria-hidden="true" className="size-3.5 animate-spin text-muted-foreground" />

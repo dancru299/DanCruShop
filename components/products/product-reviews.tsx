@@ -8,6 +8,7 @@ import {
   createProductReviewReply,
   type ProductReviewActionState,
 } from "@/actions/product-review.actions";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -347,18 +348,11 @@ export function ProductReviews({
             />
           ))
         ) : (
-          <div className="flex min-h-72 flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-8 text-center">
-            <StarIcon aria-hidden="true" className="size-8 text-muted-foreground" />
-            <div className="grid max-w-md gap-2">
-              <h3 className="text-xl font-semibold tracking-normal">
-                No reviews yet
-              </h3>
-              <p className="text-sm leading-6 text-muted-foreground">
-                Once verified buyers leave a review, their ratings and replies
-                will appear here.
-              </p>
-            </div>
-          </div>
+          <EmptyState
+            icon={StarIcon}
+            title="No reviews yet"
+            description="Once verified buyers leave a review, their ratings and replies will appear here."
+          />
         )}
       </div>
     </section>

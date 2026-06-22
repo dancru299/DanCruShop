@@ -7,7 +7,11 @@ import {
   ProductArtwork,
   formatProductPrice,
 } from "@/components/products/product-card";
-import { statusBadgeVariants, productTypeLabels } from "./constants";
+import {
+  productStatusLabels,
+  productTypeLabels,
+  statusBadgeVariants,
+} from "./constants";
 import type { ProductStatus, ProductType, PublishedProduct } from "@/lib/supabase/queries/products";
 
 type ProductPreviewPanelProps = {
@@ -49,7 +53,7 @@ export function ProductPreviewPanel({
     short_description: shortDescription.trim() || null,
     slug: slug || "product-slug",
     thumbnail_url: thumbnailUrl.trim() || null,
-    title: title.trim() || "Untitled product",
+    title: title.trim() || "Sản phẩm chưa có tên",
   };
   const descriptionLines = description
     .split("\n")
@@ -71,7 +75,9 @@ export function ProductPreviewPanel({
             <ProductArtwork product={previewProduct} />
           )}
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/80 to-transparent p-4">
-            <Badge variant={statusBadgeVariants[status]}>{status}</Badge>
+            <Badge variant={statusBadgeVariants[status]}>
+              {productStatusLabels[status]}
+            </Badge>
           </div>
         </div>
 
@@ -93,11 +99,11 @@ export function ProductPreviewPanel({
 
           <p className="line-clamp-3 min-h-16 text-sm leading-6 text-muted-foreground">
             {previewProduct.short_description ??
-              "A concise product summary will appear here on public cards."}
+              "Tóm tắt ngắn gọn của sản phẩm sẽ hiển thị ở đây trên thẻ công khai."}
           </p>
 
           <div className="flex items-center justify-between gap-3 border-t pt-4">
-            <span className="text-sm text-muted-foreground">Lifetime access</span>
+            <span className="text-sm text-muted-foreground">Truy cập trọn đời</span>
             <span className="text-sm font-semibold">
               {formatProductPrice(previewProduct)}
             </span>
@@ -108,17 +114,17 @@ export function ProductPreviewPanel({
       <div className="rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold">Public detail preview</h3>
+            <h3 className="text-sm font-semibold">Xem trước trang chi tiết</h3>
             <p className="text-xs text-muted-foreground">
               /products/{previewProduct.slug}
             </p>
           </div>
-          <Badge variant="outline">Preview</Badge>
+          <Badge variant="outline">Xem trước</Badge>
         </div>
 
         <div className="mt-4 grid gap-3 text-sm">
           <div className="rounded-lg bg-muted/40 p-3">
-            <p className="text-xs text-muted-foreground">Description</p>
+            <p className="text-xs text-muted-foreground">Mô tả</p>
             {descriptionLines.length > 0 ? (
               <div className="mt-2 grid gap-1 text-xs leading-5">
                 {descriptionLines.map((line) => (
@@ -129,7 +135,7 @@ export function ProductPreviewPanel({
               </div>
             ) : (
               <p className="mt-2 text-xs text-muted-foreground">
-                Add a full description to make the detail page feel complete.
+                Thêm mô tả đầy đủ để trang chi tiết trông hoàn chỉnh hơn.
               </p>
             )}
           </div>
@@ -138,13 +144,13 @@ export function ProductPreviewPanel({
             <div className="rounded-lg bg-muted/40 p-3">
               <p className="text-xs text-muted-foreground">Demo</p>
               <p className="mt-1 truncate text-xs">
-                {demoUrl.trim() ? "Connected" : "Missing"}
+                {demoUrl.trim() ? "Đã kết nối" : "Chưa có"}
               </p>
             </div>
             <div className="rounded-lg bg-muted/40 p-3">
-              <p className="text-xs text-muted-foreground">Preview</p>
+              <p className="text-xs text-muted-foreground">Xem trước</p>
               <p className="mt-1 truncate text-xs">
-                {previewUrl.trim() ? "Connected" : "Missing"}
+                {previewUrl.trim() ? "Đã kết nối" : "Chưa có"}
               </p>
             </div>
           </div>

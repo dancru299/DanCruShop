@@ -69,15 +69,15 @@ export function ProductForm({
           nativeButton={false}
         >
           <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-          Back to products
+          Quay lại danh sách sản phẩm
         </Button>
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-semibold tracking-normal">
-            {mode === "create" ? "New Product" : "Edit Product"}
+            {mode === "create" ? "Sản phẩm mới" : "Sửa sản phẩm"}
           </h1>
           <p className="text-sm leading-6 text-muted-foreground">
-            Build the product listing, media, checkout references, and public
-            preview in one workspace.
+            Xây dựng listing sản phẩm, hình ảnh, tham chiếu thanh toán và bản
+            xem trước công khai trong cùng một nơi.
           </p>
         </div>
       </div>
@@ -171,7 +171,7 @@ export function ProductForm({
             disabled={form.isPending}
           >
             <PackagePlusIcon aria-hidden="true" data-icon="inline-start" />
-            Manage bundle
+            Quản lý bộ sản phẩm
           </Button>
         ) : null}
         {mode === "edit" && product ? (
@@ -187,7 +187,7 @@ export function ProductForm({
           nativeButton={false}
           disabled={form.isPending}
         >
-          Cancel
+          Hủy
         </Button>
         <Button type="submit" disabled={form.isPending}>
           {form.isPending ? (
@@ -199,7 +199,7 @@ export function ProductForm({
           ) : (
             <SaveIcon aria-hidden="true" data-icon="inline-start" />
           )}
-          {form.isPending ? "Saving..." : form.submitLabel}
+          {form.isPending ? "Đang lưu..." : form.submitLabel}
         </Button>
       </div>
     </form>

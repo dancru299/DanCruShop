@@ -62,7 +62,7 @@ function LessonForm({
 
   function handleSave() {
     if (!title.trim()) {
-      toast.error("Lesson title is required.");
+      toast.error("Vui lòng nhập tên bài học.");
       return;
     }
     const finalSlug = slug.trim() || slugify(title);
@@ -84,13 +84,13 @@ function LessonForm({
         return;
       }
 
-      toast.success("Lesson saved.");
+      toast.success("Đã lưu bài học.");
       router.refresh();
     });
   }
 
   function handleDelete() {
-    if (!window.confirm(`Delete lesson "${lesson.title}"? This cannot be undone.`)) return;
+    if (!window.confirm(`Xóa bài học "${lesson.title}"? Không thể hoàn tác.`)) return;
 
     startTransition(async () => {
       const result = await deleteLesson(lesson.id, productId);
@@ -98,7 +98,7 @@ function LessonForm({
         toast.error(result.error);
         return;
       }
-      toast.success("Lesson deleted.");
+      toast.success("Đã xóa bài học.");
       onDelete(lesson.id);
       router.refresh();
     });
@@ -116,11 +116,11 @@ function LessonForm({
         ) : (
           <ChevronDownIcon aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
         )}
-        <span className="flex-1 truncate font-medium">{title || "Untitled lesson"}</span>
+        <span className="flex-1 truncate font-medium">{title || "Bài học chưa có tên"}</span>
         {isPreview && (
           <Badge variant="outline" className="shrink-0 text-xs">
             <EyeIcon aria-hidden="true" data-icon="inline-start" />
-            Preview
+            Xem trước
           </Badge>
         )}
       </button>
@@ -130,7 +130,7 @@ function LessonForm({
           <FieldGroup>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field>
-                <FieldLabel>Title</FieldLabel>
+                <FieldLabel>Tiêu đề</FieldLabel>
                 <Input
                   value={title}
                   onChange={(e) => {
@@ -139,7 +139,7 @@ function LessonForm({
                       setSlug(slugify(e.target.value));
                     }
                   }}
-                  placeholder="Lesson title"
+                  placeholder="Tên bài học"
                 />
               </Field>
               <Field>
@@ -153,29 +153,29 @@ function LessonForm({
             </div>
 
             <Field>
-              <FieldLabel>Description</FieldLabel>
+              <FieldLabel>Mô tả</FieldLabel>
               <Input
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Short description (optional)"
+                placeholder="Mô tả ngắn (tùy chọn)"
               />
             </Field>
 
             <Field>
-              <FieldLabel>Video URL</FieldLabel>
+              <FieldLabel>URL video</FieldLabel>
               <Input
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
-                placeholder="YouTube or direct video URL"
+                placeholder="URL YouTube hoặc video trực tiếp"
               />
             </Field>
 
             <Field>
-              <FieldLabel>Content (Markdown)</FieldLabel>
+              <FieldLabel>Nội dung (Markdown)</FieldLabel>
               <Textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Lesson content in Markdown"
+                placeholder="Nội dung bài học bằng Markdown"
                 rows={6}
               />
             </Field>
@@ -190,7 +190,7 @@ function LessonForm({
                   className="size-4 cursor-pointer rounded border-input accent-primary"
                 />
                 <label htmlFor={`preview-${lesson.id}`} className="cursor-pointer select-none">
-                  Free preview
+                  Cho xem trước miễn phí
                 </label>
               </div>
 
@@ -206,13 +206,13 @@ function LessonForm({
                   ) : (
                     <Trash2Icon aria-hidden="true" data-icon="inline-start" />
                   )}
-                  Delete
+                  Xóa
                 </Button>
                 <Button size="sm" disabled={isPending} onClick={handleSave}>
                   {isPending && (
                     <Loader2Icon aria-hidden="true" data-icon="inline-start" className="animate-spin" />
                   )}
-                  Save
+                  Lưu
                 </Button>
               </div>
             </div>
@@ -244,7 +244,7 @@ function AddLessonForm({
 
   function handleAdd() {
     if (!title.trim()) {
-      toast.error("Lesson title is required.");
+      toast.error("Vui lòng nhập tên bài học.");
       return;
     }
 
@@ -260,7 +260,7 @@ function AddLessonForm({
         return;
       }
 
-      toast.success("Lesson added.");
+      toast.success("Đã thêm bài học.");
       setTitle("");
       onAdded();
       router.refresh();
@@ -272,7 +272,7 @@ function AddLessonForm({
       <Input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="New lesson title"
+        placeholder="Tên bài học mới"
         className="flex-1"
         onKeyDown={(e) => {
           if (e.key === "Enter") handleAdd();
@@ -284,7 +284,7 @@ function AddLessonForm({
         ) : (
           <PlusIcon aria-hidden="true" />
         )}
-        Add
+        Thêm
       </Button>
     </div>
   );
@@ -328,7 +328,7 @@ function ModuleCard({
   function handleDelete() {
     if (
       !window.confirm(
-        `Delete module "${mod.title}" and all its lessons? This cannot be undone.`
+        `Xóa chương "${mod.title}" và toàn bộ bài học? Không thể hoàn tác.`
       )
     )
       return;
@@ -339,7 +339,7 @@ function ModuleCard({
         toast.error(result.error);
         return;
       }
-      toast.success("Module deleted.");
+      toast.success("Đã xóa chương.");
       onDelete(mod.id);
       router.refresh();
     });
@@ -353,7 +353,7 @@ function ModuleCard({
           <div className="flex items-center gap-1">
             <button
               type="button"
-              title="Move up"
+              title="Di chuyển lên"
               disabled={mod.position <= 1 || isPending}
               onClick={() => onMove(mod.id, "up")}
               className="rounded p-0.5 text-muted-foreground hover:bg-muted disabled:opacity-30"
@@ -362,7 +362,7 @@ function ModuleCard({
             </button>
             <button
               type="button"
-              title="Move down"
+              title="Di chuyển xuống"
               disabled={mod.position >= totalModules || isPending}
               onClick={() => onMove(mod.id, "down")}
               className="rounded p-0.5 text-muted-foreground hover:bg-muted disabled:opacity-30"
@@ -377,16 +377,16 @@ function ModuleCard({
           onChange={(e) => setTitle(e.target.value)}
           onBlur={handleTitleBlur}
           className="flex-1 rounded border-0 bg-transparent px-1 py-0.5 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-ring"
-          placeholder="Module title"
+          placeholder="Tên chương"
         />
 
-        <span className="text-xs text-muted-foreground">{lessons.length} lessons</span>
+        <span className="text-xs text-muted-foreground">{lessons.length} bài học</span>
 
         <button
           type="button"
           onClick={() => setIsExpanded((v) => !v)}
           className="rounded p-1 text-muted-foreground hover:bg-muted"
-          title={isExpanded ? "Collapse" : "Expand"}
+          title={isExpanded ? "Thu gọn" : "Mở rộng"}
         >
           {isExpanded ? (
             <ChevronUpIcon aria-hidden="true" className="size-4" />
@@ -400,7 +400,7 @@ function ModuleCard({
           onClick={handleDelete}
           disabled={isPending}
           className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
-          title="Delete module"
+          title="Xóa chương"
         >
           {isPending ? (
             <Loader2Icon aria-hidden="true" className="size-4 animate-spin" />
@@ -425,7 +425,7 @@ function ModuleCard({
 
           {lessons.length === 0 && (
             <p className="px-1 text-sm text-muted-foreground">
-              No lessons yet. Add one below.
+              Chưa có bài học. Thêm một bài bên dưới.
             </p>
           )}
 
@@ -461,7 +461,7 @@ export function CourseEditor({
 
   function handleAddModule() {
     if (!newModuleTitle.trim()) {
-      toast.error("Module title is required.");
+      toast.error("Vui lòng nhập tên chương.");
       return;
     }
 
@@ -478,7 +478,7 @@ export function CourseEditor({
         return;
       }
 
-      toast.success("Module added.");
+      toast.success("Đã thêm chương.");
       setNewModuleTitle("");
       router.refresh();
     });
@@ -523,7 +523,7 @@ export function CourseEditor({
 
       {modules.length === 0 && (
         <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No modules yet. Add the first one below.
+          Chưa có chương nào. Thêm chương đầu tiên bên dưới.
         </div>
       )}
 
@@ -532,7 +532,7 @@ export function CourseEditor({
         <Input
           value={newModuleTitle}
           onChange={(e) => setNewModuleTitle(e.target.value)}
-          placeholder="New module title"
+          placeholder="Tên chương mới"
           className="flex-1"
           onKeyDown={(e) => {
             if (e.key === "Enter") handleAddModule();
@@ -544,7 +544,7 @@ export function CourseEditor({
           ) : (
             <PlusIcon aria-hidden="true" data-icon="inline-start" />
           )}
-          Add Module
+          Thêm chương
         </Button>
       </div>
     </div>

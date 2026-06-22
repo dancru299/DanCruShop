@@ -114,7 +114,7 @@ export function CategoryForm({ mode, category }: CategoryFormProps) {
             id="category-name"
             value={name}
             onChange={(event) => handleNameChange(event.target.value)}
-            placeholder="Source code"
+            placeholder="Mã nguồn"
             aria-invalid={Boolean(errors.name)}
             disabled={isPending}
           />
@@ -152,7 +152,7 @@ export function CategoryForm({ mode, category }: CategoryFormProps) {
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="category-icon">Icon</FieldLabel>
+          <FieldLabel htmlFor="category-icon">Biểu tượng</FieldLabel>
           <Input
             id="category-icon"
             value={icon}

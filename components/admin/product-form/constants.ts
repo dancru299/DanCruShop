@@ -4,21 +4,21 @@ export const productTypeOptions: Array<{
   label: string;
   value: ProductType;
 }> = [
-  { label: "Digital download", value: "digital_download" },
-  { label: "Course", value: "course" },
-  { label: "Tool", value: "tool" },
-  { label: "Template", value: "template" },
-  { label: "Bundle", value: "bundle" },
-  { label: "Free resource", value: "free_resource" },
+  { label: "Tải về", value: "digital_download" },
+  { label: "Khóa học", value: "course" },
+  { label: "Công cụ", value: "tool" },
+  { label: "Mẫu", value: "template" },
+  { label: "Bộ", value: "bundle" },
+  { label: "Miễn phí", value: "free_resource" },
 ];
 
 export const productStatusOptions: Array<{
   label: string;
   value: ProductStatus;
 }> = [
-  { label: "Draft", value: "draft" },
-  { label: "Published", value: "published" },
-  { label: "Archived", value: "archived" },
+  { label: "Bản nháp", value: "draft" },
+  { label: "Đã xuất bản", value: "published" },
+  { label: "Đã lưu trữ", value: "archived" },
 ];
 
 export const currencyOptions = [
@@ -27,12 +27,18 @@ export const currencyOptions = [
 ] as const;
 
 export const productTypeLabels: Record<ProductType, string> = {
-  bundle: "Bundle",
-  course: "Course",
-  digital_download: "Digital download",
-  free_resource: "Free resource",
-  template: "Template",
-  tool: "Tool",
+  bundle: "Bộ",
+  course: "Khóa học",
+  digital_download: "Tải về",
+  free_resource: "Miễn phí",
+  template: "Mẫu",
+  tool: "Công cụ",
+};
+
+export const productStatusLabels: Record<ProductStatus, string> = {
+  archived: "Đã lưu trữ",
+  draft: "Bản nháp",
+  published: "Đã xuất bản",
 };
 
 export const statusBadgeVariants: Record<ProductStatus, "default" | "outline" | "secondary"> = {

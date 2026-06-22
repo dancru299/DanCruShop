@@ -385,7 +385,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
                       />
                     </Field>
                     <Field>
-                      <FieldLabel htmlFor={`social-url-${index}`}>Link</FieldLabel>
+                      <FieldLabel htmlFor={`social-url-${index}`}>Liên kết</FieldLabel>
                       <Input
                         id={`social-url-${index}`}
                         value={social.url}

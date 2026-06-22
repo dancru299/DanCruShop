@@ -129,7 +129,7 @@ export async function HeroSection({ section }: { section: HeroSectionConfig }) {
           </div>
 
           <HeroCtas section={section} />
-          <HeroSignals section={section} className="hidden md:grid" />
+          <HeroSignals section={section} />
         </div>
 
         {section.showSpotlight ? (

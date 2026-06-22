@@ -24,47 +24,47 @@ const adminNavItems = [
   {
     href: "/admin",
     icon: BarChart3Icon,
-    label: "Overview",
+    label: "Tổng quan",
   },
   {
     href: "/admin/home",
     icon: LayoutDashboardIcon,
-    label: "Home layout",
+    label: "Bố cục trang chủ",
   },
   {
     href: "/admin/products",
     icon: PackageIcon,
-    label: "Products",
+    label: "Sản phẩm",
   },
   {
     href: "/admin/coupons",
     icon: TicketPercentIcon,
-    label: "Coupons",
+    label: "Mã giảm giá",
   },
   {
     href: "/admin/orders",
     icon: ReceiptTextIcon,
-    label: "Orders",
+    label: "Đơn hàng",
   },
   {
     href: "/admin/licenses",
     icon: KeyRoundIcon,
-    label: "Licenses",
+    label: "License key",
   },
   {
     href: "/admin/blog",
     icon: FileTextIcon,
-    label: "Blog",
+    label: "Bài viết",
   },
   {
     href: "/admin/reviews",
     icon: MessageSquareIcon,
-    label: "Reviews",
+    label: "Đánh giá",
   },
   {
     href: "/admin/users",
     icon: UsersIcon,
-    label: "Customers",
+    label: "Khách hàng",
   },
   {
     href: "/admin/specs",
@@ -74,7 +74,7 @@ const adminNavItems = [
   {
     href: "/admin/settings",
     icon: SettingsIcon,
-    label: "Settings",
+    label: "Cài đặt",
   },
 ];
 
