@@ -9,7 +9,6 @@ import {
   PlusIcon,
   Trash2Icon,
   PencilIcon,
-  SlidersHorizontalIcon,
   TagIcon,
   LayersIcon,
 } from "lucide-react";
@@ -62,21 +61,10 @@ type SpecOptionRow = {
 
 type SpecsManagerProps = {
   groups: SpecGroupRow[];
-  totalFields: number;
-  totalOptions: number;
   categories: AdminCategory[];
-  totalProducts: number;
-  emptyCategories: number;
 };
 
-export function SpecsManager({
-  groups,
-  totalFields,
-  totalOptions,
-  categories,
-  totalProducts,
-  emptyCategories,
-}: SpecsManagerProps) {
+export function SpecsManager({ groups, categories }: SpecsManagerProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -530,6 +518,7 @@ export function SpecsManager({
                               className="group/opt inline-flex items-center gap-1.5 rounded-full border bg-muted/20 hover:bg-muted/40 transition-colors pl-2.5 pr-1.5 py-0.5 text-xs font-medium"
                             >
                               {option.logo ? (
+                                // eslint-disable-next-line @next/next/no-img-element -- small external tech logos, not worth next/image
                                 <img alt="" src={option.logo} className="size-3.5 object-contain" />
                               ) : null}
                               <span>{option.label}</span>

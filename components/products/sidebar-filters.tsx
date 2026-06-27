@@ -1,7 +1,7 @@
 "use client";
  
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { SearchIcon, XIcon } from "lucide-react";
  
 import {
@@ -13,11 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { productTypeLabels } from "@/lib/products/display";
-import {
-  getTechSpecGroups,
-  techLabel,
-  validateTechSlugs,
-} from "@/lib/products/specs";
+import { getTechSpecGroups, techLabel } from "@/lib/products/specs";
 import type {
   ProductCategory,
   ProductType,
@@ -88,33 +84,35 @@ export function SidebarFilters({ categories }: SidebarFiltersProps) {
     [queryLower]
   );
  
-  // Auto-expand accordion items containing matches when searching
-  useEffect(() => {
-    if (queryLower) {
-      const matchedGroups: string[] = [];
- 
-      const hasCategoryMatch = categories.some((c) => matchQuery(c.name));
-      if (hasCategoryMatch) matchedGroups.push("categories");
- 
-      const hasTypeMatch = productTypes.some((t) =>
-        matchQuery(productTypeLabels[t])
-      );
-      if (hasTypeMatch) matchedGroups.push("types");
- 
-      techSpecGroups.forEach((group) => {
-        const hasTechMatch = group.fields.some((field) =>
-          (field.options ?? []).some(
-            (opt) =>
-              matchQuery(opt.label) ||
-              (opt.labelEn && matchQuery(opt.labelEn))
-          )
-        );
-        if (hasTechMatch) matchedGroups.push(group.id);
-      });
- 
-      setOpenItems(matchedGroups);
+  // Accordion groups that contain matches while searching. Derived during render
+  // (a memo, not an effect) so we never call setState inside an effect.
+  const matchedGroups = useMemo(() => {
+    if (!queryLower) return null;
+
+    const groups: string[] = [];
+
+    if (categories.some((c) => matchQuery(c.name))) groups.push("categories");
+
+    if (productTypes.some((t) => matchQuery(productTypeLabels[t]))) {
+      groups.push("types");
     }
+
+    techSpecGroups.forEach((group) => {
+      const hasTechMatch = group.fields.some((field) =>
+        (field.options ?? []).some(
+          (opt) =>
+            matchQuery(opt.label) || (opt.labelEn && matchQuery(opt.labelEn))
+        )
+      );
+      if (hasTechMatch) groups.push(group.id);
+    });
+
+    return groups;
   }, [queryLower, categories, techSpecGroups, matchQuery]);
+
+  // While searching, expansion follows the matches; otherwise the user's manual
+  // open/close state drives the accordion.
+  const accordionValue = matchedGroups ?? openItems;
  
   // Filtered categories
   const filteredCategories = useMemo(() => {
@@ -142,7 +140,7 @@ export function SidebarFilters({ categories }: SidebarFiltersProps) {
         matchedOptions,
       };
     });
-  }, [techSpecGroups, queryLower, matchQuery]);
+  }, [techSpecGroups, matchQuery]);
  
   // Toggle multiple Categories (comma-separated list)
   const toggleCategory = useCallback(
@@ -304,7 +302,7 @@ export function SidebarFilters({ categories }: SidebarFiltersProps) {
       {hasMatches ? (
         <Accordion
           multiple
-          value={openItems}
+          value={accordionValue}
           onValueChange={setOpenItems}
           className="w-full"
         >
@@ -496,6 +494,7 @@ function StackPill({
       )}
     >
       {logo ? (
+        // eslint-disable-next-line @next/next/no-img-element -- small external tech logos, not worth next/image
         <img
           alt=""
           src={logo}
