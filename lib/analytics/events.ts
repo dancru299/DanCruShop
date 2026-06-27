@@ -6,7 +6,6 @@ export const analyticsEventNames = [
   "compare_add",
   "checkout_start",
   "checkout_error",
-  "vietqr_order_created",
   "download_start",
   "download_success",
   "download_error",

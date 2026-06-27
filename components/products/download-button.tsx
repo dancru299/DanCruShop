@@ -7,7 +7,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 type DownloadButtonProps = {
-  productId: string;
+  // The variant id whose primary file we deliver.
+  variantId: string;
+  children?: string;
   className?: string;
 };
 
@@ -16,14 +18,18 @@ type DownloadResponse = {
   error?: string;
 };
 
-export function DownloadButton({ productId, className }: DownloadButtonProps) {
+export function DownloadButton({
+  variantId,
+  children,
+  className,
+}: DownloadButtonProps) {
   const [isPreparing, setIsPreparing] = useState(false);
 
   async function handleDownload() {
     setIsPreparing(true);
 
     try {
-      const response = await fetch(`/api/products/${productId}/download`, {
+      const response = await fetch(`/api/products/${variantId}/download`, {
         method: "POST",
       });
       const result = (await response.json()) as DownloadResponse;
@@ -68,7 +74,7 @@ export function DownloadButton({ productId, className }: DownloadButtonProps) {
       ) : (
         <DownloadIcon data-icon="inline-start" aria-hidden="true" />
       )}
-      {isPreparing ? "Preparing..." : "Download File"}
+      {isPreparing ? "Preparing..." : children ?? "Download File"}
     </Button>
   );
 }

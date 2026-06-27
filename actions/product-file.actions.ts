@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 export type ProductFileRecord = {
   id: string;
   product_id: string;
+  variant_id: string | null;
   file_name: string;
   file_path: string;
   file_size_bytes: number | null;
@@ -22,6 +23,7 @@ export type ProductFileRecord = {
 
 type AddProductFileInput = {
   productId: string;
+  variantId: string;
   fileName: string;
   filePath: string;
   fileSize: number;
@@ -66,8 +68,8 @@ function assertProductFilePath(productId: string, filePath: string) {
 }
 
 function revalidateProductFiles(productId: string) {
-  revalidatePath(`/admin/products/${productId}/files`);
-  revalidatePath(`/admin/products/${productId}/edit`);
+  // File management now lives inside the Option tab of each product's workspace.
+  revalidatePath(`/admin/products/${productId}/options`);
 }
 
 export async function addProductFile(
@@ -77,6 +79,7 @@ export async function addProductFile(
     await requireAdmin();
 
     const productId = normalizeText(data.productId, "Product id");
+    const variantId = normalizeText(data.variantId, "Variant id");
     const fileName = normalizeText(data.fileName, "File name");
     const filePath = normalizeText(data.filePath, "File path");
     const fileSize = normalizeFileSize(data.fileSize);
@@ -85,10 +88,11 @@ export async function addProductFile(
     assertProductFilePath(productId, filePath);
 
     const supabase = await createClient();
+    // Primary is computed per VARIANT — each variant has its own primary file.
     const { count, error: countError } = await supabase
       .from("product_files")
       .select("id", { count: "exact", head: true })
-      .eq("product_id", productId);
+      .eq("variant_id", variantId);
 
     if (countError) {
       console.error("Failed to count product files", countError);
@@ -102,6 +106,7 @@ export async function addProductFile(
       file_type: fileType,
       is_primary: (count ?? 0) === 0,
       product_id: productId,
+      variant_id: variantId,
     });
 
     if (error) {
@@ -130,7 +135,7 @@ export async function deleteProductFile(
     const supabaseAdmin = createAdminClient();
     const { data: fileRecord, error: loadError } = await supabaseAdmin
       .from("product_files")
-      .select("id, product_id, is_primary")
+      .select("id, product_id, variant_id, is_primary")
       .eq("id", normalizedFileId)
       .maybeSingle();
 
@@ -165,11 +170,11 @@ export async function deleteProductFile(
       return { ok: false, error: "Không thể xóa tệp. Vui lòng thử lại." };
     }
 
-    if (fileRecord.is_primary) {
+    if (fileRecord.is_primary && fileRecord.variant_id) {
       const { data: nextPrimary, error: nextPrimaryError } = await supabaseAdmin
         .from("product_files")
         .select("id")
-        .eq("product_id", productId)
+        .eq("variant_id", String(fileRecord.variant_id))
         .order("created_at", { ascending: true })
         .limit(1)
         .maybeSingle();
@@ -202,12 +207,12 @@ export async function deleteProductFile(
 }
 
 export async function getProductFiles(
-  productId: string
+  variantId: string
 ): Promise<ProductFileRecord[]> {
   try {
     await requireAdmin();
 
-    const normalizedProductId = normalizeText(productId, "Product id");
+    const normalizedVariantId = normalizeText(variantId, "Variant id");
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("product_files")
@@ -215,6 +220,7 @@ export async function getProductFiles(
         `
           id,
           product_id,
+          variant_id,
           file_name,
           file_path,
           file_size_bytes,
@@ -226,7 +232,7 @@ export async function getProductFiles(
           created_at
         `
       )
-      .eq("product_id", normalizedProductId)
+      .eq("variant_id", normalizedVariantId)
       .order("is_primary", { ascending: false })
       .order("created_at", { ascending: true });
 

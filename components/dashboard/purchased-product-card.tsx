@@ -58,13 +58,15 @@ export function PurchasedProductCard({ purchase }: PurchasedProductCardProps) {
         <div className="mt-auto flex flex-col gap-2 sm:flex-row">
           <Button
             variant="default"
-            render={<Link href={`/products/${product.slug}`} />}
+            render={<Link href={`/dashboard/products/${product.id}`} />}
             nativeButton={false}
           >
             View details
             <ArrowUpRightIcon data-icon="inline-end" aria-hidden="true" />
           </Button>
-          <DownloadButton productId={product.id} />
+          {purchase.variant ? (
+            <DownloadButton variantId={purchase.variant.id} />
+          ) : null}
         </div>
       </div>
     </article>

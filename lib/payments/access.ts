@@ -6,7 +6,8 @@ import { issueLicenseKeys } from "@/lib/payments/licenses";
 
 type GrantAccessArgs = {
   userId: string;
-  productIds: string[];
+  // The purchasable identity is the variant id. Each maps to one product.
+  variantIds: string[];
   orderId?: string | null;
 };
 
@@ -47,36 +48,105 @@ export async function expandBundleProductIds(
   return uniqueIds([...ids, ...childIds]);
 }
 
+// The default variant id for each given product (for bundle children, which are
+// unlocked at their default variant).
+async function getDefaultVariantByProduct(
+  supabaseAdmin: SupabaseClient,
+  productIds: string[]
+): Promise<Map<string, string>> {
+  const ids = uniqueIds(productIds);
+  const map = new Map<string, string>();
+
+  if (ids.length === 0) {
+    return map;
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from("product_variants")
+    .select("id, product_id")
+    .in("product_id", ids)
+    .eq("is_default", true);
+
+  if (error) {
+    throw new Error(`Could not load default variants: ${error.message}`);
+  }
+
+  for (const row of (data ?? []) as { id: string; product_id: string }[]) {
+    map.set(row.product_id, row.id);
+  }
+
+  return map;
+}
+
 /**
  * Single source of truth for unlocking products after payment/free claim.
- * Expands bundles, upserts active purchases for every resulting product, and
- * issues license keys for products that require them. Idempotent.
+ * Takes the purchased variant ids, expands bundles (granting each child's
+ * default variant), upserts active purchases per (product, variant), and issues
+ * license keys. Idempotent.
  */
 export async function grantProductAccess(
   supabaseAdmin: SupabaseClient,
-  { userId, productIds, orderId = null }: GrantAccessArgs
+  { userId, variantIds, orderId = null }: GrantAccessArgs
 ): Promise<string[]> {
-  const allProductIds = await expandBundleProductIds(supabaseAdmin, productIds);
+  const ids = uniqueIds(variantIds);
 
-  if (allProductIds.length === 0) {
+  if (ids.length === 0) {
     return [];
   }
 
-  const { error } = await supabaseAdmin.from("purchases").upsert(
-    allProductIds.map((productId) => ({
-      access_status: "active",
-      order_id: orderId,
-      product_id: productId,
-      user_id: userId,
-    })),
-    { onConflict: "user_id,product_id" }
+  // Resolve the purchased variants to their products.
+  const { data: variantRows, error: variantError } = await supabaseAdmin
+    .from("product_variants")
+    .select("id, product_id")
+    .in("id", ids);
+
+  if (variantError) {
+    throw new Error(`Could not load purchased variants: ${variantError.message}`);
+  }
+
+  const pairs = new Map<string, string>(); // variantId -> productId
+  for (const row of (variantRows ?? []) as { id: string; product_id: string }[]) {
+    pairs.set(row.id, row.product_id);
+  }
+
+  // Expand bundles: child products are unlocked at their default variant.
+  const directProductIds = Array.from(new Set(pairs.values()));
+  const allProductIds = await expandBundleProductIds(
+    supabaseAdmin,
+    directProductIds
   );
+  const childProductIds = allProductIds.filter(
+    (id) => !directProductIds.includes(id)
+  );
+
+  if (childProductIds.length > 0) {
+    const defaults = await getDefaultVariantByProduct(
+      supabaseAdmin,
+      childProductIds
+    );
+    for (const [productId, variantId] of defaults) {
+      pairs.set(variantId, productId);
+    }
+  }
+
+  const rows = Array.from(pairs.entries()).map(([variantId, productId]) => ({
+    access_status: "active",
+    order_id: orderId,
+    product_id: productId,
+    user_id: userId,
+    variant_id: variantId,
+  }));
+
+  const { error } = await supabaseAdmin
+    .from("purchases")
+    .upsert(rows, { onConflict: "user_id,product_id,variant_id" });
 
   if (error) {
     throw new Error(`Could not grant product access: ${error.message}`);
   }
 
-  await issueLicenseKeys(supabaseAdmin, userId, allProductIds, orderId);
+  const grantedProductIds = Array.from(new Set(rows.map((row) => row.product_id)));
+  await issueLicenseKeys(supabaseAdmin, userId, grantedProductIds, orderId);
 
-  return allProductIds;
+  return grantedProductIds;
 }

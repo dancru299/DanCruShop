@@ -4,10 +4,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ArrowRightIcon,
   CheckCircle2Icon,
   Clock3Icon,
-  ExternalLinkIcon,
   LifeBuoyIcon,
   Layers3Icon,
   MonitorCheckIcon,
@@ -20,7 +18,10 @@ import {
 import ReactMarkdown from "react-markdown";
 
 import { ProductViewTracker } from "@/components/analytics/product-view-tracker";
-import { ProductCta } from "@/components/products/product-cta";
+import {
+  ProductBuyBox,
+  type BuyBoxOption,
+} from "@/components/products/product-buy-box";
 import {
   ProductArtwork,
   ProductCard,
@@ -28,7 +29,6 @@ import {
 import { ProductReviews } from "@/components/products/product-reviews";
 import { Badge } from "@/components/ui/badge";
 import {
-  formatProductPrice,
   productTypeDescriptions,
   productTypeLabels,
 } from "@/lib/products/display";
@@ -52,7 +52,11 @@ import {
   siteName,
 } from "@/lib/site-config";
 import { getBundleChildProducts } from "@/lib/supabase/queries/bundles";
-import { checkUserAccess } from "@/lib/supabase/queries/purchases";
+import { getPublishedVariants } from "@/lib/supabase/queries/product-variants";
+import {
+  checkUserAccess,
+  getPurchasedVariantIds,
+} from "@/lib/supabase/queries/purchases";
 import { getProductReviews } from "@/lib/supabase/queries/product-reviews";
 import {
   getProductBySlug,
@@ -259,15 +263,60 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   const viewer = await getViewerState();
   const githubRepo = getProductGithubRepo(product.metadata);
-  const [hasPurchased, reviewsData, bundleChildren, changelog] =
-    await Promise.all([
-      viewer.userId ? checkUserAccess(viewer.userId, product.id) : false,
-      getProductReviews(product.id),
-      product.product_type === "bundle"
-        ? getBundleChildProducts(product.id)
-        : Promise.resolve([]),
-      githubRepo ? getProductChangelog(githubRepo) : Promise.resolve([]),
-    ]);
+  const [
+    hasPurchased,
+    purchasedVariantIds,
+    reviewsData,
+    bundleChildren,
+    changelog,
+    variants,
+  ] = await Promise.all([
+    viewer.userId ? checkUserAccess(viewer.userId, product.id) : false,
+    viewer.userId
+      ? getPurchasedVariantIds(viewer.userId, product.id)
+      : Promise.resolve<string[]>([]),
+    getProductReviews(product.id),
+    product.product_type === "bundle"
+      ? getBundleChildProducts(product.id)
+      : Promise.resolve([]),
+    githubRepo ? getProductChangelog(githubRepo) : Promise.resolve([]),
+    getPublishedVariants(product.id),
+  ]);
+
+  // Each variant of the product is a selectable, purchasable version on the same
+  // page. id = variant id (the purchasable identity); productId is the product.
+  const buyBoxOptions: BuyBoxOption[] =
+    variants.length > 0
+      ? variants.map((variant) => ({
+          id: variant.id,
+          productId: product.id,
+          title: product.title,
+          slug: product.slug,
+          productType: product.product_type,
+          optionLabel: variant.name,
+          priceCents: variant.price_cents,
+          compareAtPriceCents: variant.compare_at_price_cents,
+          currency: product.currency,
+          isFree: variant.is_free,
+        }))
+      : [
+          {
+            id: product.id,
+            productId: product.id,
+            title: product.title,
+            slug: product.slug,
+            productType: product.product_type,
+            optionLabel: null,
+            priceCents: product.price_cents,
+            compareAtPriceCents: product.compare_at_price_cents,
+            currency: product.currency,
+            isFree: product.is_free,
+          },
+        ];
+  const lemonSqueezyUrl =
+    getStringFromMetadata(product.metadata, "lemonSqueezyUrl") ??
+    process.env.NEXT_PUBLIC_LEMONSQUEEZY_STORE_URL?.trim() ??
+    null;
   const techStack = getTechStack(product);
   const license = getLicense(product);
   const includedItems = getIncludedItems(product);
@@ -340,31 +389,6 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                 )}
               </div>
             </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              {product.demo_url ? (
-                <Link
-                  href={product.demo_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  View demo
-                  <ExternalLinkIcon aria-hidden="true" className="size-4" />
-                </Link>
-              ) : null}
-              {product.preview_url ? (
-                <Link
-                  href={product.preview_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  View preview
-                  <ExternalLinkIcon aria-hidden="true" className="size-4" />
-                </Link>
-              ) : null}
-            </div>
           </div>
 
           <aside className="motion-fade-up motion-delay-1 flex flex-col gap-4 lg:pt-1">
@@ -404,7 +428,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                 <p className="mt-1 text-sm text-muted-foreground">
                   {reviewsData.summary.totalReviews > 0
                     ? `${reviewsData.summary.totalReviews} reviews`
-                    : "No reviews yet"}
+                    : "Be the first to review"}
                 </p>
               </div>
               <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-2.5">
@@ -422,25 +446,18 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             </div>
 
             <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-4 text-card-foreground shadow-sm">
-              <div className="mb-4 flex items-start justify-between gap-4 border-b pb-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Price</p>
-                  <p className="mt-1 text-2xl font-semibold tracking-normal">
-                    {formatProductPrice(product)}
-                  </p>
-                </div>
-                <Badge variant="outline">Secure payment</Badge>
-              </div>
-              <ProductCta
-                currency={product.currency}
-                productId={product.id}
-                priceCents={product.price_cents}
-                isFree={product.is_free}
-                hasPurchased={hasPurchased}
-                productType={product.product_type}
-                slug={product.slug}
+              <ProductBuyBox
+                activeOptionId={
+                  variants.find((variant) => variant.is_default)?.id ??
+                  buyBoxOptions[0]?.id ??
+                  product.id
+                }
+                demoUrl={product.demo_url}
+                lemonSqueezyUrl={lemonSqueezyUrl}
+                options={buyBoxOptions}
+                previewUrl={product.preview_url}
+                purchasedOptionIds={purchasedVariantIds}
                 thumbnailUrl={product.thumbnail_url}
-                title={product.title}
               />
               <div className="mt-4 grid gap-2 border-t pt-4 text-xs leading-5 text-muted-foreground">
                 <p>{betaPolicies.delivery}</p>
@@ -512,10 +529,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
       <section className="scroll-reveal mx-auto grid w-full max-w-6xl gap-8 px-4 py-12 md:py-16 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-muted-foreground">Product details</p>
-          <h2 className="text-3xl font-semibold tracking-normal">
-            Ready to use in real projects, not just a file to download.
-          </h2>
+          <h2 className="text-2xl font-semibold tracking-normal">Overview</h2>
           {githubRepo ? (
             <ProductInfoTabs overview={overviewContent} commits={changelog} />
           ) : (
@@ -586,32 +600,11 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-5 shadow-sm">
-              <p className="font-medium">Best for</p>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                {getAudience(product)}
-              </p>
-            </div>
-            <Link
-              href="/cart"
-              className="group flex flex-col justify-between rounded-lg border bg-card/60 backdrop-blur-xl p-5 shadow-sm transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/35 hover:shadow-lg"
-            >
-              <div>
-                <p className="font-medium">Buy it together in your cart?</p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  Add this product to your cart and check out with your other
-                  resources in one place.
-                </p>
-              </div>
-              <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium">
-                Open cart
-                <ArrowRightIcon
-                  aria-hidden="true"
-                  className="size-4 transition-transform group-hover:translate-x-0.5"
-                />
-              </span>
-            </Link>
+          <div className="rounded-lg border bg-card/60 backdrop-blur-xl p-5 shadow-sm">
+            <p className="font-medium">Best for</p>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              {getAudience(product)}
+            </p>
           </div>
         </div>
       </section>

@@ -12,7 +12,7 @@ export default async function AdminOrdersPage() {
       <AdminPageHeader
         eyebrow="Quản lý giao dịch"
         title="Đơn hàng"
-        description="Theo dõi lịch sử thanh toán, doanh thu và phê duyệt thủ công các đơn VietQR đang chờ xử lý."
+        description="Theo dõi lịch sử thanh toán và doanh thu. Đơn PayPal được mở khóa tự động sau khi thanh toán."
       />
 
       <OrdersTable orders={orders} />

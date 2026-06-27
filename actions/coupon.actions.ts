@@ -80,7 +80,7 @@ function normalizeCoupon(data: CouponInput) {
   const currency: string | null = rawCurrency.length === 3 ? rawCurrency : null;
 
   if (data.discount_type === "fixed" && !currency) {
-    throw new Error("Chọn tiền tệ cho mã giảm cố định (VD: VND, USD).");
+    throw new Error("Chọn tiền tệ cho mã giảm cố định (VD: USD).");
   }
 
   const minOrder =

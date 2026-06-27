@@ -12,7 +12,7 @@ export default async function AdminSettingsPage() {
       <AdminPageHeader
         eyebrow="Cấu hình"
         title="Cài đặt"
-        description="Cấu hình thanh toán VietQR và thông tin shop. Giá trị để trống sẽ dùng biến môi trường làm mặc định."
+        description="Cấu hình thông tin shop, kênh liên hệ và banner. Giá trị để trống sẽ dùng biến môi trường làm mặc định."
       />
 
       <SettingsForm settings={settings} />

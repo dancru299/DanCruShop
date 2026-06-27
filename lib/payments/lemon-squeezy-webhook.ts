@@ -28,13 +28,41 @@ type LemonSqueezyOrderPayload = {
   [key: string]: unknown;
 };
 
-type ProductForOrder = {
-  id: string;
+type VariantForOrder = {
+  variant_id: string;
+  product_id: string;
   title: string;
   slug: string;
   lemon_squeezy_variant_id: string | null;
   price_cents: number;
 };
+
+type VariantRow = {
+  id: string;
+  price_cents: number;
+  lemon_squeezy_variant_id: string | null;
+  product:
+    | { id: string; title: string; slug: string; status?: string }
+    | { id: string; title: string; slug: string; status?: string }[]
+    | null;
+};
+
+function toVariantForOrder(row: VariantRow): VariantForOrder | null {
+  const product = Array.isArray(row.product) ? row.product[0] : row.product;
+
+  if (!product) {
+    return null;
+  }
+
+  return {
+    variant_id: row.id,
+    product_id: product.id,
+    title: product.title,
+    slug: product.slug,
+    lemon_squeezy_variant_id: row.lemon_squeezy_variant_id,
+    price_cents: row.price_cents,
+  };
+}
 
 type ExtractedOrderData = {
   customerEmail: string;
@@ -55,6 +83,7 @@ type OrderForRefund = {
 
 type OrderItemInput = {
   product_id: string;
+  variant_id: string;
   price_cents: number;
   quantity: number;
 };
@@ -227,70 +256,78 @@ function extractOrderData(payload: LemonSqueezyOrderPayload): ExtractedOrderData
   };
 }
 
-async function findProductByVariantId(
+const variantOrderSelect =
+  "id, price_cents, lemon_squeezy_variant_id, product:products!inner ( id, title, slug )";
+
+async function findVariantByLemonId(
   supabaseAdmin: SupabaseClient,
-  variantId: string
+  lemonVariantId: string
 ) {
   const { data, error } = await supabaseAdmin
-    .from("products")
-    .select("id, title, slug, lemon_squeezy_variant_id, price_cents")
-    .eq("lemon_squeezy_variant_id", variantId)
+    .from("product_variants")
+    .select(variantOrderSelect)
+    .eq("lemon_squeezy_variant_id", lemonVariantId)
     .maybeSingle();
 
   if (error) {
     throw new Error(`Could not map Lemon Squeezy variant to product: ${error.message}`);
   }
 
-  if (!data) {
-    throw new Error(`No product found for Lemon Squeezy variant ${variantId}`);
+  const variant = data ? toVariantForOrder(data as VariantRow) : null;
+
+  if (!variant) {
+    throw new Error(`No variant found for Lemon Squeezy variant ${lemonVariantId}`);
   }
 
-  return data as ProductForOrder;
+  return variant;
 }
 
-async function findProductsByIds(
+async function findVariantsByIds(
   supabaseAdmin: SupabaseClient,
-  productIds: string[],
-  fallbackProduct: ProductForOrder
+  variantIds: string[],
+  fallbackVariant: VariantForOrder
 ) {
-  if (productIds.length === 0) {
-    return [fallbackProduct];
+  if (variantIds.length === 0) {
+    return [fallbackVariant];
   }
 
   const { data, error } = await supabaseAdmin
-    .from("products")
-    .select("id, title, slug, lemon_squeezy_variant_id, price_cents")
-    .in("id", productIds)
-    .eq("status", "published");
+    .from("product_variants")
+    .select(variantOrderSelect)
+    .in("id", variantIds);
 
   if (error) {
-    throw new Error(`Could not load cart products: ${error.message}`);
+    throw new Error(`Could not load cart variants: ${error.message}`);
   }
 
-  const products = (data ?? []) as ProductForOrder[];
-  const byId = new Map(products.map((product) => [product.id, product]));
-  const orderedProducts = productIds.flatMap((productId) => {
-    const product = byId.get(productId);
+  const variants = ((data ?? []) as VariantRow[]).flatMap((row) => {
+    const variant = toVariantForOrder(row);
+    return variant ? [variant] : [];
+  });
+  const byId = new Map(variants.map((variant) => [variant.variant_id, variant]));
+  const orderedVariants = variantIds.flatMap((variantId) => {
+    const variant = byId.get(variantId);
 
-    return product ? [product] : [];
+    return variant ? [variant] : [];
   });
 
-  if (orderedProducts.length !== productIds.length) {
+  if (orderedVariants.length !== variantIds.length) {
     throw new Error("Cart checkout referenced unavailable products.");
   }
 
-  return orderedProducts;
+  return orderedVariants;
 }
 
 function buildOrderItems(
-  products: ProductForOrder[],
+  variants: VariantForOrder[],
   orderData: ExtractedOrderData
 ): OrderItemInput[] {
-  const isSingleItem = products.length === 1;
+  const isSingleItem = variants.length === 1;
 
-  return products.map((product) => ({
-    price_cents: isSingleItem ? orderData.itemPriceCents : product.price_cents,
-    product_id: product.id,
+  return variants.map((variant) => ({
+    price_cents: isSingleItem ? orderData.itemPriceCents : variant.price_cents,
+    product_id: variant.product_id,
+    variant_id: variant.variant_id,
     quantity: isSingleItem ? orderData.quantity : 1,
   }));
 }
@@ -391,15 +428,15 @@ export async function processOrderCreatedEvent(payload: unknown) {
     const orderPayload = payload as LemonSqueezyOrderPayload;
     const orderData = extractOrderData(orderPayload);
     const supabaseAdmin = createAdminClient();
-    const product = await findProductByVariantId(
+    const variant = await findVariantByLemonId(
       supabaseAdmin,
       orderData.variantId
     );
     const customData = getCustomData(orderPayload);
-    const products = await findProductsByIds(
+    const variants = await findVariantsByIds(
       supabaseAdmin,
       getCartProductIds(customData),
-      product
+      variant
     );
     const user = await getOrCreateFulfillmentUser(
       supabaseAdmin,
@@ -411,15 +448,15 @@ export async function processOrderCreatedEvent(payload: unknown) {
       orderData,
       user.id,
       orderPayload,
-      buildOrderItems(products, orderData)
+      buildOrderItems(variants, orderData)
     );
 
     // Unlock bundle children and issue license keys for the purchased products.
     // Parent purchases were already created atomically by fulfill_paid_order.
     await grantProductAccess(supabaseAdmin, {
       orderId,
-      productIds: products.map((item) => item.id),
       userId: user.id,
+      variantIds: variants.map((item) => item.variant_id),
     });
 
     const couponCode = getString(customData, "coupon_code");
@@ -438,15 +475,15 @@ export async function processOrderCreatedEvent(payload: unknown) {
     await sendPurchaseAccessEmail(
       supabaseAdmin,
       orderData.customerEmail,
-      products.length === 1
-        ? products[0].title
-        : `${products.length} DanCruShop products`
+      variants.length === 1
+        ? variants[0].title
+        : `${variants.length} DanCruShop products`
     );
 
     return {
       orderId,
-      productId: product.id,
-      productIds: products.map((item) => item.id),
+      productId: variant.product_id,
+      productIds: variants.map((item) => item.product_id),
       userId: user.id,
     };
   } catch (error) {

@@ -7,13 +7,6 @@ import { STORE_SETTINGS_KEYS } from "@/lib/store/settings";
 import { createClient } from "@/lib/supabase/server";
 
 export type StoreSettingsInput = {
-  vietqr: {
-    bankBin: string;
-    accountNo: string;
-    accountName: string;
-    template: string;
-    enabled: boolean;
-  };
   store: {
     storeName: string;
     supportEmail: string;
@@ -60,16 +53,6 @@ export async function updateStoreSettings(
     const supabase = await createClient();
     const { error } = await supabase.from("app_settings").upsert(
       [
-        {
-          key: STORE_SETTINGS_KEYS.vietqr,
-          value: {
-            account_name: cleanText(input.vietqr.accountName),
-            account_no: cleanText(input.vietqr.accountNo),
-            bank_bin: cleanText(input.vietqr.bankBin),
-            enabled: Boolean(input.vietqr.enabled),
-            template: cleanText(input.vietqr.template) || "compact2",
-          },
-        },
         {
           key: STORE_SETTINGS_KEYS.store,
           value: {

@@ -1,7 +1,5 @@
 "use server";
 
-import crypto from "node:crypto";
-
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -13,6 +11,7 @@ import {
   type CouponValidation,
 } from "@/lib/payments/coupons";
 import { createCheckoutSession } from "@/lib/payments/lemon-squeezy";
+import { createPayPalOrder } from "@/lib/payments/paypal";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -23,8 +22,12 @@ type CouponContext = {
   currency: string;
 };
 
+// `id` is the VARIANT id (the purchasable identity); `product_id` is its parent
+// product. Price/is_free/lemon id come from the variant; title/slug/currency/
+// status from the product.
 type CheckoutProduct = {
   id: string;
+  product_id: string;
   currency: string;
   is_free: boolean;
   price_cents: number;
@@ -35,6 +38,65 @@ type CheckoutProduct = {
   lemon_squeezy_variant_id: string | null;
   thumbnail_url?: string | null;
 };
+
+type CheckoutVariantRow = {
+  id: string;
+  price_cents: number;
+  is_free: boolean;
+  lemon_squeezy_variant_id: string | null;
+  product:
+    | {
+        id: string;
+        title: string;
+        slug: string;
+        status: string;
+        product_type: string;
+        currency: string;
+        thumbnail_url: string | null;
+      }
+    | {
+        id: string;
+        title: string;
+        slug: string;
+        status: string;
+        product_type: string;
+        currency: string;
+        thumbnail_url: string | null;
+      }[]
+    | null;
+};
+
+function toCheckoutProduct(row: CheckoutVariantRow): CheckoutProduct | null {
+  const product = Array.isArray(row.product) ? row.product[0] : row.product;
+
+  if (!product || product.status !== "published") {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    product_id: product.id,
+    currency: product.currency,
+    is_free: row.is_free,
+    price_cents: row.price_cents,
+    product_type: product.product_type,
+    title: product.title,
+    slug: product.slug,
+    status: product.status,
+    lemon_squeezy_variant_id: row.lemon_squeezy_variant_id,
+    thumbnail_url: product.thumbnail_url,
+  };
+}
+
+const checkoutVariantSelect = `
+  id,
+  price_cents,
+  is_free,
+  lemon_squeezy_variant_id,
+  product:products!inner (
+    id, title, slug, status, product_type, currency, thumbnail_url
+  )
+`;
 
 export type CartCheckoutState = {
   error: string | null;
@@ -74,47 +136,31 @@ function getLoginUrl(nextPath: string) {
   return `/login?next=${encodeURIComponent(nextPath)}`;
 }
 
-function createVietQrOrderCode() {
-  const suffix = crypto.randomBytes(3).toString("hex").toUpperCase();
-
-  return `DCS-${Date.now()}-${suffix}`;
-}
-
-async function getPublishedCheckoutProduct(productId: string) {
-  if (!productId) {
-    throw new Error("Missing product ID");
+async function getPublishedCheckoutProduct(variantId: string) {
+  if (!variantId) {
+    throw new Error("Missing variant ID");
   }
 
   const supabase = await createClient();
-  const { data: product, error } = await supabase
-    .from("products")
-    .select(
-      `
-        id,
-        title,
-        slug,
-        status,
-        product_type,
-        price_cents,
-        currency,
-        is_free,
-        lemon_squeezy_variant_id
-      `
-    )
-    .eq("id", productId)
-    .eq("status", "published")
+  const { data, error } = await supabase
+    .from("product_variants")
+    .select(checkoutVariantSelect)
+    .eq("id", variantId)
+    .eq("is_active", true)
     .maybeSingle();
 
   if (error) {
-    console.error("Failed to load product for checkout", error);
+    console.error("Failed to load variant for checkout", error);
     throw new Error("Could not load product for checkout.");
   }
 
-  if (!product) {
+  const checkoutProduct = data ? toCheckoutProduct(data as CheckoutVariantRow) : null;
+
+  if (!checkoutProduct) {
     throw new Error("Product not found.");
   }
 
-  return product as CheckoutProduct;
+  return checkoutProduct;
 }
 
 function normalizeProductIds(productIds: string[]) {
@@ -157,48 +203,38 @@ function isNextRedirectError(error: unknown) {
   );
 }
 
-async function getPublishedCheckoutProducts(productIds: string[]) {
-  const normalizedProductIds = normalizeProductIds(productIds);
+async function getPublishedCheckoutProducts(variantIds: string[]) {
+  const normalizedVariantIds = normalizeProductIds(variantIds);
 
-  if (normalizedProductIds.length === 0) {
+  if (normalizedVariantIds.length === 0) {
     throw new Error("Your cart is empty.");
   }
 
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("products")
-    .select(
-      `
-        id,
-        title,
-        slug,
-        status,
-        product_type,
-        price_cents,
-        currency,
-        is_free,
-        thumbnail_url,
-        lemon_squeezy_variant_id
-      `
-    )
-    .in("id", normalizedProductIds)
-    .eq("status", "published");
+    .from("product_variants")
+    .select(checkoutVariantSelect)
+    .in("id", normalizedVariantIds)
+    .eq("is_active", true);
 
   if (error) {
-    console.error("Failed to load cart products for checkout", error);
+    console.error("Failed to load cart variants for checkout", error);
     throw new Error("Couldn't load the products in your cart.");
   }
 
-  const products = (data ?? []) as CheckoutProduct[];
+  const products = ((data ?? []) as CheckoutVariantRow[]).flatMap((row) => {
+    const product = toCheckoutProduct(row);
+    return product ? [product] : [];
+  });
 
-  if (products.length !== normalizedProductIds.length) {
+  if (products.length !== normalizedVariantIds.length) {
     throw new Error("Some products in your cart are no longer available.");
   }
 
   const byId = new Map(products.map((product) => [product.id, product]));
 
-  return normalizedProductIds.flatMap((productId) => {
-    const product = byId.get(productId);
+  return normalizedVariantIds.flatMap((variantId) => {
+    const product = byId.get(variantId);
 
     return product ? [product] : [];
   });
@@ -234,37 +270,58 @@ async function unlockFreeProducts(products: CheckoutProduct[], userId: string) {
 
   const supabaseAdmin = createAdminClient();
   await grantProductAccess(supabaseAdmin, {
-    productIds: products.map((product) => product.id),
     userId,
+    variantIds: products.map((product) => product.id),
   });
 }
 
-async function createVietQrCartOrder(
+// Creates a local pending PayPal order, opens a PayPal CAPTURE order and returns
+// the buyer approval URL to redirect to. The local order id is sent to PayPal as
+// the reference/custom id so the return page and webhook can fulfil it later.
+async function preparePayPalCheckout(
   products: CheckoutProduct[],
   user: { email?: string | null; id: string },
-  coupon: CouponContext | null
+  coupon: CouponContext | null,
+  cancelPath: string,
+  source: string
 ) {
   if (!user.email) {
     throw new Error("Your account must have an email before checkout.");
   }
 
   const paidProducts = products.filter((product) => !product.is_free);
+
+  if (paidProducts.length === 0) {
+    throw new Error("There's nothing to pay for with PayPal.");
+  }
+
+  const currencies = new Set(
+    paidProducts.map((product) => product.currency.trim().toUpperCase())
+  );
+
+  if (currencies.size > 1) {
+    throw new Error("PayPal checkout supports only a single currency per cart.");
+  }
+
+  const currency = Array.from(currencies)[0];
+
+  if (currency === "VND") {
+    throw new Error("PayPal isn't available for VND. Please use VietQR instead.");
+  }
+
   const totalCents = paidProducts.reduce(
     (total, product) => total + product.price_cents,
     0
   );
   const discountCents = coupon ? Math.min(coupon.discountCents, totalCents) : 0;
   const finalTotalCents = Math.max(0, totalCents - discountCents);
-  const currency = paidProducts[0]?.currency ?? "VND";
   const supabaseAdmin = createAdminClient();
-  const providerOrderId = createVietQrOrderCode();
   const { data: order, error: orderError } = await supabaseAdmin
     .from("orders")
     .insert({
       currency,
       email: user.email.trim().toLowerCase(),
-      provider: "vietqr",
-      provider_order_id: providerOrderId,
+      provider: "paypal",
       raw_payload: {
         cart_product_ids: products.map((product) => product.id),
         ...(coupon
@@ -275,7 +332,7 @@ async function createVietQrCartOrder(
               subtotal_cents: totalCents,
             }
           : {}),
-        provider_order_id: providerOrderId,
+        source,
       },
       status: "pending",
       total_cents: finalTotalCents,
@@ -285,7 +342,7 @@ async function createVietQrCartOrder(
     .single();
 
   if (orderError) {
-    console.error("Failed to create VietQR cart order", orderError);
+    console.error("Failed to create PayPal order", orderError);
     throw new Error("Couldn't start checkout. Please try again.");
   }
 
@@ -294,7 +351,8 @@ async function createVietQrCartOrder(
     paidProducts.map((product) => ({
       order_id: orderId,
       price_cents: product.price_cents,
-      product_id: product.id,
+      product_id: product.product_id,
+      variant_id: product.id,
       quantity: 1,
     }))
   );
@@ -305,92 +363,77 @@ async function createVietQrCartOrder(
       .update({ status: "failed" })
       .eq("id", orderId);
 
-    console.error("Failed to create VietQR cart items", itemError);
+    console.error("Failed to create PayPal order items", itemError);
     throw new Error("Couldn't start checkout. Please try again.");
   }
+
+  const siteUrl = await getSiteUrl();
+
+  let approveUrl: string;
+  let paypalOrderId: string;
+
+  try {
+    const session = await createPayPalOrder({
+      amountCents: finalTotalCents,
+      cancelUrl: `${siteUrl}${cancelPath}`,
+      currency,
+      description: products.map((product) => product.title).join(", "),
+      referenceId: orderId,
+      returnUrl: `${siteUrl}/checkout/paypal/return`,
+    });
+
+    approveUrl = session.approveUrl;
+    paypalOrderId = session.id;
+  } catch (error) {
+    await supabaseAdmin
+      .from("orders")
+      .update({ status: "failed" })
+      .eq("id", orderId);
+
+    throw error;
+  }
+
+  await supabaseAdmin
+    .from("orders")
+    .update({ provider_order_id: paypalOrderId })
+    .eq("id", orderId);
 
   await unlockFreeProducts(
     products.filter((product) => product.is_free),
     user.id
   );
   await recordAnalyticsEvent({
-    eventName: "vietqr_order_created",
+    eventName: "checkout_start",
     metadata: {
       cart_size: products.length,
-      provider_order_id: providerOrderId,
-      source: "cart",
+      provider: "paypal",
+      source,
     },
     orderId,
-    path: "/cart",
+    path: cancelPath,
     userId: user.id,
   });
 
-  redirect(`/vietqr/${orderId}`);
+  return approveUrl;
 }
 
-async function createLemonSqueezyCartCheckout(
-  products: CheckoutProduct[],
-  user: { email?: string | null; id: string } | null,
-  coupon: CouponContext | null
-) {
-  const paidProducts = products.filter((product) => !product.is_free);
-  const primaryProduct = paidProducts[0];
+export async function createPayPalCheckout(productId: string) {
+  const product = await getPublishedCheckoutProduct(productId);
 
-  if (!primaryProduct?.lemon_squeezy_variant_id) {
-    throw new Error("This cart is missing Lemon Squeezy checkout data.");
+  if (product.is_free) {
+    throw new Error("Free products don't need PayPal checkout.");
   }
 
-  if (paidProducts.some((product) => !product.lemon_squeezy_variant_id)) {
-    throw new Error("Some cart products are missing Lemon Squeezy variant IDs.");
-  }
-
-  const currencies = new Set(
-    paidProducts.map((product) => product.currency.trim().toUpperCase())
+  const user = await getRequiredAuthenticatedUser(`/products/${product.slug}`);
+  const approveUrl = await preparePayPalCheckout(
+    [product],
+    user,
+    null,
+    `/products/${product.slug}`,
+    "product_detail"
   );
 
-  if (currencies.size > 1) {
-    throw new Error("Checkout currently supports only a single currency per cart.");
-  }
-
-  const totalCents = paidProducts.reduce(
-    (total, product) => total + product.price_cents,
-    0
-  );
-  const discountCents = coupon ? Math.min(coupon.discountCents, totalCents) : 0;
-  const finalTotalCents = Math.max(0, totalCents - discountCents);
-  const siteUrl = await getSiteUrl();
-  const redirectUrl = `${siteUrl}/checkout/success`;
-  const checkoutUrl = await createCheckoutSession(
-    getLemonSqueezyStoreId(),
-    primaryProduct.lemon_squeezy_variant_id,
-    redirectUrl,
-    {
-      cart_product_ids: products.map((product) => product.id).join(","),
-      cart_size: products.length,
-      coupon_code: coupon?.code ?? null,
-      coupon_discount_cents: coupon ? discountCents : null,
-      product_id: primaryProduct.id,
-      product_slug: primaryProduct.slug,
-      user_email: user?.email ?? null,
-      user_id: user?.id ?? null,
-    },
-    {
-      customPriceCents:
-        coupon || paidProducts.length > 1 ? finalTotalCents : undefined,
-      productDescription: products
-        .map((product) => `- ${product.title}`)
-        .join("\n"),
-      productMedia: primaryProduct.thumbnail_url
-        ? [primaryProduct.thumbnail_url]
-        : undefined,
-      productName:
-        products.length === 1
-          ? primaryProduct.title
-          : `DanCruShop cart (${products.length} products)`,
-    }
-  );
-
-  redirect(checkoutUrl);
+  redirect(approveUrl);
 }
 
 export async function createLemonSqueezyCheckout(productId: string) {
@@ -414,7 +457,7 @@ export async function createLemonSqueezyCheckout(productId: string) {
       source: "product_detail",
     },
     path: `/products/${checkoutProduct.slug}`,
-    productId: checkoutProduct.id,
+    productId: checkoutProduct.product_id,
     userId: user?.id ?? null,
   });
   const siteUrl = await getSiteUrl();
@@ -424,7 +467,8 @@ export async function createLemonSqueezyCheckout(productId: string) {
     variantId,
     redirectUrl,
     {
-      product_id: checkoutProduct.id,
+      product_id: checkoutProduct.product_id,
+      variant_id: checkoutProduct.id,
       product_slug: checkoutProduct.slug,
       user_id: user?.id ?? null,
       user_email: user?.email ?? null,
@@ -535,26 +579,26 @@ export async function createCartCheckoutFromForm(
       }
     }
 
-    const canUseLemonSqueezy =
-      paidCurrencies.size === 1 &&
-      paidProducts.every((product) => product.lemon_squeezy_variant_id);
-    const canUseVietQr =
-      paidCurrencies.size === 1 && paidCurrencies.has("VND");
-
-    if (canUseLemonSqueezy) {
-      await createLemonSqueezyCartCheckout(products, user, coupon);
+    // The buyer picks the method in the cart UI; route to it explicitly instead
+    // Paid carts check out with PayPal (the only online method). A single
+    // currency is required so the PayPal order has one amount/currency.
+    if (paidCurrencies.size > 1) {
+      return {
+        error:
+          "Your cart has multiple currencies. Split the order before checking out.",
+      };
     }
 
-    if (canUseVietQr) {
-      const requiredUser = user ?? (await getRequiredAuthenticatedUser("/cart"));
+    const requiredUser = user ?? (await getRequiredAuthenticatedUser("/cart"));
+    const approveUrl = await preparePayPalCheckout(
+      products,
+      requiredUser,
+      coupon,
+      "/cart",
+      "cart"
+    );
 
-      await createVietQrCartOrder(products, requiredUser, coupon);
-    }
-
-    return {
-      error:
-        "This cart can't be checked out yet because some paid products are missing payment configuration.",
-    };
+    redirect(approveUrl);
   } catch (error) {
     if (isNextRedirectError(error)) {
       throw error;
@@ -588,107 +632,18 @@ export async function claimFreeProduct(productId: string) {
   try {
     const supabaseAdmin = createAdminClient();
     await grantProductAccess(supabaseAdmin, {
-      productIds: [product.id],
       userId: user.id,
+      variantIds: [product.id],
     });
   } catch (error) {
     console.error("Failed to claim free product", {
       error,
-      productId: product.id,
+      productId: product.product_id,
       userId: user.id,
     });
 
     throw error;
   }
 
-  redirect(`/dashboard/products/${product.id}`);
-}
-
-export async function createVietQrOrder(productId: string) {
-  const product = await getPublishedCheckoutProduct(productId);
-
-  if (product.is_free) {
-    throw new Error("Free products don't need to be paid via VietQR.");
-  }
-
-  if (product.currency !== "VND") {
-    throw new Error("VietQR checkout is only available for VND products.");
-  }
-
-  const user = await getRequiredAuthenticatedUser(`/products/${product.slug}`);
-
-  if (!user.email) {
-    throw new Error("Your account must have an email before checkout.");
-  }
-
-  let orderId: string;
-
-  try {
-    const supabaseAdmin = createAdminClient();
-    const providerOrderId = createVietQrOrderCode();
-    const { data: order, error: orderError } = await supabaseAdmin
-      .from("orders")
-      .insert({
-        currency: product.currency,
-        email: user.email.trim().toLowerCase(),
-        provider: "vietqr",
-        provider_order_id: providerOrderId,
-        raw_payload: {
-          product_id: product.id,
-          product_slug: product.slug,
-          provider_order_id: providerOrderId,
-        },
-        status: "pending",
-        total_cents: product.price_cents,
-        user_id: user.id,
-      })
-      .select("id")
-      .single();
-
-    if (orderError) {
-      console.error("Failed to create VietQR order", orderError);
-      throw new Error("Couldn't start checkout. Please try again.");
-    }
-
-    orderId = String(order.id);
-
-    const { error: itemError } = await supabaseAdmin.from("order_items").insert({
-      order_id: orderId,
-      price_cents: product.price_cents,
-      product_id: product.id,
-      quantity: 1,
-    });
-
-    if (itemError) {
-      await supabaseAdmin
-        .from("orders")
-        .update({ status: "failed" })
-        .eq("id", orderId);
-
-      console.error("Failed to create VietQR order item", itemError);
-      throw new Error("Couldn't start checkout. Please try again.");
-    }
-
-    await recordAnalyticsEvent({
-      eventName: "vietqr_order_created",
-      metadata: {
-        provider_order_id: providerOrderId,
-        source: "product_detail",
-      },
-      orderId,
-      path: `/products/${product.slug}`,
-      productId: product.id,
-      userId: user.id,
-    });
-  } catch (error) {
-    console.error("Failed to create VietQR order", {
-      error,
-      productId: product.id,
-      userId: user.id,
-    });
-
-    throw error;
-  }
-
-  redirect(`/vietqr/${orderId}`);
+  redirect(`/dashboard/products/${product.product_id}`);
 }

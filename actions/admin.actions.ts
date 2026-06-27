@@ -356,6 +356,22 @@ export async function createProduct(
 
     await syncProductCategories(supabase, String(product.id), data.categoryIds);
 
+    // Every product needs at least one (default) variant — the purchasable unit.
+    const priceCents = Number(payload.price_cents) || 0;
+    const { error: variantError } = await supabase
+      .from("product_variants")
+      .insert({
+        product_id: String(product.id),
+        name: "Mặc định",
+        price_cents: priceCents,
+        is_free: priceCents === 0,
+        is_default: true,
+      });
+
+    if (variantError) {
+      console.error("Failed to create default variant", variantError);
+    }
+
     revalidateProductSurfaces(String(payload.slug));
 
     return { ok: true, productId: String(product.id) };

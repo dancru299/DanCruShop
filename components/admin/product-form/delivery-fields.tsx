@@ -19,8 +19,6 @@ import { cn } from "@/lib/utils";
 type DeliveryFieldsProps = {
   demoUrl: string;
   previewUrl: string;
-  lemonProductId: string;
-  lemonVariantId: string;
   githubRepo: string;
   isCheckingRepo: boolean;
   repoCheck: {
@@ -30,8 +28,6 @@ type DeliveryFieldsProps = {
   isPending: boolean;
   onDemoUrlChange: (value: string) => void;
   onPreviewUrlChange: (value: string) => void;
-  onLemonProductIdChange: (value: string) => void;
-  onLemonVariantIdChange: (value: string) => void;
   onGithubRepoChange: (value: string) => void;
   onClearRepoCheck: () => void;
   onCheckRepo: () => void;
@@ -40,16 +36,12 @@ type DeliveryFieldsProps = {
 export function DeliveryFields({
   demoUrl,
   previewUrl,
-  lemonProductId,
-  lemonVariantId,
   githubRepo,
   isCheckingRepo,
   repoCheck,
   isPending,
   onDemoUrlChange,
   onPreviewUrlChange,
-  onLemonProductIdChange,
-  onLemonVariantIdChange,
   onGithubRepoChange,
   onClearRepoCheck,
   onCheckRepo,
@@ -59,10 +51,11 @@ export function DeliveryFields({
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <h2 className="text-base font-semibold tracking-normal">
-            Giao hàng &amp; liên kết ngoài
+            Demo &amp; liên kết ngoài
           </h2>
           <p className="text-sm leading-6 text-muted-foreground">
-            Kết nối demo, bản xem trước và tham chiếu Lemon Squeezy.
+            Demo, bản xem trước và repo GitHub — dùng chung cho cả nhóm option.
+            (Mã thanh toán Lemon Squeezy đặt riêng từng option ở tab Option.)
           </p>
         </div>
         <ExternalLinkIcon
@@ -90,33 +83,6 @@ export function DeliveryFields({
               value={previewUrl}
               onChange={(event) => onPreviewUrlChange(event.target.value)}
               placeholder="https://example.com/preview"
-              disabled={isPending}
-            />
-          </Field>
-        </div>
-
-        <div className="grid gap-5 md:grid-cols-2">
-          <Field>
-            <FieldLabel htmlFor="lemon-product-id">
-              ID sản phẩm Lemon Squeezy
-            </FieldLabel>
-            <Input
-              id="lemon-product-id"
-              value={lemonProductId}
-              onChange={(event) => onLemonProductIdChange(event.target.value)}
-              placeholder="Tùy chọn"
-              disabled={isPending}
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="lemon-variant-id">
-              ID biến thể Lemon Squeezy
-            </FieldLabel>
-            <Input
-              id="lemon-variant-id"
-              value={lemonVariantId}
-              onChange={(event) => onLemonVariantIdChange(event.target.value)}
-              placeholder="Tùy chọn"
               disabled={isPending}
             />
           </Field>

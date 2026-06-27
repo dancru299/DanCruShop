@@ -6,7 +6,6 @@ import {
   AlertCircleIcon,
   ArrowRightIcon,
   CreditCardIcon,
-  LandmarkIcon,
   PackageOpenIcon,
   ShoppingCartIcon,
   TagIcon,
@@ -85,6 +84,14 @@ export function CartPageClient() {
   const [isApplying, startApplying] = useTransition();
 
   const singleCurrencyTotal = totals.length === 1 ? totals[0] : null;
+  // Paid carts check out with PayPal (single currency only); free-only carts
+  // just unlock in the dashboard.
+  const canCheckout =
+    checkoutReadiness.isFreeOnly ||
+    checkoutReadiness.paidCurrencies.length === 1;
+  const checkoutLabel = checkoutReadiness.isFreeOnly
+    ? "Unlock free products"
+    : "Pay with PayPal or card";
   // Drop a stale coupon during render (no effect needed) when the cart changes.
   const effectiveCoupon =
     appliedCoupon && appliedCoupon.productIds === productIds
@@ -340,14 +347,7 @@ export function CartPageClient() {
             <div className="grid gap-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CreditCardIcon aria-hidden="true" className="size-4" />
-                <span>Lemon Squeezy unlocks automatically after payment.</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <LandmarkIcon aria-hidden="true" className="size-4" />
-                <span>
-                  VietQR applies to VND orders
-                  {checkoutReadiness.canUseVietQr ? " in this cart." : "."}
-                </span>
+                <span>PayPal or card unlocks automatically after payment.</span>
               </div>
             </div>
           </div>
@@ -375,13 +375,17 @@ export function CartPageClient() {
               type="hidden"
               value={effectiveCoupon?.code ?? ""}
             />
-            <Button type="submit" size="lg" disabled={isPending}>
-              {isPending ? "Preparing checkout..." : "Check out everything"}
+            <Button
+              type="submit"
+              size="lg"
+              disabled={isPending || !canCheckout}
+            >
+              {isPending ? "Preparing checkout..." : checkoutLabel}
               <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
             </Button>
             <p className="text-sm leading-6 text-muted-foreground">
-              Free products open in your dashboard. Paid products go through the
-              configured payment flow.
+              Free products open in your dashboard. Paid products check out with
+              PayPal or card.
             </p>
           </form>
         </div>

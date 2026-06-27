@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeftIcon, DownloadIcon } from "lucide-react";
+import { DownloadIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,11 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { buttonVariants } from "@/components/ui/button";
 import { checkIsAdmin } from "@/lib/auth/roles";
 import { getAdminDownloadLogs } from "@/lib/supabase/queries/download-logs";
+import { getProductVariants } from "@/lib/supabase/queries/product-variants";
 import { getAdminProductById } from "@/lib/supabase/queries/products";
-import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -43,35 +41,29 @@ export default async function ProductDownloadsPage({
     redirect("/dashboard");
   }
 
-  const [product, logs] = await Promise.all([
-    getAdminProductById(id),
-    getAdminDownloadLogs(id),
-  ]);
+  const product = await getAdminProductById(id);
 
   if (!product) {
     notFound();
   }
 
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3">
-        <Link
-          href={`/admin/products/${product.id}/files`}
-          className={cn(buttonVariants({ variant: "ghost" }), "w-fit")}
-        >
-          <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-          Back to Files
-        </Link>
+  // Downloads across every variant of the product, labelled by variant.
+  const variants = await getProductVariants(product.id);
+  const variantNameById = new Map(
+    variants.map((variant) => [variant.id, variant.name])
+  );
+  const logs = await getAdminDownloadLogs(product.id);
+  const isGrouped = variants.length > 1;
 
-        <div className="flex flex-col gap-2">
-          <p className="text-sm text-muted-foreground">Download history</p>
-          <h1 className="text-3xl font-semibold tracking-normal">
-            Downloads: {product.title}
-          </h1>
-          <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-            200 lượt download gần nhất của sản phẩm này.
-          </p>
-        </div>
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-base font-semibold tracking-normal">
+          Lịch sử tải xuống
+        </h2>
+        <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+          200 lượt tải gần nhất của sản phẩm này.
+        </p>
       </div>
 
       <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
@@ -79,7 +71,8 @@ export default async function ProductDownloadsPage({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>User</TableHead>
+                <TableHead>Người dùng</TableHead>
+                {isGrouped ? <TableHead>Option</TableHead> : null}
                 <TableHead>File</TableHead>
                 <TableHead>Thời gian</TableHead>
               </TableRow>
@@ -96,6 +89,15 @@ export default async function ProductDownloadsPage({
                       </span>
                     )}
                   </TableCell>
+                  {isGrouped ? (
+                    <TableCell>
+                      <Badge variant="outline">
+                        {(log.variant_id &&
+                          variantNameById.get(log.variant_id)) ||
+                          "—"}
+                      </Badge>
+                    </TableCell>
+                  ) : null}
                   <TableCell>
                     {log.file_name ? (
                       <Badge variant="secondary">{log.file_name}</Badge>

@@ -17,7 +17,6 @@ export function getCartCheckoutReadiness(items: CheckoutReadinessItem[]) {
   const paidCurrencies = getPaidCurrencies(items);
 
   return {
-    canUseVietQr: paidCurrencies.length === 1 && paidCurrencies[0] === "VND",
     hasMixedCurrencies: paidCurrencies.length > 1,
     isFreeOnly: items.length > 0 && paidCurrencies.length === 0,
     paidCurrencies,

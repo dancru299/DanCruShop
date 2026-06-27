@@ -95,10 +95,10 @@ describe("expandBundleProductIds", () => {
 });
 
 describe("grantProductAccess", () => {
-  it("returns empty array when productIds is empty", async () => {
+  it("returns empty array when variantIds is empty", async () => {
     const admin = makeAdmin({});
     const result = await grantProductAccess(admin, {
-      productIds: [],
+      variantIds: [],
       userId: "user-1",
     });
     expect(result).toEqual([]);
@@ -106,6 +106,18 @@ describe("grantProductAccess", () => {
 
   it("upserts purchases and returns the full product list", async () => {
     const admin = makeAdmin({
+      product_variants: [
+        // resolve purchased variants -> their products
+        {
+          data: [
+            { id: "var-1", product_id: "prod-1" },
+            { id: "var-2", product_id: "prod-2" },
+          ],
+          error: null,
+        },
+        // default variant for bundle child product
+        { data: [{ id: "var-child-1", product_id: "child-1" }], error: null },
+      ],
       bundle_items: [
         { data: [{ child_product_id: "child-1" }], error: null },
       ],
@@ -119,8 +131,8 @@ describe("grantProductAccess", () => {
 
     const result = await grantProductAccess(admin, {
       orderId: "order-1",
-      productIds: ["prod-1", "prod-2"],
       userId: "user-1",
+      variantIds: ["var-1", "var-2"],
     });
 
     expect(result).toEqual(["prod-1", "prod-2", "child-1"]);
@@ -128,13 +140,16 @@ describe("grantProductAccess", () => {
 
   it("throws when purchases upsert fails", async () => {
     const admin = makeAdmin({
+      product_variants: [
+        { data: [{ id: "var-1", product_id: "prod-1" }], error: null },
+      ],
       bundle_items: [{ data: [], error: null }],
       purchases: [{ data: null, error: { message: "insert error" } }],
     });
 
     await expect(
       grantProductAccess(admin, {
-        productIds: ["prod-1"],
+        variantIds: ["var-1"],
         userId: "user-1",
       })
     ).rejects.toThrow(/Could not grant product access/);

@@ -1059,4 +1059,34 @@ insert into public.download_logs (id, user_id, product_id, file_id, downloaded_a
 
 on conflict (id) do nothing;
 
+-- Variants backfill: give every seeded product one default variant (mirroring
+-- its price) and point its files/purchases/logs at that variant. Mirrors
+-- migration 0020 so a fresh reseed stays consistent with the variant model.
+-- Idempotent.
+insert into public.product_variants (
+  product_id, name, price_cents, compare_at_price_cents, is_free, position,
+  is_default, is_active, lemon_squeezy_variant_id, requires_license
+)
+select p.id, 'Mặc định', p.price_cents, p.compare_at_price_cents, p.is_free,
+       0, true, true, p.lemon_squeezy_variant_id, p.requires_license
+from public.products p
+where not exists (
+  select 1 from public.product_variants v where v.product_id = p.id
+);
+
+update public.product_files f
+set variant_id = v.id
+from public.product_variants v
+where v.product_id = f.product_id and v.is_default and f.variant_id is null;
+
+update public.purchases pu
+set variant_id = v.id
+from public.product_variants v
+where v.product_id = pu.product_id and v.is_default and pu.variant_id is null;
+
+update public.download_logs dl
+set variant_id = v.id
+from public.product_variants v
+where v.product_id = dl.product_id and v.is_default and dl.variant_id is null;
+
 commit;

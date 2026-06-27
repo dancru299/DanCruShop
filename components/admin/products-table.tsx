@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { AdminProductListItem } from "@/lib/supabase/queries/products";
+import { cn } from "@/lib/utils";
 
 type ProductsTableProps = {
   products: AdminProductListItem[];
@@ -91,6 +92,36 @@ function ProductThumbnail({ product }: { product: AdminProductListItem }) {
         </div>
       )}
     </div>
+  );
+}
+
+function ProductActions({ product }: { product: AdminProductListItem }) {
+  return (
+    <AdminActionMenu label={`Thao tác cho ${product.title}`}>
+      <AdminActionMenuLink href={`/products/${product.slug}`} icon="external-link">
+        Xem
+      </AdminActionMenuLink>
+      <AdminActionMenuLink
+        href={`/admin/products/${product.id}/options`}
+        icon="paperclip"
+      >
+        Phiên bản &amp; file
+      </AdminActionMenuLink>
+      {product.product_type === "bundle" ? (
+        <AdminActionMenuLink
+          href={`/admin/products/${product.id}/bundle`}
+          icon="bundle"
+        >
+          Bộ sản phẩm
+        </AdminActionMenuLink>
+      ) : null}
+      <AdminActionMenuLink
+        href={`/admin/products/${product.id}/edit`}
+        icon="pencil"
+      >
+        Sửa
+      </AdminActionMenuLink>
+    </AdminActionMenu>
   );
 }
 
@@ -172,36 +203,11 @@ export function ProductsTable({ products }: ProductsTableProps) {
                       {statusLabels[product.status]}
                     </Badge>
                   </TableCell>
-                  <TableCell>{formatDate(product.updated_at)}</TableCell>
+                  <TableCell className={cn("text-muted-foreground")}>
+                    {formatDate(product.updated_at)}
+                  </TableCell>
                   <TableCell className="text-right">
-                    <AdminActionMenu label={`Thao tác cho ${product.title}`}>
-                      <AdminActionMenuLink
-                        href={`/products/${product.slug}`}
-                        icon="external-link"
-                      >
-                        Xem
-                      </AdminActionMenuLink>
-                      <AdminActionMenuLink
-                        href={`/admin/products/${product.id}/files`}
-                        icon="paperclip"
-                      >
-                        Tệp
-                      </AdminActionMenuLink>
-                      {product.product_type === "bundle" ? (
-                        <AdminActionMenuLink
-                          href={`/admin/products/${product.id}/bundle`}
-                          icon="bundle"
-                        >
-                          Bộ sản phẩm
-                        </AdminActionMenuLink>
-                      ) : null}
-                      <AdminActionMenuLink
-                        href={`/admin/products/${product.id}/edit`}
-                        icon="pencil"
-                      >
-                        Sửa
-                      </AdminActionMenuLink>
-                    </AdminActionMenu>
+                    <ProductActions product={product} />
                   </TableCell>
                 </TableRow>
               ))}

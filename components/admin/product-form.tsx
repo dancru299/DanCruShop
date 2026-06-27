@@ -1,14 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowLeftIcon,
-  Loader2Icon,
-  PackagePlusIcon,
-  SaveIcon,
-} from "lucide-react";
+import { ArrowLeftIcon, InfoIcon, Loader2Icon, SaveIcon } from "lucide-react";
 
-import { ProductFilesDialog } from "@/components/admin/product-files-dialog";
 import { Button } from "@/components/ui/button";
 import type { CategoryOption } from "@/lib/supabase/queries/categories";
 import type { ProductDetail } from "@/lib/supabase/queries/products";
@@ -16,7 +10,7 @@ import type { ProductDetail } from "@/lib/supabase/queries/products";
 import { useProductForm } from "./product-form/use-product-form";
 import { ProductPreviewPanel } from "./product-form/product-preview-panel";
 import { StorefrontFields } from "./product-form/storefront-fields";
-import { PricingFields } from "./product-form/pricing-fields";
+import { ClassificationFields } from "./product-form/classification-fields";
 import { SpecsFields } from "./product-form/specs-fields";
 import { DeliveryFields } from "./product-form/delivery-fields";
 
@@ -61,63 +55,69 @@ export function ProductForm({
 
   return (
     <form onSubmit={form.handleSubmit} className="flex w-full flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <Button
-          className="w-fit"
-          variant="ghost"
-          render={<Link href="/admin/products" />}
-          nativeButton={false}
-        >
-          <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-          Quay lại danh sách sản phẩm
-        </Button>
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-semibold tracking-normal">
-            {mode === "create" ? "Sản phẩm mới" : "Sửa sản phẩm"}
-          </h1>
-          <p className="text-sm leading-6 text-muted-foreground">
-            Xây dựng listing sản phẩm, hình ảnh, tham chiếu thanh toán và bản
-            xem trước công khai trong cùng một nơi.
+      {mode === "create" ? (
+        <div className="flex flex-col gap-2">
+          <Button
+            className="w-fit"
+            variant="ghost"
+            render={<Link href="/admin/products" />}
+            nativeButton={false}
+          >
+            <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
+            Quay lại danh sách sản phẩm
+          </Button>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-3xl font-semibold tracking-normal">
+              Sản phẩm mới
+            </h1>
+            <p className="text-sm leading-6 text-muted-foreground">
+              Nhập nội dung dùng chung. Sau khi tạo, đặt giá và tải file ở tab
+              Option.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm leading-6 text-foreground">
+          <InfoIcon
+            aria-hidden="true"
+            className="mt-0.5 size-4 shrink-0 text-primary"
+          />
+          <p>
+            Đây là nội dung dùng chung cho mọi option. Giá, file, slug, trạng
+            thái và mã thanh toán của từng option đặt ở{" "}
+            <strong className="font-medium">tab Option</strong>.
           </p>
         </div>
-      </div>
+      )}
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div className="flex min-w-0 flex-col gap-5">
           <StorefrontFields
             title={form.title}
             slug={form.slug}
+            status={form.status}
             shortDescription={form.shortDescription}
             description={form.description}
             thumbnailUrl={form.thumbnailUrl}
-            status={form.status}
             errors={form.errors}
             isPending={form.isPending}
             onTitleChange={form.handleTitleChange}
             onSlugChange={form.handleSlugChange}
+            onStatusChange={form.setStatus}
             onShortDescriptionChange={form.setShortDescription}
             onDescriptionChange={form.setDescription}
             onThumbnailUrlChange={form.setThumbnailUrl}
           />
 
-          <PricingFields
-            priceUsd={form.priceUsd}
-            comparePriceUsd={form.comparePriceUsd}
-            currency={form.currency}
+          <ClassificationFields
             productType={form.productType}
-            status={form.status}
+            currency={form.currency}
             categoryIds={form.categoryIds}
-            requiresLicense={form.requiresLicense}
-            errors={form.errors}
             isPending={form.isPending}
             categories={form.categories}
-            onPriceUsdChange={form.setPriceUsd}
-            onComparePriceUsdChange={form.setComparePriceUsd}
-            onCurrencyChange={form.setCurrency}
             onProductTypeChange={form.setProductType}
-            onStatusChange={form.setStatus}
+            onCurrencyChange={form.setCurrency}
             onCategoryToggle={form.toggleCategory}
-            onRequiresLicenseToggle={() => form.setRequiresLicense((v) => !v)}
           />
 
           <SpecsFields
@@ -130,16 +130,12 @@ export function ProductForm({
           <DeliveryFields
             demoUrl={form.demoUrl}
             previewUrl={form.previewUrl}
-            lemonProductId={form.lemonProductId}
-            lemonVariantId={form.lemonVariantId}
             githubRepo={form.githubRepo}
             isCheckingRepo={form.isCheckingRepo}
             repoCheck={form.repoCheck}
             isPending={form.isPending}
             onDemoUrlChange={form.setDemoUrl}
             onPreviewUrlChange={form.setPreviewUrl}
-            onLemonProductIdChange={form.setLemonProductId}
-            onLemonVariantIdChange={form.setLemonVariantId}
             onGithubRepoChange={form.setGithubRepo}
             onClearRepoCheck={() => form.setRepoCheck(null)}
             onCheckRepo={form.handleCheckRepo}
@@ -163,24 +159,6 @@ export function ProductForm({
       </div>
 
       <div className="flex flex-col-reverse gap-2 border-t pt-5 sm:flex-row sm:justify-end">
-        {mode === "edit" && product && form.productType === "bundle" ? (
-          <Button
-            variant="outline"
-            render={<Link href={`/admin/products/${product.id}/bundle`} />}
-            nativeButton={false}
-            disabled={form.isPending}
-          >
-            <PackagePlusIcon aria-hidden="true" data-icon="inline-start" />
-            Quản lý bộ sản phẩm
-          </Button>
-        ) : null}
-        {mode === "edit" && product ? (
-          <ProductFilesDialog
-            productId={product.id}
-            productTitle={product.title}
-            disabled={form.isPending}
-          />
-        ) : null}
         <Button
           variant="outline"
           render={<Link href="/admin/products" />}

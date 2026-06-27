@@ -95,8 +95,17 @@ function primeAdmin(resultsByTable: Record<string, QueryResult[]>) {
   });
 }
 
-const PAID_PRODUCT = { id: "prod-1", is_free: false, status: "published" };
-const FREE_PRODUCT = { id: "prod-2", is_free: true, status: "published" };
+// getVariant() loads a product_variants row joined to its product.
+const PAID_VARIANT = {
+  id: "var-1",
+  is_free: false,
+  product: { id: "prod-1", status: "published" },
+};
+const FREE_VARIANT = {
+  id: "var-2",
+  is_free: true,
+  product: { id: "prod-2", status: "published" },
+};
 
 function signedUrlStorage(signedUrl = "https://signed.example/app.zip") {
   return {
@@ -163,7 +172,7 @@ describe("POST /api/products/[identifier]/download", () => {
   });
 
   it("returns 404 when the product is missing or unpublished", async () => {
-    primeAdmin({ products: [{ data: null, error: null }] });
+    primeAdmin({ product_variants: [{ data: null, error: null }] });
 
     const response = await POST(makeRequest(), context());
 
@@ -172,7 +181,7 @@ describe("POST /api/products/[identifier]/download", () => {
 
   it("returns 403 when a paid product has no active purchase", async () => {
     primeAdmin({
-      products: [{ data: PAID_PRODUCT, error: null }],
+      product_variants: [{ data: PAID_VARIANT, error: null }],
       purchases: [{ data: null, error: null }],
     });
 
@@ -189,7 +198,7 @@ describe("POST /api/products/[identifier]/download", () => {
 
   it("returns 404 when the product has no primary file", async () => {
     primeAdmin({
-      products: [{ data: FREE_PRODUCT, error: null }],
+      product_variants: [{ data: FREE_VARIANT, error: null }],
       product_files: [{ data: null, error: null }],
     });
 
@@ -200,7 +209,7 @@ describe("POST /api/products/[identifier]/download", () => {
 
   it("issues a signed URL for a free product and logs the download", async () => {
     primeAdmin({
-      products: [{ data: FREE_PRODUCT, error: null }],
+      product_variants: [{ data: FREE_VARIANT, error: null }],
       product_files: [
         {
           data: {
@@ -230,7 +239,7 @@ describe("POST /api/products/[identifier]/download", () => {
 
   it("issues a signed URL for a purchased product under the download cap", async () => {
     primeAdmin({
-      products: [{ data: PAID_PRODUCT, error: null }],
+      product_variants: [{ data: PAID_VARIANT, error: null }],
       purchases: [{ data: { id: "purchase-1" }, error: null }],
       product_files: [
         {
@@ -255,7 +264,7 @@ describe("POST /api/products/[identifier]/download", () => {
 
   it("returns 403 once the per-user download cap is reached", async () => {
     primeAdmin({
-      products: [{ data: FREE_PRODUCT, error: null }],
+      product_variants: [{ data: FREE_VARIANT, error: null }],
       product_files: [
         {
           data: {

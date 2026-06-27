@@ -92,11 +92,11 @@ export function useProductForm({
   );
   const [currency, setCurrency] = useState(product?.currency ?? "USD");
   const [priceUsd, setPriceUsd] = useState(
-    formatPriceInput(product?.price_cents, product?.currency ?? "USD")
+    formatPriceInput(product?.price_cents)
   );
   const [comparePriceUsd, setComparePriceUsd] = useState(
     product?.compare_at_price_cents != null
-      ? formatPriceInput(product.compare_at_price_cents, product?.currency ?? "USD")
+      ? formatPriceInput(product.compare_at_price_cents)
       : ""
   );
   const [productType, setProductType] = useState<ProductType>(
@@ -188,9 +188,9 @@ export function useProductForm({
     () => (mode === "create" ? "Tạo sản phẩm" : "Lưu thay đổi"),
     [mode]
   );
-  const previewPriceCents = parsePriceCents(priceUsd, currency) ?? 0;
+  const previewPriceCents = parsePriceCents(priceUsd) ?? 0;
   const previewCompareCents = comparePriceUsd.trim()
-    ? parsePriceCents(comparePriceUsd, currency)
+    ? parsePriceCents(comparePriceUsd)
     : null;
 
   function handleTitleChange(value: string) {
@@ -207,46 +207,22 @@ export function useProductForm({
   }
 
   function validate() {
+    // Tổng quan only owns shared content now; price/slug/status live per-option
+    // in the Option tab, so the only hard requirement here is a title.
     const nextErrors: ProductFormErrors = {};
-    const priceCents = parsePriceCents(priceUsd, currency);
-    const normalizedSlug = slugify(slug);
+    const normalizedSlug = slugify(slug) || slugify(title);
 
     if (!title.trim()) {
       nextErrors.title = "Title is required.";
     }
 
-    if (!normalizedSlug) {
-      nextErrors.slug = "Slug is required.";
-    }
-
-    if (priceCents === null) {
-      nextErrors.priceUsd = "Price must be greater than or equal to 0.";
-    }
-
-    const hasCompare = comparePriceUsd.trim().length > 0;
-    const compareCents = hasCompare
-      ? parsePriceCents(comparePriceUsd, currency)
-      : null;
-
-    if (hasCompare) {
-      if (compareCents === null || compareCents <= 0) {
-        nextErrors.comparePriceUsd = "Giá gốc phải là số lớn hơn 0.";
-      } else if (priceCents !== null && compareCents <= priceCents) {
-        nextErrors.comparePriceUsd = "Giá gốc phải lớn hơn giá bán.";
-      }
-    }
-
     setErrors(nextErrors);
 
-    if (Object.keys(nextErrors).length > 0 || priceCents === null) {
+    if (Object.keys(nextErrors).length > 0) {
       return null;
     }
 
-    return {
-      normalizedSlug,
-      priceCents,
-      compareCents,
-    };
+    return { normalizedSlug };
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -275,43 +251,52 @@ export function useProductForm({
 
     delete nextMetadata.tech_stack;
 
-    const payload: ProductInsert = {
+    // The product owns shared content + slug/status/currency. Per-VARIANT fields
+    // (price, files, lemon ids, license) are owned by the Phiên bản tab and are
+    // NOT sent here.
+    const sharedFields = {
       categoryIds,
       currency,
       metadata: nextMetadata,
       demo_url: demoUrl.trim() || null,
       description: description.trim() || null,
-      is_free:
-        validated.priceCents === 0 || productType === "free_resource",
-      lemon_squeezy_product_id: lemonProductId.trim() || null,
-      lemon_squeezy_variant_id: lemonVariantId.trim() || null,
       preview_url: previewUrl.trim() || null,
-      price_cents: validated.priceCents,
-      compare_at_price_cents: validated.compareCents,
       product_type: productType,
-      requires_license: requiresLicense,
       short_description: shortDescription.trim() || null,
       slug: validated.normalizedSlug,
       status,
       thumbnail_url: thumbnailUrl.trim() || null,
       title: title.trim(),
-    };
+    } satisfies ProductUpdate;
 
     startTransition(async () => {
-      const result =
-        mode === "create"
-          ? await createProduct(payload)
-          : await updateProduct(product?.id ?? "", payload satisfies ProductUpdate);
+      if (mode === "create") {
+        // createProduct also seeds the default variant; price/files are then set
+        // in the Phiên bản tab.
+        const result = await createProduct({
+          ...sharedFields,
+          price_cents: 0,
+        } satisfies ProductInsert);
+
+        if (!result.ok) {
+          toast.error(result.error);
+          return;
+        }
+
+        toast.success("Đã tạo sản phẩm. Đặt giá và file ở tab Phiên bản.");
+        router.push(`/admin/products/${result.productId}/options`);
+        router.refresh();
+        return;
+      }
+
+      const result = await updateProduct(product?.id ?? "", sharedFields);
 
       if (!result.ok) {
         toast.error(result.error);
         return;
       }
 
-      toast.success(
-        mode === "create" ? "Đã tạo sản phẩm." : "Đã cập nhật sản phẩm."
-      );
-      router.push("/admin/products");
+      toast.success("Đã cập nhật nội dung sản phẩm.");
       router.refresh();
     });
   }

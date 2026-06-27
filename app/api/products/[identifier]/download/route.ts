@@ -7,14 +7,15 @@ import { createClient } from "@/lib/supabase/server";
 
 type DownloadRouteContext = {
   params: Promise<{
+    // The variant id — the purchasable identity whose files we deliver.
     identifier: string;
   }>;
 };
 
-type ProductAccessRecord = {
-  id: string;
-  is_free: boolean;
-  status: string;
+type VariantAccessRecord = {
+  variantId: string;
+  productId: string;
+  isFree: boolean;
 };
 
 type ProductFileRecord = {
@@ -39,30 +40,48 @@ async function getAuthenticatedUser() {
   return user;
 }
 
-async function getProduct(productId: string) {
+async function getVariant(variantId: string): Promise<VariantAccessRecord | null> {
   const supabaseAdmin = createAdminClient();
   const { data, error } = await supabaseAdmin
-    .from("products")
-    .select("id, is_free, status")
-    .eq("id", productId)
-    .eq("status", "published")
+    .from("product_variants")
+    .select("id, is_free, product:products!inner ( id, status )")
+    .eq("id", variantId)
     .maybeSingle();
 
   if (error) {
-    console.error("Failed to load product for secure download", error);
+    console.error("Failed to load variant for secure download", error);
     throw new Error("Could not load product.");
   }
 
-  return data as ProductAccessRecord | null;
+  if (!data) {
+    return null;
+  }
+
+  const product = Array.isArray(data.product) ? data.product[0] : data.product;
+
+  if (!product || product.status !== "published") {
+    return null;
+  }
+
+  return {
+    variantId: data.id as string,
+    productId: product.id as string,
+    isFree: Boolean(data.is_free),
+  };
 }
 
-async function hasActivePurchase(userId: string, productId: string) {
+async function hasActivePurchase(
+  userId: string,
+  productId: string,
+  variantId: string
+) {
   const supabaseAdmin = createAdminClient();
   const { data, error } = await supabaseAdmin
     .from("purchases")
     .select("id")
     .eq("user_id", userId)
     .eq("product_id", productId)
+    .eq("variant_id", variantId)
     .eq("access_status", "active")
     .maybeSingle();
 
@@ -74,12 +93,12 @@ async function hasActivePurchase(userId: string, productId: string) {
   return Boolean(data);
 }
 
-async function getPrimaryFile(productId: string) {
+async function getPrimaryFile(variantId: string) {
   const supabaseAdmin = createAdminClient();
   const { data, error } = await supabaseAdmin
     .from("product_files")
     .select("id, file_path, max_downloads_per_user")
-    .eq("product_id", productId)
+    .eq("variant_id", variantId)
     .eq("is_primary", true)
     .maybeSingle();
 
@@ -124,6 +143,7 @@ async function createDownloadUrl(filePath: string) {
 async function recordDownload(
   userId: string,
   productId: string,
+  variantId: string,
   fileId: string
 ) {
   const supabaseAdmin = createAdminClient();
@@ -132,6 +152,7 @@ async function recordDownload(
     supabaseAdmin.from("download_logs").insert({
       file_id: fileId,
       product_id: productId,
+      variant_id: variantId,
       user_id: userId,
     }),
     supabaseAdmin.rpc("increment_download_count", { file_id_arg: fileId }),
@@ -155,14 +176,14 @@ async function recordDownloadAnalytics({
   userId,
 }: {
   eventName: "download_start" | "download_success" | "download_error";
-  productId: string;
+  productId: string | null;
   reason?: string;
   userId: string;
 }) {
   await recordAnalyticsEvent({
     eventName,
     metadata: reason ? { reason } : {},
-    path: `/api/products/${productId}/download`,
+    path: `/api/products/${productId ?? "unknown"}/download`,
     productId,
     userId,
   });
@@ -175,7 +196,7 @@ export async function POST(
   const { identifier } = await params;
 
   if (!identifier) {
-    return NextResponse.json({ error: "Missing product id." }, { status: 400 });
+    return NextResponse.json({ error: "Missing variant id." }, { status: 400 });
   }
 
   const ip = getClientIp(request.headers);
@@ -198,42 +219,44 @@ export async function POST(
   }
 
   try {
-    await recordDownloadAnalytics({
-      eventName: "download_start",
-      productId: identifier,
-      userId: user.id,
-    });
-    const product = await getProduct(identifier);
+    const variant = await getVariant(identifier);
 
-    if (!product) {
+    if (!variant) {
       await recordDownloadAnalytics({
         eventName: "download_error",
-        productId: identifier,
-        reason: "product_not_found",
+        productId: null,
+        reason: "variant_not_found",
         userId: user.id,
       });
       return NextResponse.json({ error: "Product not found." }, { status: 404 });
     }
 
+    await recordDownloadAnalytics({
+      eventName: "download_start",
+      productId: variant.productId,
+      userId: user.id,
+    });
+
     const isAllowed =
-      product.is_free || (await hasActivePurchase(user.id, product.id));
+      variant.isFree ||
+      (await hasActivePurchase(user.id, variant.productId, variant.variantId));
 
     if (!isAllowed) {
       await recordDownloadAnalytics({
         eventName: "download_error",
-        productId: product.id,
+        productId: variant.productId,
         reason: "forbidden",
         userId: user.id,
       });
       return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
-    const primaryFile = await getPrimaryFile(product.id);
+    const primaryFile = await getPrimaryFile(variant.variantId);
 
     if (!primaryFile) {
       await recordDownloadAnalytics({
         eventName: "download_error",
-        productId: product.id,
+        productId: variant.productId,
         reason: "missing_primary_file",
         userId: user.id,
       });
@@ -243,17 +266,13 @@ export async function POST(
       );
     }
 
-    // Enforce per-user download limit if configured
     if (primaryFile.max_downloads_per_user !== null) {
-      const downloadCount = await getUserDownloadCount(
-        user.id,
-        primaryFile.id
-      );
+      const downloadCount = await getUserDownloadCount(user.id, primaryFile.id);
 
       if (downloadCount >= primaryFile.max_downloads_per_user) {
         await recordDownloadAnalytics({
           eventName: "download_error",
-          productId: product.id,
+          productId: variant.productId,
           reason: "download_limit_reached",
           userId: user.id,
         });
@@ -268,12 +287,17 @@ export async function POST(
 
     const [downloadUrl] = await Promise.all([
       createDownloadUrl(primaryFile.file_path),
-      recordDownload(user.id, product.id, primaryFile.id),
+      recordDownload(
+        user.id,
+        variant.productId,
+        variant.variantId,
+        primaryFile.id
+      ),
     ]);
 
     await recordDownloadAnalytics({
       eventName: "download_success",
-      productId: product.id,
+      productId: variant.productId,
       userId: user.id,
     });
 
@@ -282,7 +306,7 @@ export async function POST(
     console.error("Secure download route failed", error);
     await recordDownloadAnalytics({
       eventName: "download_error",
-      productId: identifier,
+      productId: null,
       reason: "unexpected_error",
       userId: user.id,
     });

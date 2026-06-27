@@ -17,19 +17,19 @@ describe("cart checkout readiness", () => {
     expect(getCartCheckoutWarning(items)).toContain("free resources");
   });
 
-  it("detects VND carts that can use VietQR", () => {
+  it("normalizes a single paid currency", () => {
     expect(
-      getCartCheckoutReadiness([{ currency: "vnd", isFree: false }])
+      getCartCheckoutReadiness([{ currency: "usd", isFree: false }])
     ).toMatchObject({
-      canUseVietQr: true,
-      paidCurrencies: ["VND"],
+      hasMixedCurrencies: false,
+      paidCurrencies: ["USD"],
     });
   });
 
   it("warns when a cart has mixed paid currencies", () => {
     const items = [
       { currency: "USD", isFree: false },
-      { currency: "VND", isFree: false },
+      { currency: "EUR", isFree: false },
     ];
 
     expect(getCartCheckoutReadiness(items).hasMixedCurrencies).toBe(true);

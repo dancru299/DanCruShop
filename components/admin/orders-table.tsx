@@ -7,7 +7,6 @@ import {
   AdminActionMenu,
   AdminActionMenuText,
 } from "@/components/admin/admin-action-menu";
-import { ApproveVietQrOrderButton } from "@/components/admin/approve-vietqr-order-button";
 import { AdminSearchInput } from "@/components/admin/admin-search-input";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -61,15 +60,19 @@ function formatTotal(order: AdminOrder) {
 }
 
 function formatProvider(provider: AdminOrder["provider"]) {
+  if (provider === "paypal") {
+    return "PayPal";
+  }
+
   if (provider === "lemon_squeezy") {
     return "Lemon Squeezy";
   }
 
-  if (provider === "vietqr") {
-    return "VietQR";
+  if (provider === "vietqr_manual") {
+    return "VietQR (cũ, thủ công)";
   }
 
-  return "VietQR Thủ công";
+  return "VietQR (cũ)";
 }
 
 function getOrderDisplayId(order: AdminOrder) {
@@ -140,11 +143,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                   <TableCell className="font-semibold">{formatTotal(order)}</TableCell>
                   <TableCell className="text-right">
                     <AdminActionMenu label={`Hành động cho đơn ${getOrderDisplayId(order)}`}>
-                      {order.provider === "vietqr" && order.status === "pending" ? (
-                        <ApproveVietQrOrderButton orderId={order.id} menuItem />
-                      ) : (
-                        <AdminActionMenuText>Không có hành động khả dụng</AdminActionMenuText>
-                      )}
+                      <AdminActionMenuText>Không có hành động khả dụng</AdminActionMenuText>
                     </AdminActionMenu>
                   </TableCell>
                 </TableRow>
@@ -162,7 +161,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
               }
               description={
                 orders.length === 0
-                  ? "Đơn Lemon Squeezy và VietQR sẽ xuất hiện ở đây sau khi khách bắt đầu thanh toán."
+                  ? "Đơn hàng sẽ xuất hiện ở đây sau khi khách bắt đầu thanh toán."
                   : "Vui lòng thử tìm kiếm bằng từ khóa khác."
               }
             />

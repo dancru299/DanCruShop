@@ -1,14 +1,20 @@
 "use client";
 
 import { useActionState } from "react";
-import { MessageSquareReplyIcon, StarIcon } from "lucide-react";
+import {
+  CheckCircle2Icon,
+  MessageSquareReplyIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
+  StarIcon,
+} from "lucide-react";
 
 import {
   createProductReview,
   createProductReviewReply,
   type ProductReviewActionState,
 } from "@/actions/product-review.actions";
-import { EmptyState } from "@/components/shared/empty-state";
+import { teamPledge } from "@/lib/site-config";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -262,6 +268,48 @@ function ReviewItem({
   );
 }
 
+// Shown when a product has no reviews yet — an invitation plus the team's
+// quality pledge so an empty section never reads as a red flag to a first buyer.
+function FirstReviewInvite() {
+  return (
+    <div className="flex h-full flex-col justify-center gap-5 rounded-lg border bg-card p-8 text-card-foreground shadow-sm">
+      <div className="flex flex-col gap-2">
+        <span className="flex size-11 items-center justify-center rounded-full bg-amber-400/15 text-amber-500">
+          <SparklesIcon aria-hidden="true" className="size-5" />
+        </span>
+        <h3 className="text-xl font-semibold tracking-normal">
+          {teamPledge.heading}
+        </h3>
+        <p className="max-w-xl text-sm leading-7 text-muted-foreground">
+          {teamPledge.intro}
+        </p>
+      </div>
+      <div className="grid gap-3 rounded-lg border bg-background/60 p-4">
+        <div className="flex items-center gap-2">
+          <ShieldCheckIcon
+            aria-hidden="true"
+            className="size-4 text-foreground"
+          />
+          <span className="text-sm font-medium">From the DanCruShop team</span>
+        </div>
+        <div className="grid gap-2.5">
+          {teamPledge.promises.map((promise) => (
+            <div key={promise} className="flex gap-3">
+              <CheckCircle2Icon
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0 text-emerald-400"
+              />
+              <p className="text-sm leading-6 text-muted-foreground">
+                {promise}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ProductReviews({
   canReply,
   canReview,
@@ -294,7 +342,7 @@ export function ProductReviews({
                 <span className="text-sm text-muted-foreground">
                   {summary.totalReviews > 0
                     ? `${summary.totalReviews} verified reviews`
-                    : "No reviews yet"}
+                    : "Be the first to review"}
                 </span>
               </div>
             </div>
@@ -348,11 +396,7 @@ export function ProductReviews({
             />
           ))
         ) : (
-          <EmptyState
-            icon={StarIcon}
-            title="No reviews yet"
-            description="Once verified buyers leave a review, their ratings and replies will appear here."
-          />
+          <FirstReviewInvite />
         )}
       </div>
     </section>

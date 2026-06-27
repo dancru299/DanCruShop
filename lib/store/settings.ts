@@ -4,14 +4,6 @@ import { cache } from "react";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export type VietQrSettings = {
-  bankBin: string | null;
-  accountNo: string | null;
-  accountName: string | null;
-  template: string;
-  enabled: boolean;
-};
-
 export type StoreInfo = {
   storeName: string;
   supportEmail: string;
@@ -42,7 +34,6 @@ export type PromoSettings = {
 export type SocialLink = { label: string; url: string; iconUrl: string };
 
 export type StoreSettings = {
-  vietqr: VietQrSettings;
   store: StoreInfo;
   contact: ContactSettings;
   promo: PromoSettings;
@@ -51,13 +42,11 @@ export type StoreSettings = {
 
 export const STORE_SETTINGS_KEYS = {
   store: "store.info",
-  vietqr: "payments.vietqr",
   contact: "contact.channels",
   promo: "promo.side_rails",
   socials: "social.links",
 } as const;
 
-const DEFAULT_VIETQR_TEMPLATE = "compact2";
 const DEFAULT_STORE_NAME = "DanCruShop";
 const DEFAULT_SUPPORT_EMAIL = "support@dancrushop.com";
 
@@ -71,12 +60,6 @@ function getString(record: SettingsRecord, key: string) {
     : null;
 }
 
-function getBoolean(record: SettingsRecord, key: string, fallback: boolean) {
-  const value = record[key];
-
-  return typeof value === "boolean" ? value : fallback;
-}
-
 async function loadSettingsRows(): Promise<Record<string, SettingsRecord>> {
   try {
     const supabaseAdmin = createAdminClient();
@@ -84,7 +67,6 @@ async function loadSettingsRows(): Promise<Record<string, SettingsRecord>> {
       .from("app_settings")
       .select("key, value")
       .in("key", [
-        STORE_SETTINGS_KEYS.vietqr,
         STORE_SETTINGS_KEYS.store,
         STORE_SETTINGS_KEYS.contact,
         STORE_SETTINGS_KEYS.promo,
@@ -111,31 +93,6 @@ async function loadSettingsRows(): Promise<Record<string, SettingsRecord>> {
     console.error("Unexpected error while loading app settings", error);
     return {};
   }
-}
-
-function resolveVietQrSettings(record: SettingsRecord): VietQrSettings {
-  const bankBin =
-    getString(record, "bank_bin") ?? process.env.VIETQR_BANK_BIN?.trim() ?? null;
-  const accountNo =
-    getString(record, "account_no") ??
-    process.env.VIETQR_ACCOUNT_NO?.trim() ??
-    null;
-  const accountName =
-    getString(record, "account_name") ??
-    process.env.VIETQR_ACCOUNT_NAME?.trim() ??
-    null;
-  const template =
-    getString(record, "template") ??
-    process.env.VIETQR_TEMPLATE?.trim() ??
-    DEFAULT_VIETQR_TEMPLATE;
-
-  return {
-    accountName,
-    accountNo,
-    bankBin,
-    enabled: getBoolean(record, "enabled", true),
-    template,
-  };
 }
 
 function resolveStoreInfo(record: SettingsRecord): StoreInfo {
@@ -214,7 +171,6 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
 
   return {
     store: resolveStoreInfo(rows[STORE_SETTINGS_KEYS.store] ?? {}),
-    vietqr: resolveVietQrSettings(rows[STORE_SETTINGS_KEYS.vietqr] ?? {}),
     contact: resolveContactSettings(rows[STORE_SETTINGS_KEYS.contact] ?? {}),
     promo: resolvePromoSettings(rows[STORE_SETTINGS_KEYS.promo] ?? {}),
     socials: resolveSocials(rows[STORE_SETTINGS_KEYS.socials] ?? {}),
@@ -228,8 +184,4 @@ export function hasAnyContactChannel(settings: ContactSettings) {
       settings.messenger.url ||
       settings.phone.url
   );
-}
-
-export function isVietQrConfigured(settings: VietQrSettings) {
-  return Boolean(settings.enabled && settings.bankBin && settings.accountNo);
 }

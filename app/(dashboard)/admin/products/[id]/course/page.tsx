@@ -1,14 +1,12 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeftIcon, BookOpenIcon } from "lucide-react";
+import { BookOpenIcon } from "lucide-react";
 
 import { createCourse } from "@/actions/course.actions";
 import { CourseEditor } from "@/components/admin/course-editor";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { checkIsAdmin } from "@/lib/auth/roles";
 import { getAdminCourseByProductId } from "@/lib/supabase/queries/courses";
 import { getAdminProductById } from "@/lib/supabase/queries/products";
-import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -34,25 +32,14 @@ export default async function AdminCoursePage({ params }: CoursePageProps) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3">
-        <Link
-          href={`/admin/products/${product.id}/edit`}
-          className={cn(buttonVariants({ variant: "ghost" }), "w-fit")}
-        >
-          <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-          Back to Product Edit
-        </Link>
-
-        <div className="flex flex-col gap-2">
-          <p className="text-sm text-muted-foreground">Course content editor</p>
-          <h1 className="text-3xl font-semibold tracking-normal">
-            {product.title}
-          </h1>
-          <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-            Manage modules and lessons for this course. Changes are saved immediately.
-          </p>
-        </div>
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-base font-semibold tracking-normal">
+          Nội dung khóa học
+        </h2>
+        <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+          Quản lý chương và bài học cho khóa học này. Thay đổi được lưu ngay.
+        </p>
       </div>
 
       {course ? (
@@ -83,16 +70,16 @@ function InitializeCourseSection({
       </div>
       <div className="flex max-w-md flex-col gap-2">
         <h2 className="text-xl font-semibold tracking-normal">
-          No course content yet
+          Chưa có nội dung khóa học
         </h2>
         <p className="text-sm leading-6 text-muted-foreground">
-          Initialize this product as a course to start adding modules and lessons.
+          Khởi tạo sản phẩm này thành khóa học để bắt đầu thêm chương và bài học.
         </p>
       </div>
       <form action={handleInit}>
         <Button type="submit">
           <BookOpenIcon aria-hidden="true" data-icon="inline-start" />
-          Initialize Course
+          Khởi tạo khóa học
         </Button>
       </form>
     </div>

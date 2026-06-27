@@ -21,10 +21,7 @@ export const productStatusOptions: Array<{
   { label: "Đã lưu trữ", value: "archived" },
 ];
 
-export const currencyOptions = [
-  { label: "USD", value: "USD" },
-  { label: "VND", value: "VND" },
-] as const;
+export const currencyOptions = [{ label: "USD", value: "USD" }] as const;
 
 export const productTypeLabels: Record<ProductType, string> = {
   bundle: "Bộ",
@@ -47,27 +44,19 @@ export const statusBadgeVariants: Record<ProductStatus, "default" | "outline" | 
   published: "default",
 };
 
-export function formatPriceInput(priceCents: number | undefined, currency: string) {
+export function formatPriceInput(priceCents: number | undefined) {
   if (typeof priceCents !== "number") {
     return "0";
-  }
-
-  if (currency === "VND") {
-    return String(priceCents);
   }
 
   return (priceCents / 100).toFixed(2).replace(/\.00$/, "");
 }
 
-export function parsePriceCents(value: string, currency: string) {
+export function parsePriceCents(value: string) {
   const parsed = Number(value);
 
   if (!Number.isFinite(parsed) || parsed < 0) {
     return null;
-  }
-
-  if (currency === "VND") {
-    return Math.round(parsed);
   }
 
   return Math.round(parsed * 100);

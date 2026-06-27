@@ -10,7 +10,7 @@ import type { Resend } from "resend";
  */
 export async function notifyWebhookFailure(params: {
   message: string;
-  provider: "lemon_squeezy" | "vietqr";
+  provider: "lemon_squeezy" | "paypal";
   providerEventId?: string | null;
 }) {
   const alertEmail = process.env.ADMIN_ALERT_EMAIL;

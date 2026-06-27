@@ -8,7 +8,10 @@ import { DownloadButton } from "@/components/products/download-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getUserLicenseKey } from "@/lib/supabase/queries/licenses";
-import { checkUserAccess } from "@/lib/supabase/queries/purchases";
+import {
+  checkUserAccess,
+  getPurchasedVariantIds,
+} from "@/lib/supabase/queries/purchases";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -56,6 +59,26 @@ async function getPurchasedProduct(productId: string) {
   return data as DashboardProduct | null;
 }
 
+async function getOwnedVariants(variantIds: string[]) {
+  if (variantIds.length === 0) {
+    return [];
+  }
+
+  const supabaseAdmin = createAdminClient();
+  const { data, error } = await supabaseAdmin
+    .from("product_variants")
+    .select("id, name, position")
+    .in("id", variantIds)
+    .order("position", { ascending: true });
+
+  if (error) {
+    console.error("Failed to load owned variants", error);
+    return [];
+  }
+
+  return (data ?? []) as { id: string; name: string; position: number }[];
+}
+
 export default async function DashboardProductPage({
   params,
 }: DashboardProductPageProps) {
@@ -82,6 +105,9 @@ export default async function DashboardProductPage({
     notFound();
   }
 
+  // A user may own several variants of the same product, each with its own file.
+  const ownedVariantIds = await getPurchasedVariantIds(user.id, id);
+  const ownedVariants = await getOwnedVariants(ownedVariantIds);
   const licenseKey = await getUserLicenseKey(id);
   const thumbnailSrc = product.thumbnail_url ?? "/window.svg";
 
@@ -136,10 +162,29 @@ export default async function DashboardProductPage({
             </div>
           ) : null}
 
-          <div className="mt-auto flex flex-col gap-2 sm:flex-row">
-            <DownloadButton productId={product.id} />
+          <div className="mt-auto flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
+              {ownedVariants.length > 0 ? (
+                ownedVariants.map((variant) => (
+                  <div
+                    key={variant.id}
+                    className="flex items-center justify-between gap-3 rounded-lg border bg-muted/30 p-2 pl-3"
+                  >
+                    <span className="text-sm font-medium">{variant.name}</span>
+                    <DownloadButton variantId={variant.id}>
+                      Download
+                    </DownloadButton>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Không có file nào để tải cho sản phẩm này.
+                </p>
+              )}
+            </div>
             <Button
               variant="outline"
+              className="w-fit"
               render={<Link href={`/products/${product.slug}`} />}
               nativeButton={false}
             >

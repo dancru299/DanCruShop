@@ -39,7 +39,9 @@ import {
 import { uploadProductFile } from "@/lib/supabase/storage";
 
 type ProductFileManagerProps = {
+  // productId is used for the storage path; variantId owns the file rows.
   productId: string;
+  variantId: string;
   /** Provided by the standalone page; omit to load on mount (e.g. in a modal). */
   initialFiles?: ProductFileRecord[];
 };
@@ -78,6 +80,7 @@ function formatDate(value: string) {
 
 export function ProductFileManager({
   productId,
+  variantId,
   initialFiles,
 }: ProductFileManagerProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -90,9 +93,9 @@ export function ProductFileManager({
   const isBusy = isUploading || isDeletePending;
 
   const reload = useCallback(async () => {
-    const next = await getProductFiles(productId);
+    const next = await getProductFiles(variantId);
     setFiles(next);
-  }, [productId]);
+  }, [variantId]);
 
   useEffect(() => {
     // When no files were passed in (modal usage), load them on mount.
@@ -101,7 +104,7 @@ export function ProductFileManager({
     }
 
     let active = true;
-    getProductFiles(productId)
+    getProductFiles(variantId)
       .then((next) => {
         if (active) {
           setFiles(next);
@@ -116,7 +119,7 @@ export function ProductFileManager({
     return () => {
       active = false;
     };
-  }, [initialFiles, productId]);
+  }, [initialFiles, variantId]);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -139,6 +142,7 @@ export function ProductFileManager({
         fileSize: file.size,
         fileType: file.type || "application/octet-stream",
         productId,
+        variantId,
       });
 
       if (!result.ok) {

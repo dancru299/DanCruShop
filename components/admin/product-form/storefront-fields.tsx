@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import {
   Field,
   FieldDescription,
@@ -8,18 +7,26 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { MarkdownEditor } from "@/components/admin/markdown-editor";
 import { AdminMediaUploadField } from "@/components/admin/media-upload-field";
-import { productStatusLabels, statusBadgeVariants } from "./constants";
 import type { ProductStatus } from "@/lib/supabase/queries/products";
+
+import { productStatusOptions } from "./constants";
 
 type StorefrontFieldsProps = {
   title: string;
   slug: string;
+  status: ProductStatus;
   shortDescription: string;
   description: string;
   thumbnailUrl: string;
-  status: ProductStatus;
   errors: {
     title?: string;
     slug?: string;
@@ -27,6 +34,7 @@ type StorefrontFieldsProps = {
   isPending: boolean;
   onTitleChange: (value: string) => void;
   onSlugChange: (value: string) => void;
+  onStatusChange: (value: ProductStatus) => void;
   onShortDescriptionChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onThumbnailUrlChange: (value: string) => void;
@@ -35,14 +43,15 @@ type StorefrontFieldsProps = {
 export function StorefrontFields({
   title,
   slug,
+  status,
   shortDescription,
   description,
   thumbnailUrl,
-  status,
   errors,
   isPending,
   onTitleChange,
   onSlugChange,
+  onStatusChange,
   onShortDescriptionChange,
   onDescriptionChange,
   onThumbnailUrlChange,
@@ -56,12 +65,10 @@ export function StorefrontFields({
               Nội dung cửa hàng
             </h2>
             <p className="text-sm leading-6 text-muted-foreground">
-              Các trường này định hình thẻ sản phẩm và trang chi tiết công khai.
+              Nội dung dùng chung cho mọi option. Giá, file, slug, trạng thái đặt
+              riêng ở tab Option.
             </p>
           </div>
-          <Badge variant={statusBadgeVariants[status]}>
-            {productStatusLabels[status]}
-          </Badge>
         </div>
 
         <FieldGroup>
@@ -78,21 +85,40 @@ export function StorefrontFields({
             <FieldError>{errors.title}</FieldError>
           </Field>
 
-          <Field data-invalid={Boolean(errors.slug)}>
-            <FieldLabel htmlFor="slug">Slug</FieldLabel>
-            <Input
-              id="slug"
-              value={slug}
-              onChange={(event) => onSlugChange(event.target.value)}
-              placeholder="premium-landing-page-kit"
-              aria-invalid={Boolean(errors.slug)}
-              disabled={isPending}
-            />
-            <FieldDescription>
-              Dùng trong URL sản phẩm. Tự động tạo từ tiêu đề.
-            </FieldDescription>
-            <FieldError>{errors.slug}</FieldError>
-          </Field>
+          <div className="grid gap-5 md:grid-cols-2">
+            <Field data-invalid={Boolean(errors.slug)}>
+              <FieldLabel htmlFor="slug">Slug</FieldLabel>
+              <Input
+                id="slug"
+                value={slug}
+                onChange={(event) => onSlugChange(event.target.value)}
+                placeholder="bo-landing-page-cao-cap"
+                aria-invalid={Boolean(errors.slug)}
+                disabled={isPending}
+              />
+              <FieldDescription>Đường dẫn URL của sản phẩm.</FieldDescription>
+              <FieldError>{errors.slug}</FieldError>
+            </Field>
+
+            <Field>
+              <FieldLabel>Trạng thái</FieldLabel>
+              <Select
+                value={status}
+                onValueChange={(value) => onStatusChange(value as ProductStatus)}
+              >
+                <SelectTrigger className="w-full" disabled={isPending}>
+                  <SelectValue placeholder="Chọn trạng thái" />
+                </SelectTrigger>
+                <SelectContent>
+                  {productStatusOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
 
           <Field>
             <FieldLabel htmlFor="short-description">

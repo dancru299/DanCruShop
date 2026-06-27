@@ -113,20 +113,22 @@ beforeEach(() => {
 describe("processOrderCreatedEvent", () => {
   it("maps the order, unlocks the purchase atomically, and emails access", async () => {
     primeAdmin({
-      products: [
+      product_variants: [
+        // findVariantByLemonId -> the purchased variant joined to its product.
         {
           data: {
-            id: "prod-1",
-            title: "Test Product",
-            slug: "test-product",
-            lemon_squeezy_variant_id: "999",
+            id: "var-1",
             price_cents: 1900,
+            lemon_squeezy_variant_id: "999",
+            product: { id: "prod-1", title: "Test Product", slug: "test-product" },
           },
           error: null,
         },
-        // grantProductAccess -> issueLicenseKeys looks up licensed products.
-        { data: [], error: null },
+        // grantProductAccess -> resolve purchased variants to products.
+        { data: [{ id: "var-1", product_id: "prod-1" }], error: null },
       ],
+      // grantProductAccess -> issueLicenseKeys looks up licensed products.
+      products: [{ data: [], error: null }],
       // grantProductAccess -> expandBundleProductIds (no bundle children).
       bundle_items: [{ data: [], error: null }],
       // grantProductAccess -> purchases upsert for the unlocked products.
@@ -150,7 +152,14 @@ describe("processOrderCreatedEvent", () => {
         p_currency: "USD",
         p_total_cents: 1900,
         p_user_id: "user-1",
-        p_items: [{ product_id: "prod-1", price_cents: 1900, quantity: 1 }],
+        p_items: [
+          {
+            product_id: "prod-1",
+            variant_id: "var-1",
+            price_cents: 1900,
+            quantity: 1,
+          },
+        ],
       })
     );
     expect(fulfillment.getOrCreateFulfillmentUser).toHaveBeenCalledWith(
@@ -167,11 +176,11 @@ describe("processOrderCreatedEvent", () => {
 
   it("fails loudly without fulfilling when the variant maps to no product", async () => {
     primeAdmin({
-      products: [{ data: null, error: null }],
+      product_variants: [{ data: null, error: null }],
     });
 
     await expect(processOrderCreatedEvent(orderCreatedPayload)).rejects.toThrow(
-      /No product found for Lemon Squeezy variant 999/
+      /No variant found for Lemon Squeezy variant 999/
     );
     expect(mockAdmin.rpc).not.toHaveBeenCalled();
     expect(fulfillment.sendPurchaseAccessEmail).not.toHaveBeenCalled();

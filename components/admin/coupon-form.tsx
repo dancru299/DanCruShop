@@ -30,21 +30,17 @@ type CouponFormProps = {
   coupon?: AdminCoupon;
 };
 
-function toCents(value: string, currency: string) {
+function toCents(value: string) {
   const parsed = Number(value);
 
   if (!Number.isFinite(parsed) || parsed < 0) {
     return 0;
   }
 
-  return currency === "VND" ? Math.round(parsed) : Math.round(parsed * 100);
+  return Math.round(parsed * 100);
 }
 
-function fromCents(cents: number, currency: string) {
-  if (currency === "VND") {
-    return String(cents);
-  }
-
+function fromCents(cents: number) {
   return (cents / 100).toFixed(2).replace(/\.00$/, "");
 }
 
@@ -65,7 +61,7 @@ export function CouponForm({ mode, coupon }: CouponFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const couponCurrency = coupon?.currency ?? "VND";
+  const couponCurrency = coupon?.currency ?? "USD";
 
   const [code, setCode] = useState(coupon?.code ?? "");
   const [description, setDescription] = useState(coupon?.description ?? "");
@@ -79,13 +75,13 @@ export function CouponForm({ mode, coupon }: CouponFormProps) {
   );
   const [amountValue, setAmountValue] = useState(
     coupon && coupon.discount_type === "fixed"
-      ? fromCents(coupon.discount_value, couponCurrency)
+      ? fromCents(coupon.discount_value)
       : ""
   );
   const [currency, setCurrency] = useState(couponCurrency);
   const [minOrder, setMinOrder] = useState(
     coupon && coupon.min_order_cents > 0
-      ? fromCents(coupon.min_order_cents, couponCurrency)
+      ? fromCents(coupon.min_order_cents)
       : ""
   );
   const [maxRedemptions, setMaxRedemptions] = useState(
@@ -136,11 +132,11 @@ export function CouponForm({ mode, coupon }: CouponFormProps) {
       discount_value:
         discountType === "percent"
           ? Math.round(Number(percentValue))
-          : toCents(amountValue, currency),
+          : toCents(amountValue),
       expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
       is_active: isActive,
       max_redemptions: maxRedemptions ? Math.round(Number(maxRedemptions)) : null,
-      min_order_cents: minOrder ? toCents(minOrder, currency) : 0,
+      min_order_cents: minOrder ? toCents(minOrder) : 0,
       per_user_limit: perUserLimit ? Math.round(Number(perUserLimit)) : null,
       starts_at: startsAt ? new Date(startsAt).toISOString() : null,
     };
@@ -223,7 +219,6 @@ export function CouponForm({ mode, coupon }: CouponFormProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="VND">VND</SelectItem>
                 <SelectItem value="USD">USD</SelectItem>
               </SelectContent>
             </Select>
@@ -255,7 +250,7 @@ export function CouponForm({ mode, coupon }: CouponFormProps) {
               id="amount-value"
               type="number"
               min="0"
-              step={currency === "VND" ? "1" : "0.01"}
+              step="0.01"
               value={amountValue}
               onChange={(event) => setAmountValue(event.target.value)}
               aria-invalid={Boolean(errors.amountValue)}
@@ -271,7 +266,7 @@ export function CouponForm({ mode, coupon }: CouponFormProps) {
             id="min-order"
             type="number"
             min="0"
-            step={currency === "VND" ? "1" : "0.01"}
+            step="0.01"
             value={minOrder}
             onChange={(event) => setMinOrder(event.target.value)}
             placeholder="0"
